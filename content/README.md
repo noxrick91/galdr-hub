@@ -1,6 +1,6 @@
 # Galdr 使用手册
 
-Galdr 是用 Rust 写的 GPU 加速终端。默认登录进内置的 **galdr-shell**。启动文件只有 `~/.config/galdr/galdrc`，不会自动读 `.bashrc`。
+Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文件只有 `~/.config/galdr/galdrc`，不会自动读 `.bashrc`。
 
 预编译包从本站 [GitHub Releases](https://github.com/noxrick91/galdr-hub/releases) 装到 `~/.galdr/bin`。源码仓私有，不对外。
 
@@ -40,27 +40,27 @@ Full history: [CHANGELOG.md](./CHANGELOG.md).
 Linux / Git Bash：
 
 ```bash
-curl -fsS https://noxrick91.github.io/galdr-hub/install | bash
+curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 指定版本：
 
 ```bash
-curl -fsS https://noxrick91.github.io/galdr-hub/install | bash -s -- v0.1.2
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
 # 或
-GALDR_TAG=v0.1.2 curl -fsS https://noxrick91.github.io/galdr-hub/install | bash
+GALDR_TAG=v0.1.2 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell：
 
 ```powershell
-irm https://noxrick91.github.io/galdr-hub/install.txt | iex
+irm https://term.noxcaw.com/install.txt | iex
 ```
 
 不要用 `irm …/install.ps1`：GitHub Pages 把 `.ps1` 标成 `application/octet-stream`，Windows PowerShell 5.1 的 `irm` 读不成脚本。`.txt` 是 `text/plain`。若必须拉 `.ps1`：
 
 ```powershell
-iex ((New-Object Net.WebClient).DownloadString('https://noxrick91.github.io/galdr-hub/install.ps1'))
+iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
 脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 没有 ARM64 资产时回退到 x64 系统模拟。macOS 预编译包暂不提供。再跑一次安装器会覆盖当前文件（Windows 先把正在用的 exe 改名为 `.bak`）。
