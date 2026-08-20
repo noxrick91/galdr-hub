@@ -1,0 +1,35 @@
+{
+  "groups": [
+    {
+      "title": { "zh": "开始使用", "en": "Getting started" },
+      "pages": [
+        { "key": "intro", "zh": "介绍", "en": "Introduction" },
+        { "key": "install", "zh": "安装", "en": "Install" },
+        { "key": "quick-start", "zh": "快速开始", "en": "Quick start" }
+      ]
+    },
+    {
+      "title": { "zh": "使用", "en": "Using" },
+      "pages": [
+        { "key": "shell", "zh": "Shell 与 galdrc", "en": "Shell and galdrc" },
+        { "key": "keys", "zh": "快捷键", "en": "Keyboard shortcuts" },
+        { "key": "config", "zh": "配置", "en": "Config" },
+        { "key": "ui", "zh": "界面", "en": "Interface" }
+      ]
+    },
+    {
+      "title": { "zh": "会话", "en": "Sessions" },
+      "pages": [
+        { "key": "mux", "zh": "Mux 与分屏", "en": "Mux and splits" },
+        { "key": "restore", "zh": "会话恢复", "en": "Session restore" }
+      ]
+    },
+    {
+      "title": { "zh": "帮助", "en": "Help" },
+      "pages": [
+        { "key": "whats-new", "zh": "What's new", "en": "What's new" },
+        { "key": "troubleshooting", "zh": "故障排除", "en": "Troubleshooting" }
+      ]
+    }
+  ]
+}
