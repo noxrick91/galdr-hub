@@ -247,10 +247,10 @@ function showError(err) {
   recMeta.textContent = d?.dl?.error || "最新版暂时读不到，用安装命令即可。";
 }
 
-const INSTALL_UNIX = "curl -fsS https://noxrick91.github.io/galdr-hub/install | bash";
-const INSTALL_WIN = "irm https://noxrick91.github.io/galdr-hub/install.txt | iex";
-const UPDATE_CMD = "curl -fsS https://noxrick91.github.io/galdr-hub/install | bash";
-const UPDATE_WIN = "irm https://noxrick91.github.io/galdr-hub/install.txt | iex";
+const INSTALL_UNIX = "curl -fsS https://term.noxcaw.com/install | bash";
+const INSTALL_WIN = "irm https://term.noxcaw.com/install.txt | iex";
+const UPDATE_CMD = "curl -fsS https://term.noxcaw.com/install | bash";
+const UPDATE_WIN = "irm https://term.noxcaw.com/install.txt | iex";
 const UNINSTALL_UNIX = "rm -rf ~/.galdr";
 const UNINSTALL_WIN = "Remove-Item -Recurse -Force $HOME\\.galdr";
 
