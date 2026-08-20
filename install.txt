@@ -1,6 +1,6 @@
 # Galdr Windows installer.
-#   irm https://noxrick91.github.io/galdr-hub/install.txt | iex
-#   iex ((New-Object Net.WebClient).DownloadString('https://noxrick91.github.io/galdr-hub/install.ps1'))
+#   irm https://term.noxcaw.com/install.txt | iex
+#   iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN
 # Do not `exit` — this file is meant to run via iex in an interactive shell.
 $ErrorActionPreference = "Stop"
