@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <style>
+    .cursor { animation: galdr-cursor 3.6s steps(1, end) infinite; }
+    @keyframes galdr-cursor { 75% { opacity: 0.42; } }
+    @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
+  </style>
+  <!-- Galdr: a terminal block with a blinking cell. -->
+  <path fill="#ff9838" d="M14 7h32v5h5v10H19v20h32v10h-5v5H14v-5H9V12h5z"/>
+  <rect class="cursor" x="39" y="27" width="10" height="10" fill="#ffd69c"/>
+</svg>
