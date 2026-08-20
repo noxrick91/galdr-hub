@@ -174,6 +174,19 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 }
 .tui-row { margin: 0 0 4px; white-space: pre-wrap; }
 .tui-gt, .tui-user { color: var(--egg); font-weight: 600; }
+.tui-path { color: var(--heading); }
+.tui-ls { color: var(--ink); }
+.tui-dir { color: var(--heading); font-weight: 600; }
+.tui-mut { color: var(--muted); }
+.tui-ok { color: var(--ok); }
+.tui-attach { color: var(--heading); }
+.tui-choice {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+.tui-choice-name { flex: 1; }
+.tui-choice-freq { color: var(--muted); font-variant-numeric: tabular-nums; }
 .tui-asst { color: var(--ink); }
 .tui-tool { color: var(--ink); }
 .tui-spin, .tui-star { color: var(--egg); display: inline-block; width: 1.1em; }
