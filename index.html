@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title data-i18n-title="home">Galdr — GPU 加速终端</title>
+  <meta name="description" data-i18n-desc="home" content="用 Rust 写的 GPU 终端。默认登录内置 galdr-shell，支持标签、分屏与会话恢复。">
+  <meta name="theme-color" content="#121418">
+  <link rel="canonical" href="https://noxrick91.github.io/galdr-hub/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Galdr — GPU 加速终端">
+  <meta property="og:description" content="GPU 终端，内置 galdr-shell，标签、分屏与会话恢复。">
+  <meta property="og:url" content="https://noxrick91.github.io/galdr-hub/">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css?v=v0.1.2-1787245750">
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <a class="brand" href="./">
+        <img src="./assets/favicon.svg" alt="">
+        Galdr
+      </a>
+      <nav class="nav" aria-label="主导航">
+        <a href="./" aria-current="page" data-keep-lang data-i18n="nav.home">首页</a>
+        <a href="./docs.html#/install" data-keep-lang data-i18n="nav.docs">文档</a>
+        <a href="https://github.com/noxrick91/galdr-hub" data-i18n="nav.github">GitHub</a>
+        <span class="lang" role="group" aria-label="语言">
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="en">EN</button>
+        </span>
+      </nav>
+    </header>
+  </div>
+
+  <main class="wrap">
+    <section class="hero-split">
+      <div class="hero">
+        <p class="kicker" data-i18n="hero.kicker">你的桌面上</p>
+        <h1 data-i18n-html="hero.title">一台<br>GPU 加速的终端</h1>
+        <p class="lede" data-i18n="hero.lede">
+          用 Rust 写的 GPU 终端。默认登录内置 galdr-shell，启动文件只有 galdrc。标签、分屏、搜索，会话可以分离再附着。
+        </p>
+        <div class="row">
+          <a class="btn" href="#howto" data-i18n="hero.install">立即安装</a>
+          <a class="btn btn-ghost" href="./docs.html#/quick-start" data-keep-lang data-i18n="hero.quickStart">快速开始</a>
+        </div>
+        <p class="meta hero-meta"><span id="dl-meta" aria-live="polite" data-i18n="hero.waiting">正在加载最新版</span><span aria-hidden="true"> · </span><a href="#download" data-i18n="hero.manual">手动下载</a></p>
+      </div>
+      <div class="tui" id="stage" aria-hidden="true">
+        <div class="tui-head">
+          <span class="tui-brand">Galdr</span>
+          <span class="tui-dim" id="stage-version">latest</span>
+          <span class="tui-dim">·</span>
+          <span class="tui-dim">galdr-shell</span>
+          <span class="tui-dim">·</span>
+          <span class="tui-dim">~</span>
+        </div>
+        <div class="tui-body" id="stage-body">
+          <div class="tui-log" id="stage-log"></div>
+          <div class="tui-sheet" id="stage-sheet" hidden>
+            <div class="tui-sheet-title" id="stage-sheet-title"></div>
+            <div class="tui-sheet-detail" id="stage-sheet-detail"></div>
+            <div class="tui-sheet-choices" id="stage-sheet-choices"></div>
+            <div class="tui-sheet-hint">↑↓ · enter · esc</div>
+          </div>
+        </div>
+        <div class="tui-prompt">
+          <div class="tui-box">
+            <span class="tui-gt">&gt;</span>
+            <span class="tui-ph" id="stage-input">type a command</span>
+          </div>
+          <div class="tui-mode"><span class="tui-dim">·</span> galdr</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="panel howto" id="howto">
+      <header>
+        <div class="seg" role="tablist" aria-label="安装方式">
+          <button type="button" class="seg-btn on" id="howto-tab-install" role="tab" aria-selected="true" aria-controls="howto-cmd" tabindex="0" data-howto="install" data-i18n="howto.install">安装</button>
+          <button type="button" class="seg-btn" id="howto-tab-update" role="tab" aria-selected="false" aria-controls="howto-cmd" tabindex="-1" data-howto="update" data-i18n="howto.update">更新</button>
+          <button type="button" class="seg-btn" id="howto-tab-uninstall" role="tab" aria-selected="false" aria-controls="howto-cmd" tabindex="-1" data-howto="uninstall" data-i18n="howto.uninstall">卸载</button>
+        </div>
+        <button class="copy" id="copy-howto" type="button" aria-live="polite" data-i18n="install.copy">复制</button>
+      </header>
+      <pre class="cmd" id="howto-cmd" role="tabpanel" aria-labelledby="howto-tab-install" aria-live="polite">curl -fsS https://noxrick91.github.io/galdr-hub/install | bash</pre>
+    </div>
+    <p class="howto-more">
+      <span id="howto-hint">装到 ~/.galdr/bin。装完请 source ~/.galdr/env 或新开终端。</span>
+      <span class="howto-sep">·</span>
+      <a href="./docs.html#/install" data-keep-lang data-i18n="howto.docs">安装说明</a>
+    </p>
+
+    <ul class="proof-list" aria-label="安装与兼容信息">
+      <li><strong>SHA256</strong><span data-i18n="proof.checksum">安装器自动校验下载文件</span></li>
+      <li><strong data-i18n="proof.platformsT">跨平台</strong><span data-i18n="proof.platforms">Linux 与 Windows，支持 x64 / ARM64</span></li>
+      <li><strong data-i18n="proof.modelsT">内置 shell</strong><span data-i18n="proof.models">默认 galdr-shell，启动文件只有 galdrc</span></li>
+    </ul>
+
+    <h2 class="sec" data-i18n="sec.why">为什么用它</h2>
+    <div class="grid">
+      <article class="card">
+        <h3 data-i18n="cards.capT">GPU 渲染</h3>
+        <p data-i18n="cards.cap">wgpu 实例化单元格，HiDPI 下字形按物理像素栅格化，CJK 和 emoji 走回退字体。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.safeT">自己的 shell</h3>
+        <p data-i18n="cards.safe">默认登录 galdr-shell。只读 galdrc，不会偷偷 source .bashrc；要用旧 rc 就 include。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.seeT">标签与分屏</h3>
+        <p data-i18n="cards.see">拖分屏、放大 pane、搜索、命令面板。mux 拥有 pane，窗口只是附着。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.modelT">会话恢复</h3>
+        <p data-i18n="cards.model">可重开上次的标签、分屏和 cwd。也可以先列出上次前台命令再确认。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.extendT">分离再附着</h3>
+        <p data-i18n="cards.extend">galdr --server 然后 galdr --attach。Linux 用 Unix socket，Windows 用 named pipe。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.automateT">诚实限制</h3>
+        <p data-i18n="cards.automate">不是 bash 5 认证。Tab 不跑 complete -F；Windows 没有 setpgid 作业控制。</p>
+      </article>
+    </div>
+
+    <h2 class="sec" id="download" data-i18n="sec.download">手动下载</h2>
+    <div class="table-wrap">
+      <p class="meta" id="dl-stats"></p>
+      <table>
+        <caption class="sr-only" data-i18n="table.caption">各平台最新版本下载</caption>
+        <thead>
+          <tr>
+            <th data-i18n="table.platform">平台</th>
+            <th><span data-i18n="table.build">版本</span> <span id="release-tag" class="meta"></span></th>
+            <th data-i18n="table.size">大小</th>
+            <th class="num" data-i18n="table.this">本版</th>
+            <th class="num" data-i18n="table.total">累计</th>
+          </tr>
+        </thead>
+        <tbody id="asset-rows">
+          <tr><td colspan="5" class="meta" data-i18n="table.loading">加载中…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </main>
+  <div class="wrap">
+    <footer>
+      <span data-i18n="footer.tagline">Galdr · GPU 加速终端</span>
+      <span class="footer-links">
+        <a href="./docs.html#/install" data-keep-lang data-i18n="footer.docs">安装文档</a>
+        <a href="https://github.com/noxrick91/galdr-hub/releases" data-i18n="footer.releases">Releases</a>
+        <a href="./CHANGELOG.md" data-i18n="footer.changelog">更新记录</a>
+        <a href="https://github.com/noxrick91/galdr-hub/issues" data-i18n="footer.feedback">反馈问题</a>
+      </span>
+    </footer>
+  </div>
+  <script src="./assets/i18n.js?v=v0.1.2-1787245750"></script>
+  <script src="./assets/stage.js?v=v0.1.2-1787245750"></script>
+  <script src="./assets/whats-new.js?v=v0.1.2-1787245750"></script>
+  <script src="./assets/app.js?v=v0.1.2-1787245750"></script>
+</body>
+</html>
