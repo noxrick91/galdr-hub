@@ -1,0 +1,345 @@
+const REPO = "noxrick91/galdr-hub";
+const API = `https://api.github.com/repos/${REPO}/releases?per_page=100`;
+const LOCAL_LATEST = "./latest.json";
+const CACHE_KEY = "galdr-releases-v1";
+const CACHE_MS = 10 * 60 * 1000;
+
+const ASSETS = [
+  { id: "linux-x64", label: "Linux x86_64", file: "galdr-x86_64-unknown-linux-gnu" },
+  { id: "linux-arm64", label: "Linux aarch64", file: "galdr-aarch64-unknown-linux-gnu" },
+  { id: "win-x64", label: "Windows x64", file: "galdr-x86_64-pc-windows-gnu.exe" },
+  { id: "win-arm64", label: "Windows ARM64", file: "galdr-aarch64-pc-windows-msvc.exe" },
+];
+
+async function detectPlatform() {
+  const uaData = navigator.userAgentData;
+  if (uaData?.getHighEntropyValues) {
+    try {
+      const extra = await uaData.getHighEntropyValues(["architecture"]);
+      const plat = `${uaData.platform || ""} ${extra.architecture || ""}`.toLowerCase();
+      const arm = /arm/.test(plat);
+      if (/win/.test(plat)) return arm ? "win-arm64" : "win-x64";
+      if (/mac/.test(plat)) return "unsupported";
+      if (/linux/.test(plat)) return arm ? "linux-arm64" : "linux-x64";
+    } catch {
+      /* fall through */
+    }
+  }
+  const ua = navigator.userAgent;
+  const plat = navigator.platform || "";
+  const isWin = /Win/i.test(plat) || /Windows/i.test(ua);
+  const isMac = /Mac/i.test(plat) || /Mac OS/i.test(ua);
+  const isLinux = /Linux/i.test(plat) || /Linux/i.test(ua);
+  const isArm = /aarch64|arm64/i.test(ua);
+  if (isWin) return isArm ? "win-arm64" : "win-x64";
+  if (isMac) return "unsupported";
+  if (isLinux) return isArm ? "linux-arm64" : "linux-x64";
+  return "linux-x64";
+}
+
+function assetUrl(tag, file) {
+  if (tag === "latest") {
+    return `https://github.com/${REPO}/releases/latest/download/${file}`;
+  }
+  return `https://github.com/${REPO}/releases/download/${tag}/${file}`;
+}
+
+function isReleaseList(data) {
+  return Array.isArray(data) && data.length > 0 && data[0] && data[0].tag_name;
+}
+
+function cacheReleases(data) {
+  try {
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), data }));
+  } catch {
+    /* ignore quota / private mode */
+  }
+}
+
+async function loadLocalLatest() {
+  const res = await fetch(LOCAL_LATEST, { cache: "no-cache" });
+  if (!res.ok) return null;
+  const one = await res.json();
+  if (!one || !one.tag_name) return null;
+  return [one];
+}
+
+async function loadGithubReleases() {
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY) || "null");
+    if (cached && Date.now() - cached.at < CACHE_MS && isReleaseList(cached.data)) {
+      return cached.data;
+    }
+  } catch {
+    /* ignore */
+  }
+  const res = await fetch(API);
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!isReleaseList(data)) return null;
+  cacheReleases(data);
+  return data;
+}
+
+function embeddedLatest() {
+  const tag = "latest";
+  return [
+    {
+      tag_name: tag,
+      assets: [
+        ...ASSETS.map((a) => ({
+          name: a.file,
+          size: 0,
+          browser_download_url: assetUrl(tag, a.file),
+          download_count: 0,
+        })),
+        {
+          name: "SHA256SUMS",
+          size: 0,
+          browser_download_url: assetUrl(tag, "SHA256SUMS"),
+          download_count: 0,
+        },
+      ],
+    },
+  ];
+}
+
+async function loadRelease() {
+  const local = await loadLocalLatest().catch(() => null);
+  if (isReleaseList(local)) {
+    loadGithubReleases()
+      .then((remote) => {
+        if (isReleaseList(remote)) renderHome(remote);
+      })
+      .catch(() => {});
+    return local;
+  }
+  const remote = await loadGithubReleases().catch(() => null);
+  if (isReleaseList(remote)) return remote;
+  return embeddedLatest();
+}
+
+function byName(release, name) {
+  return (release.assets || []).find((a) => a.name === name);
+}
+
+function fmtCount(n) {
+  if (n == null) return "—";
+  const loc = (typeof getLang === "function" && getLang() === "zh") ? "zh-CN" : "en-US";
+  return n.toLocaleString(loc);
+}
+
+function assetDownloads(releases, name) {
+  let n = 0;
+  for (const r of releases) {
+    const a = byName(r, name);
+    if (a) n += a.download_count || 0;
+  }
+  return n;
+}
+
+function binaryTotal(releases) {
+  const names = new Set(ASSETS.map((a) => a.file));
+  let n = 0;
+  for (const r of releases) {
+    for (const a of r.assets || []) {
+      if (names.has(a.name)) n += a.download_count || 0;
+    }
+  }
+  return n;
+}
+
+function pickLatest(releases) {
+  return (
+    releases.find((r) => !r.draft && !r.prerelease) ||
+    releases.find((r) => !r.draft) ||
+    releases[0]
+  );
+}
+
+let lastReleases = null;
+
+function claimDynamic(el) {
+  if (!el) return;
+  el.removeAttribute("data-i18n");
+  el.removeAttribute("data-i18n-html");
+}
+
+async function renderHome(releases) {
+  lastReleases = releases;
+  const release = pickLatest(releases);
+  if (!release) throw new Error("no releases");
+  const tag = release.tag_name || "latest";
+  const date = release.published_at
+    ? new Date(release.published_at).toLocaleDateString(
+        typeof getLang === "function" && getLang() === "en" ? "en-US" : "zh-CN"
+      )
+    : "";
+  const platform = await detectPlatform();
+  const rec = ASSETS.find((a) => a.id === platform);
+  const sums = byName(release, "SHA256SUMS");
+
+  const d = typeof dict === "function" ? dict() : null;
+  const recMeta = document.getElementById("dl-meta");
+  claimDynamic(recMeta);
+  const latestBin = binaryTotal([release]);
+  const allBin = binaryTotal(releases);
+  recMeta.textContent = !rec
+    ? (d?.dl?.unsupported || "当前仅发布 Linux 和 Windows 版本")
+    : d?.table?.meta
+    ? d.table.meta(tag, rec.file, date, fmtCount(latestBin), fmtCount(allBin))
+    : `${tag} · ${rec.file}${date ? ` · ${date}` : ""} · ${fmtCount(latestBin)} · ${fmtCount(allBin)}`;
+  const stageVersion = document.getElementById("stage-version");
+  if (stageVersion) stageVersion.textContent = tag;
+  const stats = document.getElementById("dl-stats");
+  if (stats) {
+    const versions = releases.filter((r) => !r.draft).length;
+    stats.textContent = d?.table?.stats
+      ? d.table.stats(fmtCount(latestBin), fmtCount(allBin), versions)
+      : `${fmtCount(latestBin)} / ${fmtCount(allBin)} (${versions})`;
+  }
+
+  document.getElementById("release-tag").textContent = tag;
+  detectedPlatform = platform;
+  applyHowto(platform);
+
+  const hereLabel = d?.table?.here || "本机";
+  const checksumLabel = d?.table?.checksum || "校验和";
+  const body = document.getElementById("asset-rows");
+  body.replaceChildren();
+  for (const item of ASSETS) {
+    const a = byName(release, item.file);
+    const tr = document.createElement("tr");
+    const href = a ? a.browser_download_url : assetUrl(tag, item.file);
+    const size = a && a.size ? `${(a.size / 1024 / 1024).toFixed(1)} MB` : "—";
+    const latest = a ? a.download_count || 0 : null;
+    const all = assetDownloads(releases, item.file);
+    tr.innerHTML = `
+      <td>${item.label}${item.id === platform ? ` <span class='meta'>${hereLabel}</span>` : ""}</td>
+      <td><a href="${href}">${item.file}</a></td>
+      <td class="meta">${size}</td>
+      <td class="num">${fmtCount(latest)}</td>
+      <td class="num">${fmtCount(all)}</td>`;
+    body.appendChild(tr);
+  }
+  if (sums) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${checksumLabel}</td>
+      <td><a href="${sums.browser_download_url}">SHA256SUMS</a></td>
+      <td class="meta">—</td>
+      <td class="num">${fmtCount(sums.download_count || 0)}</td>
+      <td class="num">${fmtCount(assetDownloads(releases, "SHA256SUMS"))}</td>`;
+    body.appendChild(tr);
+  }
+
+  const notes = document.getElementById("release-notes");
+  if (notes && release.body) {
+    notes.textContent = release.body.trim().slice(0, 800);
+  }
+}
+
+function showError(err) {
+  const d = typeof dict === "function" ? dict() : null;
+  const recMeta = document.getElementById("dl-meta");
+  claimDynamic(recMeta);
+  recMeta.classList.add("err");
+  recMeta.textContent = d?.dl?.error || "最新版暂时读不到，用安装命令即可。";
+}
+
+const INSTALL_UNIX = "curl -fsS https://noxrick91.github.io/galdr-hub/install | bash";
+const INSTALL_WIN = "irm https://noxrick91.github.io/galdr-hub/install.txt | iex";
+const UPDATE_CMD = "curl -fsS https://noxrick91.github.io/galdr-hub/install | bash";
+const UPDATE_WIN = "irm https://noxrick91.github.io/galdr-hub/install.txt | iex";
+const UNINSTALL_UNIX = "rm -rf ~/.galdr";
+const UNINSTALL_WIN = "Remove-Item -Recurse -Force $HOME\\.galdr";
+
+function installLabel(platform) {
+  const d = typeof dict === "function" ? dict().install : null;
+  if (platform === "win-x64" || platform === "win-arm64") return d?.win || "Windows";
+  if (platform === "unsupported") return d?.mac || "macOS";
+  if (platform === "linux-x64" || platform === "linux-arm64") return d?.linux || "Linux";
+  return d?.unix || "Linux / macOS";
+}
+
+const HOWTO = {
+  install: { unix: INSTALL_UNIX, win: INSTALL_WIN, hint: "installHint" },
+  update: { unix: UPDATE_CMD, win: UPDATE_WIN, hint: "updateHint" },
+  uninstall: { unix: UNINSTALL_UNIX, win: UNINSTALL_WIN, hint: "uninstallHint" },
+};
+
+let howtoTab = "install";
+
+function applyHowto(platform) {
+  const unsupported = platform === "unsupported";
+  const win = platform === "win-x64" || platform === "win-arm64";
+  const spec = HOWTO[howtoTab] || HOWTO.install;
+  const how = typeof dict === "function" ? dict().howto : null;
+  const unavailable = unsupported && howtoTab !== "uninstall";
+  const cmd = document.getElementById("howto-cmd");
+  if (cmd) cmd.textContent = unavailable
+    ? (how?.macUnavailable || "macOS prebuilt packages are temporarily unavailable")
+    : (win ? spec.win : spec.unix);
+  const copy = document.getElementById("copy-howto");
+  if (copy) copy.disabled = unavailable;
+  const hint = document.getElementById("howto-hint");
+  if (hint) {
+    const hintKey = unavailable ? "macHint" : spec.hint;
+    if (how?.[hintKey]) hint.textContent = how[hintKey];
+  }
+  document.querySelectorAll("[data-howto]").forEach((btn) => {
+    const active = btn.getAttribute("data-howto") === howtoTab;
+    btn.classList.toggle("on", active);
+    btn.setAttribute("aria-selected", String(active));
+    btn.tabIndex = active ? 0 : -1;
+    if (active && cmd) cmd.setAttribute("aria-labelledby", btn.id);
+  });
+}
+
+const howtoTabs = [...document.querySelectorAll("[data-howto]")];
+howtoTabs.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    howtoTab = btn.getAttribute("data-howto") || "install";
+    applyHowto(detectedPlatform);
+  });
+  btn.addEventListener("keydown", (event) => {
+    const index = howtoTabs.indexOf(btn);
+    let next = null;
+    if (event.key === "ArrowRight") next = (index + 1) % howtoTabs.length;
+    if (event.key === "ArrowLeft") next = (index - 1 + howtoTabs.length) % howtoTabs.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = howtoTabs.length - 1;
+    if (next == null) return;
+    event.preventDefault();
+    howtoTabs[next].click();
+    howtoTabs[next].focus();
+  });
+});
+
+document.getElementById("copy-howto")?.addEventListener("click", async () => {
+  const text = document.getElementById("howto-cmd")?.textContent;
+  if (!text) return;
+  const d = typeof dict === "function" ? dict().install : null;
+  const btn = document.getElementById("copy-howto");
+  try {
+    await navigator.clipboard.writeText(text);
+    btn.textContent = d?.copied || "已复制";
+    setTimeout(() => {
+      btn.textContent = d?.copy || "复制";
+    }, 1400);
+  } catch {
+    /* ignore */
+  }
+});
+
+let detectedPlatform = "linux-x64";
+detectPlatform().then((p) => {
+  detectedPlatform = p;
+  applyHowto(p);
+});
+document.addEventListener("galdr-lang", () => {
+  applyHowto(detectedPlatform);
+  if (lastReleases) renderHome(lastReleases);
+});
+
+loadRelease().then(renderHome).catch(showError);
