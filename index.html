@@ -4,18 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title data-i18n-title="home">Galdr — GPU 加速终端</title>
-  <meta name="description" data-i18n-desc="home" content="用 Rust 写的 GPU 终端。默认登录内置 galdr-shell，支持标签、分屏与会话恢复。">
+  <meta name="description" data-i18n-desc="home" content="GPU 加速终端。打开就是 galdr-shell，标签、分屏，会话可以分离后再附着。">
   <meta name="theme-color" content="#121418">
-  <link rel="canonical" href="https://noxrick91.github.io/galdr-hub/">
+  <link rel="canonical" href="https://term.noxcaw.com/">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Galdr — GPU 加速终端">
-  <meta property="og:description" content="GPU 终端，内置 galdr-shell，标签、分屏与会话恢复。">
-  <meta property="og:url" content="https://noxrick91.github.io/galdr-hub/">
+  <meta property="og:description" content="GPU 加速的终端。打开就是 galdr-shell，启动文件只有 galdrc。">
+  <meta property="og:url" content="https://term.noxcaw.com/">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css?v=v0.1.2-1787245750">
+  <link rel="stylesheet" href="./assets/style.css?v=v0.1.2-1787246876">
 </head>
 <body>
   <div class="wrap">
@@ -42,7 +42,7 @@
         <p class="kicker" data-i18n="hero.kicker">你的桌面上</p>
         <h1 data-i18n-html="hero.title">一台<br>GPU 加速的终端</h1>
         <p class="lede" data-i18n="hero.lede">
-          用 Rust 写的 GPU 终端。默认登录内置 galdr-shell，启动文件只有 galdrc。标签、分屏、搜索，会话可以分离再附着。
+          GPU 加速的终端。打开就是 galdr-shell，启动文件只有 galdrc。标签、分屏、搜索都在窗口里，会话可以分离后再附着。
         </p>
         <div class="row">
           <a class="btn" href="#howto" data-i18n="hero.install">立即安装</a>
@@ -57,7 +57,7 @@
           <span class="tui-dim">·</span>
           <span class="tui-dim">galdr-shell</span>
           <span class="tui-dim">·</span>
-          <span class="tui-dim">~</span>
+          <span class="tui-dim">~/Project/galdr</span>
         </div>
         <div class="tui-body" id="stage-body">
           <div class="tui-log" id="stage-log"></div>
@@ -65,7 +65,7 @@
             <div class="tui-sheet-title" id="stage-sheet-title"></div>
             <div class="tui-sheet-detail" id="stage-sheet-detail"></div>
             <div class="tui-sheet-choices" id="stage-sheet-choices"></div>
-            <div class="tui-sheet-hint">↑↓ · enter · esc</div>
+            <div class="tui-sheet-hint">↑↓ 选择   Tab / 回车 采用</div>
           </div>
         </div>
         <div class="tui-prompt">
@@ -87,7 +87,7 @@
         </div>
         <button class="copy" id="copy-howto" type="button" aria-live="polite" data-i18n="install.copy">复制</button>
       </header>
-      <pre class="cmd" id="howto-cmd" role="tabpanel" aria-labelledby="howto-tab-install" aria-live="polite">curl -fsS https://noxrick91.github.io/galdr-hub/install | bash</pre>
+      <pre class="cmd" id="howto-cmd" role="tabpanel" aria-labelledby="howto-tab-install" aria-live="polite">curl -fsS https://term.noxcaw.com/install | bash</pre>
     </div>
     <p class="howto-more">
       <span id="howto-hint">装到 ~/.galdr/bin。装完请 source ~/.galdr/env 或新开终端。</span>
@@ -105,27 +105,27 @@
     <div class="grid">
       <article class="card">
         <h3 data-i18n="cards.capT">GPU 渲染</h3>
-        <p data-i18n="cards.cap">wgpu 实例化单元格，HiDPI 下字形按物理像素栅格化，CJK 和 emoji 走回退字体。</p>
+        <p data-i18n="cards.cap">屏幕刷新走 GPU，高分屏上字形仍然对齐像素。中文和 emoji 自动换回退字体，不会糊成方块。</p>
       </article>
       <article class="card">
         <h3 data-i18n="cards.safeT">自己的 shell</h3>
-        <p data-i18n="cards.safe">默认登录 galdr-shell。只读 galdrc，不会偷偷 source .bashrc；要用旧 rc 就 include。</p>
+        <p data-i18n="cards.safe">打开就是 galdr-shell。启动只读 galdrc，不会偷偷加载 bashrc；要用旧配置就 include。</p>
       </article>
       <article class="card">
         <h3 data-i18n="cards.seeT">标签与分屏</h3>
-        <p data-i18n="cards.see">拖分屏、放大 pane、搜索、命令面板。mux 拥有 pane，窗口只是附着。</p>
+        <p data-i18n="cards.see">拖开分屏、放大一栏、搜索、命令面板。窗口只是附着，标签和分栏留在会话里。</p>
+      </article>
+      <article class="card">
+        <h3 data-i18n="cards.completeT">按频率补全</h3>
+        <p data-i18n="cards.complete">Tab 在提示符上方弹出菜单，常用命令排在前面。回车或 Tab 选中后菜单关掉。</p>
       </article>
       <article class="card">
         <h3 data-i18n="cards.modelT">会话恢复</h3>
-        <p data-i18n="cards.model">可重开上次的标签、分屏和 cwd。也可以先列出上次前台命令再确认。</p>
+        <p data-i18n="cards.model">下次打开还是原来的标签、分屏和目录。若还有命令在跑，会先列出来让你确认。</p>
       </article>
       <article class="card">
         <h3 data-i18n="cards.extendT">分离再附着</h3>
-        <p data-i18n="cards.extend">galdr --server 然后 galdr --attach。Linux 用 Unix socket，Windows 用 named pipe。</p>
-      </article>
-      <article class="card">
-        <h3 data-i18n="cards.automateT">诚实限制</h3>
-        <p data-i18n="cards.automate">不是 bash 5 认证。Tab 不跑 complete -F；Windows 没有 setpgid 作业控制。</p>
+        <p data-i18n="cards.extend">关掉窗口，进程还在。galdr --attach 回到原来的标签和分屏。</p>
       </article>
     </div>
 
@@ -161,9 +161,9 @@
       </span>
     </footer>
   </div>
-  <script src="./assets/i18n.js?v=v0.1.2-1787245750"></script>
-  <script src="./assets/stage.js?v=v0.1.2-1787245750"></script>
-  <script src="./assets/whats-new.js?v=v0.1.2-1787245750"></script>
-  <script src="./assets/app.js?v=v0.1.2-1787245750"></script>
+  <script src="./assets/i18n.js?v=v0.1.2-1787246876"></script>
+  <script src="./assets/stage.js?v=v0.1.2-1787246876"></script>
+  <script src="./assets/whats-new.js?v=v0.1.2-1787246876"></script>
+  <script src="./assets/app.js?v=v0.1.2-1787246876"></script>
 </body>
 </html>
