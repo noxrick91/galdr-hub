@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Galdr one-line installer.
-#   curl -fsS https://noxrick91.github.io/galdr-hub/install | bash
-#   curl -fsS https://noxrick91.github.io/galdr-hub/install | bash -s -- v0.1.2
-# Windows PowerShell: irm https://noxrick91.github.io/galdr-hub/install.txt | iex
+#   curl -fsS https://term.noxcaw.com/install | bash
+#   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
+# Windows PowerShell: irm https://term.noxcaw.com/install.txt | iex
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN  NO_COLOR
 # Does not edit .bashrc / .zshrc. Writes ~/.galdr/env for you to source if needed.
 set -euo pipefail
