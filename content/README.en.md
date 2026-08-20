@@ -1,6 +1,6 @@
 # Galdr user guide
 
-Galdr is a GPU-accelerated terminal written in Rust. The default login is the builtin **galdr-shell**. The only startup file is `~/.config/galdr/galdrc` — it does not read `.bashrc` unless you `include` it.
+Galdr is a GPU-accelerated terminal. The default login is the builtin **galdr-shell**. The only startup file is `~/.config/galdr/galdrc` — it does not read `.bashrc` unless you `include` it.
 
 Prebuilt binaries install from this site’s [GitHub Releases](https://github.com/noxrick91/galdr-hub/releases) into `~/.galdr/bin`. The source repo is private.
 
@@ -40,27 +40,27 @@ Full history: [CHANGELOG.md](./CHANGELOG.md).
 Linux / Git Bash:
 
 ```bash
-curl -fsS https://noxrick91.github.io/galdr-hub/install | bash
+curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Pin a version:
 
 ```bash
-curl -fsS https://noxrick91.github.io/galdr-hub/install | bash -s -- v0.1.2
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
 # or
-GALDR_TAG=v0.1.2 curl -fsS https://noxrick91.github.io/galdr-hub/install | bash
+GALDR_TAG=v0.1.2 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell:
 
 ```powershell
-irm https://noxrick91.github.io/galdr-hub/install.txt | iex
+irm https://term.noxcaw.com/install.txt | iex
 ```
 
 Do not use `irm …/install.ps1`: GitHub Pages serves `.ps1` as `application/octet-stream`, and Windows PowerShell 5.1 `irm` will not treat it as a script. `.txt` is `text/plain`. If you must fetch `.ps1`:
 
 ```powershell
-iex ((New-Object Net.WebClient).DownloadString('https://noxrick91.github.io/galdr-hub/install.ps1'))
+iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
 The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and installs into `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation for older Releases without an ARM64 asset. macOS prebuilt packages are temporarily unavailable. Running the installer again replaces the current file (on Windows it renames a running exe to `.bak` first).
