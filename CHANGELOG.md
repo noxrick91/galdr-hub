@@ -4,6 +4,12 @@ Notable user-facing changes to Galdr are recorded here. Implementation details r
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions match Git tags.
 
+## [0.1.5] - 2026-08-21
+
+### Fixed
+
+- Windows Explorer and Start menu launches no longer open a second system console next to Galdr.
+
 ## [0.1.4] - 2026-08-21
 
 ### Added
