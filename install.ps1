@@ -184,13 +184,18 @@ if (-not $onPath) {
     Write-Host "Added to user PATH: $BinDir"
 }
 
+$Ran = $false
+try {
+    $null = & $Dest --help 2>$null
+    if ($LASTEXITCODE -eq 0) { $Ran = $true }
+} catch { }
+if (-not $Ran) {
+    Restore-GaldrBinary $Dest
+    throw "Downloaded binary did not run: $Dest --help"
+}
 $Ver = ""
 try { $Ver = (& $Dest --version 2>$null) } catch { }
-if (-not $Ver) {
-    Restore-GaldrBinary $Dest
-    throw "Downloaded binary did not run: $Dest --version"
-}
-if ($Tag -ne "latest") {
+if ($Tag -ne "latest" -and $Ver) {
     $ExpectedVersion = $Tag.TrimStart('v')
     $ActualVersion = (($Ver | Select-Object -First 1) -split '\s+' | Select-Object -Last 1).TrimStart('v')
     if ($ActualVersion -ne $ExpectedVersion) {
