@@ -1,16 +1,23 @@
 {
-  "tag": "v0.1.6",
-  "version": "0.1.6",
+  "tag": "v0.1.7",
+  "version": "0.1.7",
   "date": "2026-08-22",
-  "title": "What's new in v0.1.6",
+  "title": "What's new in v0.1.7",
   "notes": [
-    "GNOME Files on Ubuntu 26.04 / Nautilus 4.1 no longer silently drops the folder context item: the installer pins the Nautilus GI version and installs `python3-nautilus` when it can.",
-    "Windows Explorer context menu title is written as Unicode code points so “在此处打开 Galdr” is not mojibaked by PowerShell 5.1 / `irm`.",
-    "Windows galdr-shell login no longer stays on the tab spinner or flash-exits from Explorer: ConPTY now starts the console helper `galdr-sh.exe` instead of GUI-subsystem `galdr.exe --shell`.",
-    "Linux installer writes a proper Apps entry (`galdr.desktop`) and folder “open here” actions; GNOME can show a top-level item when `python3-nautilus` is installed.",
-    "Windows installer adds Galdr to the Start menu and Explorer context menu (folder, background, drive). Chinese UI uses “在此处打开 Galdr”.",
-    "`~/.galdr/uninstall` (Windows: `uninstall.ps1`) removes those menu entries. `rm -rf ~/.galdr` alone leaves them behind."
+    "`complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).",
+    "`galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.",
+    "Key bindings can use `action = \"none\"` to unbind a builtin shortcut.",
+    "`[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.",
+    "Combining marks rasterize as a cluster, not just the base letter.",
+    "Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.",
+    "Folder context menu label is always **Open Galdr here**.",
+    "Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.",
+    "Windows Quick Select opens `C:\\` and UNC paths.",
+    "Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.",
+    "Pane snapshots are shared so a quiet frame no longer clones the whole grid.",
+    "galdr-shell accepts redirections on fds 3–15.",
+    "A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads."
   ],
-  "body": "### Fixed\n\n- GNOME Files on Ubuntu 26.04 / Nautilus 4.1 no longer silently drops the folder context item: the installer pins the Nautilus GI version and installs `python3-nautilus` when it can.\n- Windows Explorer context menu title is written as Unicode code points so “在此处打开 Galdr” is not mojibaked by PowerShell 5.1 / `irm`.\n- Windows galdr-shell login no longer stays on the tab spinner or flash-exits from Explorer: ConPTY now starts the console helper `galdr-sh.exe` instead of GUI-subsystem `galdr.exe --shell`.\n\n### Changed\n\n- Linux installer writes a proper Apps entry (`galdr.desktop`) and folder “open here” actions; GNOME can show a top-level item when `python3-nautilus` is installed.\n- Windows installer adds Galdr to the Start menu and Explorer context menu (folder, background, drive). Chinese UI uses “在此处打开 Galdr”.\n- `~/.galdr/uninstall` (Windows: `uninstall.ps1`) removes those menu entries. `rm -rf ~/.galdr` alone leaves them behind.",
+  "body": "### Added\n\n- `complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).\n- `galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.\n- Key bindings can use `action = \"none\"` to unbind a builtin shortcut.\n- `[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.\n- Combining marks rasterize as a cluster, not just the base letter.\n- Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.\n\n### Changed\n\n- Folder context menu label is always **Open Galdr here**.\n- Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.\n- Windows Quick Select opens `C:\\` and UNC paths.\n- Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.\n- Pane snapshots are shared so a quiet frame no longer clones the whole grid.\n- galdr-shell accepts redirections on fds 3–15.\n\n### Fixed\n\n- A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads.",
   "url": "./CHANGELOG.md"
 }
