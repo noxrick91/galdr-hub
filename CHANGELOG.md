@@ -4,7 +4,18 @@ Notable user-facing changes to Galdr are recorded here. Implementation details r
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions match Git tags.
 
-## [Unreleased]
+## [0.1.3] - 2026-08-21
+
+### Added
+
+- `galdr --version`
+
+### Changed
+
+- Windows completion, smart hints, and Enter-to-accept.
+- Settings wheel scrolls the list; Left/Right still change the value.
+- Faster, more reliable Windows console and mux attach.
+- Unix-only builtins report that they are unavailable on Windows.
 
 ## [0.1.2] - 2026-08-20
 
