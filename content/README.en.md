@@ -21,13 +21,11 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.3** — 2026-08-21
+**What's new in v0.1.4** — 2026-08-21
 
-- `galdr --version`
-- Windows completion, smart hints, and Enter-to-accept.
-- Settings wheel scrolls the list; Left/Right still change the value.
-- Faster, more reliable Windows console and mux attach.
-- Unix-only builtins report that they are unavailable on Windows.
+- `galdr --cwd` so a window can start in a chosen folder.
+- Installer adds Galdr to the Windows Start menu and Explorer context menu.
+- Linux installer adds Galdr to the app menu and folder context menus.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
