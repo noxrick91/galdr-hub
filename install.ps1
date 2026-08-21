@@ -114,16 +114,6 @@ function Get-GaldrChecksum($Lines, [string]$Asset) {
 }
 
 function Get-GaldrHereTitle {
-    try {
-        $lang = [System.Globalization.CultureInfo]::CurrentUICulture.TwoLetterISOLanguageName
-        if ($lang -eq "zh") {
-            # Code points so Windows PowerShell 5.1 / irm cannot mojibake the verb.
-            return (-join @(
-                [char]0x5728, [char]0x6B64, [char]0x5904, [char]0x6253, [char]0x5F00,
-                [char]0x0020, [char]0x0047, [char]0x0061, [char]0x006C, [char]0x0064, [char]0x0072
-            ))
-        }
-    } catch { }
     return "Open Galdr here"
 }
 
