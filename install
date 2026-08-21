@@ -172,17 +172,17 @@ chmod +x "${tmp}/${asset}"
 mv "${tmp}/${asset}" "${dest}"
 ok "Installed ${dest}"
 
-ver="$("${dest}" --version 2>/dev/null || true)"
 rollback_binary() {
   rm -f "${dest}"
   if [ "${had_dest}" = "1" ] && [ -e "${dest}.bak" ]; then
     mv -f "${dest}.bak" "${dest}"
   fi
 }
-if [ -z "${ver}" ]; then
+if ! "${dest}" --help >/dev/null 2>&1; then
   rollback_binary
-  die "downloaded binary did not run: ${dest} --version"
+  die "downloaded binary did not run: ${dest} --help"
 fi
+ver="$("${dest}" --version 2>/dev/null || true)"
 if [ -n "${ver}" ] && [ "${TAG}" != "latest" ]; then
   expect_ver="${TAG#v}"
   ver_num="${ver##* }"
