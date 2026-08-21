@@ -34,6 +34,31 @@ desktop_exec() {
   esac
 }
 
+here_menu_title() {
+  local loc="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
+  case "${loc}" in
+    zh*|ZH*|*.zh*|*.ZH*) printf '%s' "在此处打开 Galdr" ;;
+    *) printf '%s' "Open Galdr here" ;;
+  esac
+}
+
+xml_escape() {
+  printf '%s' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'
+}
+
+refresh_desktop_db() {
+  local apps="${HOME}/.local/share/applications"
+  if command -v xdg-desktop-menu >/dev/null 2>&1 && [ -f "${apps}/galdr.desktop" ]; then
+    xdg-desktop-menu install --novendor "${apps}/galdr.desktop" >/dev/null 2>&1 || true
+  fi
+  if command -v update-desktop-database >/dev/null 2>&1 && [ -d "${apps}" ]; then
+    update-desktop-database "${apps}" >/dev/null 2>&1 || true
+  fi
+  if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+  fi
+}
+
 write_icon() {
   local icon="${PREFIX}/galdr.svg"
   mkdir -p "${PREFIX}"
@@ -46,30 +71,175 @@ EOF
   local hicolor="${HOME}/.local/share/icons/hicolor/scalable/apps"
   mkdir -p "${hicolor}"
   cp -f "${icon}" "${hicolor}/galdr.svg"
+
+  local png="${PREFIX}/galdr.png"
+  # 64x64 PNG of the same mark, for file managers that skip SVG.
+  if printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAo0lEQVR42u3awQ2EIBRAQTFWYwUW5MGSPFiQFdgOtkBAI8i8+xozgR/IOgySJHVbyP1h3Jf4+ctvZyh9xtj7CgAAwBBsY+C9NRhtAQAAAAAAAAAAgF6baryjWwEAALQ7A54sXkfSNTzMa7ACAAAAAAAAAAAA/nQSLDnhWQEAAABImjNJ11L/DtsCAAAAAAAAAAAAfR6Faz0e+1rcFgAAQJKk/G6SQRYrPnCSeAAAAABJRU5ErkJggg==' | base64 -d >"${png}" 2>/dev/null; then
+    local hicolor64="${HOME}/.local/share/icons/hicolor/64x64/apps"
+    mkdir -p "${hicolor64}"
+    cp -f "${png}" "${hicolor64}/galdr.png"
+  else
+    rm -f "${png}"
+  fi
 }
 
 write_here_helper() {
   local helper="${PREFIX}/galdr-here"
-  cat >"${helper}" <<EOF
-#!/bin/sh
-bin='${dest}'
-path="\$1"
-if [ -z "\${path}" ]; then
-  path="\${PWD}"
+  mkdir -p "${PREFIX}"
+  printf '%s\n' "#!/bin/sh" "bin='${dest}'" >"${helper}"
+  cat >>"${helper}" <<'EOF'
+first_line() {
+  printf '%s' "$1" | tr -d '\r' | sed -n '1p'
+}
+
+percent_decode() {
+  in=$1
+  if command -v python3 >/dev/null 2>&1; then
+    decoded=$(python3 -c 'import sys, urllib.parse as u
+p = sys.argv[1]
+if p.startswith("file://"):
+    parsed = u.urlparse(p)
+    p = parsed.path
+    if parsed.netloc and parsed.netloc not in ("", "localhost"):
+        p = "//" + parsed.netloc + p
+print(u.unquote(p))' "${in}" 2>/dev/null) && {
+      printf '%s' "${decoded}"
+      return
+    }
+  fi
+  case "${in}" in
+    file://localhost/*) in=${in#file://localhost} ;;
+    file:///*) in=${in#file://} ;;
+    file://*) in=${in#file://} ;;
+  esac
+  out=
+  while [ -n "${in}" ]; do
+    rest=${in#?}
+    ch=${in%"${rest}"}
+    if [ "${ch}" = "%" ]; then
+      hex=${rest}
+      hex=${hex%${hex#??}}
+      case "${hex}" in
+        [0-9A-Fa-f][0-9A-Fa-f])
+          out=${out}$(printf '%b' "\\x${hex}")
+          in=${rest#??}
+          continue
+          ;;
+      esac
+    fi
+    out=${out}${ch}
+    in=${rest}
+  done
+  printf '%s' "${out}"
+}
+
+path=$1
+if [ -z "${path}" ]; then
+  path=$(first_line "${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS:-}")
 fi
-case "\${path}" in
-  file://*) path="\${path#file://}" ;;
-esac
-path=\$(printf '%s' "\${path}" | sed 's/%20/ /g')
-if [ -f "\${path}" ]; then
-  path=\$(dirname "\${path}")
+if [ -z "${path}" ]; then
+  path=${NAUTILUS_SCRIPT_CURRENT_URI:-}
 fi
-if [ ! -d "\${path}" ]; then
-  path="\${PWD}"
+if [ -z "${path}" ]; then
+  path=$(first_line "${CAJA_SCRIPT_SELECTED_FILE_PATHS:-}")
 fi
-exec "\$bin" --cwd "\$path"
+if [ -z "${path}" ]; then
+  path=${CAJA_SCRIPT_CURRENT_URI:-}
+fi
+if [ -z "${path}" ]; then
+  path=$(first_line "${NEMO_SCRIPT_SELECTED_FILE_PATHS:-}")
+fi
+if [ -z "${path}" ]; then
+  path=${NEMO_SCRIPT_CURRENT_URI:-}
+fi
+if [ -z "${path}" ]; then
+  path=${PWD}
+fi
+path=$(percent_decode "${path}")
+if [ -f "${path}" ]; then
+  path=$(dirname "${path}")
+fi
+if [ ! -d "${path}" ]; then
+  path=${PWD}
+fi
+exec "${bin}" --cwd "${path}"
 EOF
   chmod +x "${helper}"
+}
+
+nautilus_gi_ok() {
+  command -v python3 >/dev/null 2>&1 || return 1
+  python3 - <<'PY' >/dev/null 2>&1
+import gi
+for version in ("4.1", "4.0", "3.0"):
+    try:
+        gi.require_version("Nautilus", version)
+        break
+    except ValueError:
+        continue
+else:
+    raise SystemExit(1)
+from gi.repository import Nautilus
+PY
+}
+
+nautilus_python_hint() {
+  if command -v apt-get >/dev/null 2>&1; then
+    printf '%s' "sudo apt install python3-nautilus && nautilus -q"
+  elif command -v dnf >/dev/null 2>&1; then
+    printf '%s' "sudo dnf install nautilus-python && nautilus -q"
+  elif command -v pacman >/dev/null 2>&1; then
+    printf '%s' "sudo pacman -S nautilus-python && nautilus -q"
+  else
+    printf '%s' "install nautilus-python / python3-nautilus, then nautilus -q"
+  fi
+}
+
+run_privileged() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif sudo -n true >/dev/null 2>&1; then
+    sudo -n "$@"
+  elif command -v pkexec >/dev/null 2>&1 && [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]; then
+    pkexec "$@"
+  elif [ -t 0 ] && [ -t 1 ]; then
+    sudo "$@"
+  else
+    return 1
+  fi
+}
+
+install_nautilus_python_pkg() {
+  if command -v apt-get >/dev/null 2>&1; then
+    run_privileged apt-get install -y python3-nautilus
+  elif command -v dnf >/dev/null 2>&1; then
+    run_privileged dnf install -y nautilus-python
+  elif command -v pacman >/dev/null 2>&1; then
+    run_privileged pacman -S --noconfirm nautilus-python
+  else
+    return 1
+  fi
+}
+
+ensure_nautilus_python() {
+  [ -n "${GALDR_NO_CONTEXT_MENU:-}" ] && return 0
+  command -v nautilus >/dev/null 2>&1 || return 0
+  if nautilus_gi_ok; then
+    ok "GNOME Files Python bindings"
+    return 0
+  fi
+  step "Installing GNOME Files bindings so “$(here_menu_title)” is a top-level item…"
+  if install_nautilus_python_pkg && nautilus_gi_ok; then
+    ok "GNOME Files Python bindings"
+    return 0
+  fi
+  printf '  hint: GNOME Files hides the item without Python bindings.\n'
+  printf '        %s\n' "$(nautilus_python_hint)"
+}
+
+reload_nautilus() {
+  command -v nautilus >/dev/null 2>&1 || return 0
+  nautilus -q >/dev/null 2>&1 || true
 }
 
 write_desktop_entry() {
@@ -83,24 +253,125 @@ write_desktop_entry() {
 Type=Application
 Name=Galdr
 Comment=GPU-accelerated terminal
+Comment[zh_CN]=GPU 加速终端
+Comment[zh_TW]=GPU 加速終端
 Exec=${exec}
 TryExec=${dest}
 Icon=galdr
 Terminal=false
 Categories=System;TerminalEmulator;
 Keywords=terminal;shell;console;
+Keywords[zh_CN]=终端;命令行;控制台;
 StartupNotify=true
+StartupWMClass=galdr
+X-TerminalArgExec=-e
+X-TerminalArgDir=--cwd
 EOF
-  if command -v update-desktop-database >/dev/null 2>&1; then
-    update-desktop-database "${apps}" >/dev/null 2>&1 || true
-  fi
+  refresh_desktop_db
   ok "App menu: ${apps}/galdr.desktop"
+}
+
+write_nautilus_extension() {
+  [ -n "${GALDR_NO_CONTEXT_MENU:-}" ] && return 0
+  local dir="${HOME}/.local/share/nautilus-python/extensions"
+  mkdir -p "${dir}"
+  local helper="${PREFIX}/galdr-here"
+  local title
+  title="$(here_menu_title)"
+  {
+    printf '%s\n' "# Generated by the Galdr installer."
+    printf 'HELPER = %s\n' "$(python3 -c 'import sys; print(repr(sys.argv[1]))' "${helper}" 2>/dev/null || printf "'%s'" "${helper}")"
+    printf 'LABEL = %s\n' "$(python3 -c 'import sys; print(repr(sys.argv[1]))' "${title}" 2>/dev/null || printf "'%s'" "${title}")"
+    cat <<'EOF'
+import os
+import subprocess
+
+import gi
+
+_NAUTILUS = None
+for _ver in ("4.1", "4.0", "3.0"):
+    try:
+        gi.require_version("Nautilus", _ver)
+        _NAUTILUS = _ver
+        break
+    except ValueError:
+        continue
+if _NAUTILUS is None:
+    raise ImportError("Nautilus GI typelib is not installed")
+
+from gi.repository import GObject, Nautilus
+
+
+def _path(info):
+    loc = info.get_location() if hasattr(info, "get_location") else None
+    if loc is not None:
+        path = loc.get_path()
+        if path:
+            return path
+    uri = info.get_uri() if hasattr(info, "get_uri") else None
+    if not uri:
+        return None
+    try:
+        from gi.repository import GLib
+
+        path, _host = GLib.filename_from_uri(uri)
+        return path
+    except Exception:
+        pass
+    if uri.startswith("file://"):
+        return uri[7:]
+    return None
+
+
+class GaldrHere(GObject.GObject, Nautilus.MenuProvider):
+    __gtype_name__ = "GaldrHere"
+
+    def _items(self, path):
+        if not path:
+            return []
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        if not os.path.isdir(path):
+            return []
+        item = Nautilus.MenuItem(name="GaldrHere::Open", label=LABEL, icon="galdr")
+        item.connect("activate", self._open, path)
+        return [item]
+
+    def _open(self, _item, path):
+        subprocess.Popen([HELPER, path], start_new_session=True)
+
+    def get_file_items(self, *args):
+        files = args[-1]
+        if not files:
+            return []
+        paths = [p for p in (_path(f) for f in files) if p]
+        if not paths:
+            return []
+        dirs = {
+            os.path.dirname(p) if os.path.isfile(p) else p
+            for p in paths
+        }
+        if len(dirs) != 1:
+            return []
+        return self._items(dirs.pop())
+
+    def get_background_items(self, *args):
+        return self._items(_path(args[-1]))
+EOF
+  } >"${dir}/galdr-here.py"
 }
 
 install_file_manager_actions() {
   [ -n "${GALDR_NO_CONTEXT_MENU:-}" ] && return 0
   local helper="${PREFIX}/galdr-here"
-  local name="Open Galdr here"
+  local name
+  name="$(here_menu_title)"
+  local old_name
+  for old_name in "Open Galdr here" "在此处打开 Galdr" "在此處開啟 Galdr"; do
+    rm -f "${HOME}/.local/share/nautilus/scripts/${old_name}" \
+      "${HOME}/.config/caja/scripts/${old_name}"
+  done
+
   local script
   for script in \
     "${HOME}/.local/share/nautilus/scripts/${name}" \
@@ -109,7 +380,7 @@ install_file_manager_actions() {
     mkdir -p "$(dirname "${script}")"
     cat >"${script}" <<EOF
 #!/bin/sh
-exec "${helper}" "\$1"
+exec "${helper}" "\$@"
 EOF
     chmod +x "${script}"
   done
@@ -118,8 +389,11 @@ EOF
   mkdir -p "${nemo}"
   cat >"${nemo}/galdr-dir.nemo_action" <<EOF
 [Nemo Action]
-Name=${name}
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+Name[zh_TW]=在此處開啟 Galdr
 Comment=Open Galdr in this folder
+Comment[zh_CN]=在此文件夹打开 Galdr
 Exec="${helper}" %F
 Icon-Name=galdr
 Selection=s
@@ -128,8 +402,11 @@ Quote=double
 EOF
   cat >"${nemo}/galdr-bg.nemo_action" <<EOF
 [Nemo Action]
-Name=${name}
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+Name[zh_TW]=在此處開啟 Galdr
 Comment=Open Galdr in this folder
+Comment[zh_CN]=在此文件夹打开 Galdr
 Exec="${helper}" %P
 Icon-Name=galdr
 Selection=none
@@ -141,12 +418,15 @@ EOF
   kde_body=$(cat <<EOF
 [Desktop Entry]
 Type=Service
+ServiceTypes=KonqPopupMenu/Plugin
 MimeType=inode/directory;
 Actions=openGaldr;
 X-KDE-Priority=TopLevel
 
 [Desktop Action openGaldr]
-Name=${name}
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+Name[zh_TW]=在此處開啟 Galdr
 Icon=galdr
 Exec="${helper}" %f
 EOF
@@ -158,17 +438,61 @@ EOF
   do
     mkdir -p "${kde}"
     printf '%s\n' "${kde_body}" >"${kde}/galdr.desktop"
+    chmod +x "${kde}/galdr.desktop" 2>/dev/null || true
   done
 
+  local fm_actions="${HOME}/.local/share/file-manager/actions"
+  mkdir -p "${fm_actions}"
+  cat >"${fm_actions}/galdr-here.desktop" <<EOF
+[Desktop Entry]
+Type=Action
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+Name[zh_TW]=在此處開啟 Galdr
+Icon=galdr
+Profiles=folder;
+
+[X-Action-Profile folder]
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+MimeTypes=inode/directory;
+Exec="${helper}" %f
+EOF
+
+  local contractor="${HOME}/.local/share/contractor"
+  mkdir -p "${contractor}"
+  cat >"${contractor}/galdr-here.contract" <<EOF
+[Contractor Entry]
+Name=Open Galdr here
+Name[zh_CN]=在此处打开 Galdr
+Name[zh_TW]=在此處開啟 Galdr
+Icon=galdr
+Description=Open Galdr in this folder
+MimeType=inode;
+Exec="${helper}" %U
+EOF
+
   local uca="${HOME}/.config/Thunar/uca.xml"
+  local uca_name
+  uca_name="$(xml_escape "${name}")"
   mkdir -p "$(dirname "${uca}")"
-  if [ ! -f "${uca}" ]; then
+  if [ -f "${uca}" ] && grep -q 'galdr-open-here' "${uca}"; then
+    local tmp_uca
+    tmp_uca="$(mktemp)"
+    awk -v cmd="${helper} %f" -v n="${uca_name}" '
+      /<unique-id>galdr-open-here<\/unique-id>/ { hit=1 }
+      hit && /<name>/ { sub(/<name>.*<\/name>/, "<name>" n "</name>") }
+      hit && /<command>/ { sub(/<command>.*<\/command>/, "<command>" cmd "</command>"); hit=0 }
+      { print }
+    ' "${uca}" >"${tmp_uca}"
+    mv "${tmp_uca}" "${uca}"
+  elif [ ! -f "${uca}" ]; then
     cat >"${uca}" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
 <action>
 	<icon>galdr</icon>
-	<name>${name}</name>
+	<name>${uca_name}</name>
 	<unique-id>galdr-open-here</unique-id>
 	<command>${helper} %f</command>
 	<description>Open Galdr in this folder</description>
@@ -177,10 +501,10 @@ EOF
 </action>
 </actions>
 EOF
-  elif ! grep -q 'galdr-open-here' "${uca}"; then
+  else
     local tmp_uca
     tmp_uca="$(mktemp)"
-    awk -v cmd="${helper} %f" -v n="${name}" '
+    awk -v cmd="${helper} %f" -v n="${uca_name}" '
       /<\/actions>/ && !done {
         print "<action>"
         print "\t<icon>galdr</icon>"
@@ -198,6 +522,68 @@ EOF
     mv "${tmp_uca}" "${uca}"
   fi
   ok "Folder context menu: ${name}"
+}
+
+write_uninstall() {
+  local uninst="${PREFIX}/uninstall"
+  cat >"${uninst}" <<EOF
+#!/bin/sh
+set -eu
+PREFIX='${PREFIX}'
+rm -f \\
+  "\${HOME}/.local/share/applications/galdr.desktop" \\
+  "\${HOME}/.local/share/icons/hicolor/scalable/apps/galdr.svg" \\
+  "\${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \\
+  "\${HOME}/.local/share/nautilus-python/extensions/galdr-here.py" \\
+  "\${HOME}/.local/share/nemo/actions/galdr-dir.nemo_action" \\
+  "\${HOME}/.local/share/nemo/actions/galdr-bg.nemo_action" \\
+  "\${HOME}/.local/share/kio/servicemenus/galdr.desktop" \\
+  "\${HOME}/.local/share/kservices5/ServiceMenus/galdr.desktop" \\
+  "\${HOME}/.local/share/file-manager/actions/galdr-here.desktop" \\
+  "\${HOME}/.local/share/contractor/galdr-here.contract"
+for title in "Open Galdr here" "在此处打开 Galdr" "在此處開啟 Galdr"; do
+  rm -f "\${HOME}/.local/share/nautilus/scripts/\${title}" \\
+    "\${HOME}/.config/caja/scripts/\${title}"
+done
+if command -v xdg-desktop-menu >/dev/null 2>&1; then
+  xdg-desktop-menu uninstall --novendor galdr.desktop >/dev/null 2>&1 || true
+fi
+if command -v update-desktop-database >/dev/null 2>&1; then
+  update-desktop-database "\${HOME}/.local/share/applications" >/dev/null 2>&1 || true
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+  gtk-update-icon-cache -f -t "\${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+fi
+EOF
+  cat >>"${uninst}" <<'EOF'
+remove_thunar() {
+  uca="${HOME}/.config/Thunar/uca.xml"
+  [ -f "${uca}" ] || return 0
+  grep -q 'galdr-open-here' "${uca}" || return 0
+  tmp=$(mktemp)
+  awk '
+    /<action>/ { buf=$0 ORS; grab=1; next }
+    grab {
+      buf=buf $0 ORS
+      if ($0 ~ /<\/action>/) {
+        if (buf !~ /galdr-open-here/) printf "%s", buf
+        grab=0
+        buf=""
+      }
+      next
+    }
+    { print }
+  ' "${uca}" >"${tmp}"
+  mv "${tmp}" "${uca}"
+}
+remove_thunar
+EOF
+  cat >>"${uninst}" <<EOF
+rm -rf "\${PREFIX}"
+printf 'Removed %s\n' "\${PREFIX}"
+printf 'Config in ~/.config/galdr/ was left in place.\n'
+EOF
+  chmod +x "${uninst}"
 }
 
 write_env_file() {
@@ -370,8 +756,11 @@ fi
 write_env_file
 
 if [ "${os}" = "linux" ]; then
-  if write_icon && write_here_helper && write_desktop_entry && install_file_manager_actions; then
-    :
+  write_uninstall || printf '  warning: could not write uninstall helper\n'
+  if write_icon && write_here_helper && write_desktop_entry \
+    && write_nautilus_extension && install_file_manager_actions; then
+    ensure_nautilus_python || true
+    reload_nautilus || true
   else
     printf '  warning: desktop integration failed\n'
   fi
@@ -390,6 +779,10 @@ printf '  or add %s to PATH, then open Galdr:\n' "${BIN_DIR}"
 printf '\n  galdr\n  galdr --version\n'
 if [ "${os}" = "linux" ]; then
   printf '  App menu: Galdr\n'
-  printf '  Right-click a folder: Open Galdr here\n'
+  printf '  Right-click a folder: %s\n' "$(here_menu_title)"
+  if command -v nautilus >/dev/null 2>&1 && ! nautilus_gi_ok; then
+    printf '  GNOME Files: %s\n' "$(nautilus_python_hint)"
+  fi
+  printf '  uninstall %s/uninstall\n' "${PREFIX}"
 fi
 printf '\n'
