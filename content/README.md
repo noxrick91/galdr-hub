@@ -21,11 +21,9 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.4** — 2026-08-21
+**What's new in v0.1.5** — 2026-08-21
 
-- `galdr --cwd` so a window can start in a chosen folder.
-- Installer adds Galdr to the Windows Start menu and Explorer context menu.
-- Linux installer adds Galdr to the app menu and folder context menus.
+- Windows Explorer and Start menu launches no longer open a second system console next to Galdr.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
