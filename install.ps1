@@ -89,6 +89,13 @@ function Install-GaldrBinary([string]$Src, [string]$Dest) {
     try { Unblock-File -LiteralPath $Dest -ErrorAction SilentlyContinue } catch { }
 }
 
+function Install-GaldrShellHelper([string]$Src, [string]$BinDir) {
+    if (-not $Src -or -not (Test-Path -LiteralPath $Src)) { return }
+    $dest = Join-Path $BinDir "galdr-sh.exe"
+    Install-GaldrBinary $Src $dest
+    Write-Host "  shell    $dest"
+}
+
 function Restore-GaldrBinary([string]$Dest) {
     $bak = "$Dest.bak"
     Remove-Item -LiteralPath $Dest -Force -ErrorAction SilentlyContinue
@@ -106,30 +113,60 @@ function Get-GaldrChecksum($Lines, [string]$Asset) {
     return $null
 }
 
-function Install-GaldrContextMenu([string]$Exe) {
+function Get-GaldrHereTitle {
+    try {
+        $lang = [System.Globalization.CultureInfo]::CurrentUICulture.TwoLetterISOLanguageName
+        if ($lang -eq "zh") {
+            # Code points so Windows PowerShell 5.1 / irm cannot mojibake the verb.
+            return (-join @(
+                [char]0x5728, [char]0x6B64, [char]0x5904, [char]0x6253, [char]0x5F00,
+                [char]0x0020, [char]0x0047, [char]0x0061, [char]0x006C, [char]0x0064, [char]0x0072
+            ))
+        }
+    } catch { }
+    return "Open Galdr here"
+}
+
+function Install-GaldrIcon([string]$Prefix) {
+    $ico = Join-Path $Prefix "galdr.ico"
+    $b64 = "AAABAAMAEBAAAAEAIACJAAAANgAAACAgAAABACAAmAAAAL8AAAAwMAAAAQAgALoAAABXAQAAiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAUElEQVR42mNgGGjAiMz5P8PiP0ENGSdQ9DCRohmbOiZKvUCxASzE+JMqLvh/bc7//9fm/KePF7B6SyuFEW86IDYa0cNo4KORidSoIyWK6QMAhy0Yva2RH/oAAAAASUVORK5CYIKJUE5HDQoaCgAAAA1JSERSAAAAIAAAACAIBgAAAHN6evQAAABfSURBVHjaY2AYBQMMGPFJ/p9h8Z8iwzNOMBJSwzTQIcA06KKA0mAnNTpGo2DUASzUzNPDOwSIAf+vzcHIwoxaKYyjiXDUAXRLhIQS3GgUjFbHow4YGolwtFk+CkYcAABQQRX5EgOhkQAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAIFJREFUeNrt2cENgCAQBVExVmMFFuTBkjxYkBXYDnZgJCgB8uYMCRP+sgSGAUDThLcD477E3xeznSF1ztj6DhCougZK5D63JkSIAAECBLKYSt9d7IAIfUC8jscrSpjXIEIECBAg0G8fSDnnRah2vEqIEAECBAj028hKNzVfTABQnBuEYxYRde+bnQAAAABJRU5ErkJggg=="
+    New-Item -ItemType Directory -Force -Path $Prefix | Out-Null
+    [IO.File]::WriteAllBytes($ico, [Convert]::FromBase64String($b64))
+    return $ico
+}
+
+function Install-GaldrContextMenu([string]$Exe, [string]$Icon) {
     if ($env:GALDR_NO_CONTEXT_MENU) { return }
     if (-not (Test-Path -LiteralPath $Exe)) { return }
-    $title = "Open Galdr here"
+    $title = Get-GaldrHereTitle
     # "%V." keeps drive roots like C:\ from breaking the quoted argument.
     $launch = "`"$Exe`" --cwd `"%V.`""
+    $iconValue = $Exe
+    if ($Icon -and (Test-Path -LiteralPath $Icon)) { $iconValue = $Icon }
     $keys = @(
         "HKCU:\Software\Classes\Directory\shell\Galdr",
         "HKCU:\Software\Classes\Directory\Background\shell\Galdr",
         "HKCU:\Software\Classes\Drive\shell\Galdr",
-        "HKCU:\Software\Classes\DesktopBackground\Shell\Galdr"
+        "HKCU:\Software\Classes\DesktopBackground\Shell\Galdr",
+        "HKCU:\Software\Classes\LibraryFolder\shell\Galdr",
+        "HKCU:\Software\Classes\LibraryFolder\Background\shell\Galdr"
     )
     foreach ($key in $keys) {
-        New-Item -Path $key -Force | Out-Null
-        Set-Item -LiteralPath $key -Value $title
-        New-ItemProperty -LiteralPath $key -Name Icon -Value $Exe -Force | Out-Null
-        $cmdKey = Join-Path $key "command"
-        New-Item -Path $cmdKey -Force | Out-Null
-        Set-Item -LiteralPath $cmdKey -Value $launch
+        $rel = $key -replace '^HKCU:\\', ''
+        $rk = [Microsoft.Win32.Registry]::CurrentUser.CreateSubKey($rel)
+        $rk.SetValue("", $title, [Microsoft.Win32.RegistryValueKind]::String)
+        $rk.SetValue("MUIVerb", $title, [Microsoft.Win32.RegistryValueKind]::String)
+        $rk.SetValue("Icon", $iconValue, [Microsoft.Win32.RegistryValueKind]::String)
+        $rk.SetValue("Position", "Top", [Microsoft.Win32.RegistryValueKind]::String)
+        $cmd = $rk.CreateSubKey("command")
+        $cmd.SetValue("", $launch, [Microsoft.Win32.RegistryValueKind]::String)
+        $cmd.Close()
+        $rk.Close()
     }
     Write-Host "Explorer context menu: $title"
 }
 
-function Install-GaldrStartMenu([string]$Exe) {
+function Install-GaldrStartMenu([string]$Exe, [string]$Icon) {
     if ($env:GALDR_NO_START_MENU) { return }
     if (-not (Test-Path -LiteralPath $Exe)) { return }
     $dir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
@@ -141,9 +178,45 @@ function Install-GaldrStartMenu([string]$Exe) {
     $lnk.WorkingDirectory = $env:USERPROFILE
     $lnk.WindowStyle = 1
     $lnk.Description = "Galdr terminal"
-    $lnk.IconLocation = "$Exe,0"
+    if ($Icon -and (Test-Path -LiteralPath $Icon)) {
+        $lnk.IconLocation = $Icon
+    } else {
+        $lnk.IconLocation = "$Exe,0"
+    }
     $lnk.Save()
     Write-Host "Start menu: $lnkPath"
+}
+
+function Install-GaldrUninstallScript([string]$Prefix, [string]$BinDir) {
+    $path = Join-Path $Prefix "uninstall.ps1"
+    $startLnk = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Galdr.lnk"
+    $ico = Join-Path $Prefix "galdr.ico"
+    $script = @"
+# Generated by the Galdr installer.
+`$ErrorActionPreference = "SilentlyContinue"
+`$keys = @(
+    "HKCU:\Software\Classes\Directory\shell\Galdr",
+    "HKCU:\Software\Classes\Directory\Background\shell\Galdr",
+    "HKCU:\Software\Classes\Drive\shell\Galdr",
+    "HKCU:\Software\Classes\DesktopBackground\Shell\Galdr",
+    "HKCU:\Software\Classes\LibraryFolder\shell\Galdr",
+    "HKCU:\Software\Classes\LibraryFolder\Background\shell\Galdr"
+)
+foreach (`$key in `$keys) {
+    if (Test-Path -LiteralPath `$key) { Remove-Item -LiteralPath `$key -Recurse -Force }
+}
+if (Test-Path -LiteralPath "$startLnk") { Remove-Item -LiteralPath "$startLnk" -Force }
+`$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+if (`$userPath) {
+    `$parts = `$userPath -split ';' | Where-Object { `$_ -and (`$_ -ine "$BinDir") }
+    [Environment]::SetEnvironmentVariable("Path", (`$parts -join ';'), "User")
+}
+Remove-Item -LiteralPath "$ico" -Force
+Remove-Item -Recurse -Force "$Prefix"
+Write-Host "Removed $Prefix"
+Write-Host "Config in ~/.config/galdr/ was left in place."
+"@
+    Set-Content -LiteralPath $path -Value $script -Encoding UTF8
 }
 
 function Show-GaldrPathConflict([string]$Dest) {
@@ -212,6 +285,19 @@ try {
         throw "SHA256 mismatch: got $Got expected $Expect"
     }
     Install-GaldrBinary $Bin $Dest
+    $ShAsset = $Asset -replace '^galdr-','galdr-sh-'
+    $ShExpect = Get-GaldrChecksum $SumLines $ShAsset
+    if ($ShExpect) {
+        $ShBin = Join-Path $Tmp $ShAsset
+        Get-GaldrRemoteFile "$Base/$ShAsset" $ShBin
+        $ShGot = (Get-FileHash -Algorithm SHA256 -Path $ShBin).Hash.ToLowerInvariant()
+        if ($ShGot -ne $ShExpect.ToLowerInvariant()) {
+            throw "SHA256 mismatch: got $ShGot expected $ShExpect"
+        }
+        Install-GaldrShellHelper $ShBin $BinDir
+    } else {
+        Write-Host "Warning: $ShAsset is not in this Release; galdr-shell may fail on Windows"
+    }
 } finally {
     Remove-Item $Tmp -Recurse -Force -ErrorAction SilentlyContinue
 }
@@ -249,15 +335,23 @@ if ($Ver) { Write-Host "  version  $Ver" }
 Write-Host "  binary   $Dest"
 if ($Got) { Write-Host "  sha256   $Got" }
 Write-Host ""
-try { Install-GaldrContextMenu $Dest } catch {
+$Icon = $null
+try { $Icon = Install-GaldrIcon $Prefix } catch {
+    Write-Host "Warning: could not write Start menu icon: $($_.Exception.Message)"
+}
+try { Install-GaldrContextMenu $Dest $Icon } catch {
     Write-Host "Warning: could not add Explorer context menu: $($_.Exception.Message)"
 }
-try { Install-GaldrStartMenu $Dest } catch {
+try { Install-GaldrStartMenu $Dest $Icon } catch {
     Write-Host "Warning: could not add Start menu shortcut: $($_.Exception.Message)"
+}
+try { Install-GaldrUninstallScript $Prefix $BinDir } catch {
+    Write-Host "Warning: could not write uninstall helper: $($_.Exception.Message)"
 }
 Show-GaldrPathConflict $Dest
 Write-Host "  galdr"
 Write-Host "  galdr --version"
 Write-Host "  Start menu: Galdr"
 Write-Host "  Right-click a folder: Open Galdr here"
+Write-Host "  uninstall $Prefix\uninstall.ps1"
 Write-Host ""
