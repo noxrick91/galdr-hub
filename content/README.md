@@ -21,14 +21,21 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.6** — 2026-08-22
+**What's new in v0.1.7** — 2026-08-22
 
-- GNOME Files on Ubuntu 26.04 / Nautilus 4.1 no longer silently drops the folder context item: the installer pins the Nautilus GI version and installs `python3-nautilus` when it can.
-- Windows Explorer context menu title is written as Unicode code points so “在此处打开 Galdr” is not mojibaked by PowerShell 5.1 / `irm`.
-- Windows galdr-shell login no longer stays on the tab spinner or flash-exits from Explorer: ConPTY now starts the console helper `galdr-sh.exe` instead of GUI-subsystem `galdr.exe --shell`.
-- Linux installer writes a proper Apps entry (`galdr.desktop`) and folder “open here” actions; GNOME can show a top-level item when `python3-nautilus` is installed.
-- Windows installer adds Galdr to the Start menu and Explorer context menu (folder, background, drive). Chinese UI uses “在此处打开 Galdr”.
-- `~/.galdr/uninstall` (Windows: `uninstall.ps1`) removes those menu entries. `rm -rf ~/.galdr` alone leaves them behind.
+- `complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).
+- `galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.
+- Key bindings can use `action = "none"` to unbind a builtin shortcut.
+- `[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.
+- Combining marks rasterize as a cluster, not just the base letter.
+- Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.
+- Folder context menu label is always **Open Galdr here**.
+- Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.
+- Windows Quick Select opens `C:\` and UNC paths.
+- Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.
+- Pane snapshots are shared so a quiet frame no longer clones the whole grid.
+- galdr-shell accepts redirections on fds 3–15.
+- A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -73,8 +80,8 @@ source ~/.galdr/env
 
 安装时还会把 Galdr 接到系统菜单：
 
-- Linux：写入 `~/.local/share/applications/galdr.desktop`，应用菜单（Apps）里会出现 **Galdr**。在文件夹上右键 **在此处打开 Galdr** 会新开终端并 `cd` 到该目录。GNOME Files 的顶层菜单需要 `python3-nautilus`；安装器在能提权时会装上，否则请 `sudo apt install python3-nautilus && nautilus -q`。没装绑定时只在「脚本」里，且要点选文件夹。
-- Windows：开始菜单加入 **Galdr**；资源管理器里右键文件夹 / 空白处 **在此处打开 Galdr**。Windows 11 可能在「显示更多选项」里。
+- Linux：写入 `~/.local/share/applications/galdr.desktop`，应用菜单（Apps）里会出现 **Galdr**。在文件夹上右键 **Open Galdr here** 会新开终端并 `cd` 到该目录。GNOME Files 的顶层菜单需要 `python3-nautilus`；安装器在能提权时会装上，否则请 `sudo apt install python3-nautilus && nautilus -q`。没装绑定时只在「脚本」里，且要点选文件夹。
+- Windows：开始菜单加入 **Galdr**；资源管理器里右键文件夹 / 空白处 **Open Galdr here**。Windows 11 可能在「显示更多选项」里。
 
 不想加菜单时设 `GALDR_NO_CONTEXT_MENU=1` 或 `GALDR_NO_START_MENU=1`。
 
@@ -165,7 +172,7 @@ include ~/.profile
 
 `include bashrc`、`zshrc`、`profile`、`bash_profile`、`zprofile`、`fish` 会找常见家目录路径；文件不存在就跳过。带 `/` 或 `~` 的路径必须存在。导入器会跑 `export`、`alias`、赋值和其它 galdr-shell 命令；bash/zsh 专用行（`setopt`、`bindkey` 等）会被跳过。
 
-诚实限制：Tab 补全不执行 `complete -F`；`case` 没有 `;&` / `;;&`；后台 `&&` / `||` 列表没有真正的 `$!`；Windows 没有 `setpgid` 作业控制。
+诚实限制：`case` 没有 `;&` / `;;&`；后台 `&&` / `||` 列表没有真正的 `$!`；Windows 没有 `setpgid` 作业控制。
 
 ---
 
