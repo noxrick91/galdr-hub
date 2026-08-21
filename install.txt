@@ -2,6 +2,7 @@
 #   irm https://term.noxcaw.com/install.txt | iex
 #   iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN
+#      GALDR_NO_CONTEXT_MENU  GALDR_NO_START_MENU
 # Do not `exit` — this file is meant to run via iex in an interactive shell.
 $ErrorActionPreference = "Stop"
 try {
@@ -103,6 +104,46 @@ function Get-GaldrChecksum($Lines, [string]$Asset) {
         if ($match.Success) { return $match.Groups[1].Value.ToLowerInvariant() }
     }
     return $null
+}
+
+function Install-GaldrContextMenu([string]$Exe) {
+    if ($env:GALDR_NO_CONTEXT_MENU) { return }
+    if (-not (Test-Path -LiteralPath $Exe)) { return }
+    $title = "Open Galdr here"
+    # "%V." keeps drive roots like C:\ from breaking the quoted argument.
+    $launch = "`"$Exe`" --cwd `"%V.`""
+    $keys = @(
+        "HKCU:\Software\Classes\Directory\shell\Galdr",
+        "HKCU:\Software\Classes\Directory\Background\shell\Galdr",
+        "HKCU:\Software\Classes\Drive\shell\Galdr",
+        "HKCU:\Software\Classes\DesktopBackground\Shell\Galdr"
+    )
+    foreach ($key in $keys) {
+        New-Item -Path $key -Force | Out-Null
+        Set-Item -LiteralPath $key -Value $title
+        New-ItemProperty -LiteralPath $key -Name Icon -Value $Exe -Force | Out-Null
+        $cmdKey = Join-Path $key "command"
+        New-Item -Path $cmdKey -Force | Out-Null
+        Set-Item -LiteralPath $cmdKey -Value $launch
+    }
+    Write-Host "Explorer context menu: $title"
+}
+
+function Install-GaldrStartMenu([string]$Exe) {
+    if ($env:GALDR_NO_START_MENU) { return }
+    if (-not (Test-Path -LiteralPath $Exe)) { return }
+    $dir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs"
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    $lnkPath = Join-Path $dir "Galdr.lnk"
+    $wsh = New-Object -ComObject WScript.Shell
+    $lnk = $wsh.CreateShortcut($lnkPath)
+    $lnk.TargetPath = $Exe
+    $lnk.WorkingDirectory = $env:USERPROFILE
+    $lnk.WindowStyle = 1
+    $lnk.Description = "Galdr terminal"
+    $lnk.IconLocation = "$Exe,0"
+    $lnk.Save()
+    Write-Host "Start menu: $lnkPath"
 }
 
 function Show-GaldrPathConflict([string]$Dest) {
@@ -208,7 +249,15 @@ if ($Ver) { Write-Host "  version  $Ver" }
 Write-Host "  binary   $Dest"
 if ($Got) { Write-Host "  sha256   $Got" }
 Write-Host ""
+try { Install-GaldrContextMenu $Dest } catch {
+    Write-Host "Warning: could not add Explorer context menu: $($_.Exception.Message)"
+}
+try { Install-GaldrStartMenu $Dest } catch {
+    Write-Host "Warning: could not add Start menu shortcut: $($_.Exception.Message)"
+}
 Show-GaldrPathConflict $Dest
 Write-Host "  galdr"
 Write-Host "  galdr --version"
+Write-Host "  Start menu: Galdr"
+Write-Host "  Right-click a folder: Open Galdr here"
 Write-Host ""
