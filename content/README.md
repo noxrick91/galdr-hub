@@ -21,21 +21,24 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.7** — 2026-08-22
+**What's new in v0.1.8** — 2026-08-22
 
-- `complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).
-- `galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.
-- Key bindings can use `action = "none"` to unbind a builtin shortcut.
-- `[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.
-- Combining marks rasterize as a cluster, not just the base letter.
-- Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.
-- Folder context menu label is always **Open Galdr here**.
-- Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.
-- Windows Quick Select opens `C:\` and UNC paths.
-- Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.
-- Pane snapshots are shared so a quiet frame no longer clones the whole grid.
-- galdr-shell accepts redirections on fds 3–15.
-- A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads.
+- Settings can toggle system font fallback and edit `TERM`.
+- `exec 3>file` (no command) keeps the redirection on the shell.
+- `complete -C` runs an external completer (`COMP_LINE` / `COMP_POINT` / `COMP_CWORD`).
+- Windows children inherit fds 3–15 (CRT `lpReserved2`). Nested `galdr-sh` imports them.
+- `case` fallthrough: `;&` runs the next arm's body; `;;&` keeps testing later arms.
+- Background `&&`/`||` lists set `$!` (same fake-PID range as coproc).
+- Windows `fg` waits on stored process handles or in-process jobs; `bg` marks the job running.
+- Closing the window no longer treats the login shell `galdr-sh` as a running command.
+- Glyph atlas reset clears the GPU texture so stale glyphs do not linger after a font change or overflow.
+- Grapheme intern recycles slots instead of returning 0 (empty cell) when full.
+- Attach search uses the same line-text / wrap join as the local grid.
+- `[[ =~ ]]` caches compiled regular expressions.
+- Completion matches substrings and abbreviations (`git cko` → checkout), follows aliases, completes `$VARS` / `export` / `help`, and reads git branches from `.git`.
+- `complete -F` / `-C` no longer block the hint on every keystroke.
+- Quoted words and `>` redirections complete as paths. Home / End jump in the menu.
+- Docs match the real defaults (`galdr-dark`; Cascadia on Windows, DejaVu on Unix).
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -108,7 +111,7 @@ irm https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install.ps1 | iex
 
 Windows 安装器还会装同目录的 `galdr-sh-*.exe`（ConPTY 里跑 galdr-shell 的 console 助手）。
 
-Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及字体。默认配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji。
+Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及字体。零配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，并打开系统字体回退。
 
 ### 已安装后升级
 
@@ -172,7 +175,7 @@ include ~/.profile
 
 `include bashrc`、`zshrc`、`profile`、`bash_profile`、`zprofile`、`fish` 会找常见家目录路径；文件不存在就跳过。带 `/` 或 `~` 的路径必须存在。导入器会跑 `export`、`alias`、赋值和其它 galdr-shell 命令；bash/zsh 专用行（`setopt`、`bindkey` 等）会被跳过。
 
-诚实限制：`case` 没有 `;&` / `;;&`；后台 `&&` / `||` 列表没有真正的 `$!`；Windows 没有 `setpgid` 作业控制。
+`case` 支持 `;;` / `;&` / `;;&`。后台 `&&` / `||` 列表会设置 `$!`。Windows 没有 POSIX 进程组；`fg` / `wait` / `kill` 走进程句柄或进程内任务。
 
 ---
 
@@ -195,20 +198,21 @@ include ~/.profile
 | F11 | 全屏 |
 | Ctrl+= / - / 0 | 字体放大 / 缩小 / 重置 |
 
-Tab 或 Enter 接受补全；Esc / Ctrl+G 关掉补全菜单。空格不接受。
+Tab 或 Enter 接受补全；Esc / Ctrl+G 关掉补全菜单。空格不接受。补全会跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。
 
 ---
 
 ## 配置
 
-可选 `~/.config/galdr/config.toml`。零配置默认用 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji、Catppuccin Mocha。
+可选 `~/.config/galdr/config.toml`。零配置主题是 `galdr-dark`。Windows 默认 Cascadia Mono + 微软雅黑 / Segoe UI Emoji；Linux / macOS 默认 DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji。`system_fallback = true` 还会追加内置 CJK / emoji / mono 列表。
 
 ```toml
 [font]
-family = "DejaVu Sans Mono"
+family = "DejaVu Sans Mono"          # Windows 默认：Cascadia Mono
 size = 15.0
 line_height = 1.0
 fallback = ["Noto Sans CJK SC", "Noto Color Emoji"]
+system_fallback = true
 
 [window]
 padding = 8
@@ -216,7 +220,10 @@ opacity = 1.0
 tab_line_height = 1.5
 
 [theme]
-name = "catppuccin-mocha"
+name = "galdr-dark"
+
+[term]
+name = "xterm-256color"
 
 [shell]
 kind = "galdr"            # galdr | system
@@ -240,7 +247,7 @@ osc52 = "confirm"         # copy | confirm | off
 
 ## 界面
 
-- 主题：Catppuccin、Tokyo Night、Gruvbox、One Dark、Solarized
+- 主题：galdr-dark（默认）、Catppuccin、Tokyo Night、Gruvbox、One Dark、Solarized
 - OSC 0/2 标题，OSC 7 cwd，OSC 8 超链接（Ctrl+点击），OSC 52（默认先确认）
 - 选区、剪贴板、滚动条、右键菜单
 - WezTerm 风格 quick select 与 vi / copy mode
