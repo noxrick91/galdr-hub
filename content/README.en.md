@@ -21,21 +21,24 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.7** — 2026-08-22
+**What's new in v0.1.8** — 2026-08-22
 
-- `complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).
-- `galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.
-- Key bindings can use `action = "none"` to unbind a builtin shortcut.
-- `[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.
-- Combining marks rasterize as a cluster, not just the base letter.
-- Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.
-- Folder context menu label is always **Open Galdr here**.
-- Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.
-- Windows Quick Select opens `C:\` and UNC paths.
-- Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.
-- Pane snapshots are shared so a quiet frame no longer clones the whole grid.
-- galdr-shell accepts redirections on fds 3–15.
-- A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads.
+- Settings can toggle system font fallback and edit `TERM`.
+- `exec 3>file` (no command) keeps the redirection on the shell.
+- `complete -C` runs an external completer (`COMP_LINE` / `COMP_POINT` / `COMP_CWORD`).
+- Windows children inherit fds 3–15 (CRT `lpReserved2`). Nested `galdr-sh` imports them.
+- `case` fallthrough: `;&` runs the next arm's body; `;;&` keeps testing later arms.
+- Background `&&`/`||` lists set `$!` (same fake-PID range as coproc).
+- Windows `fg` waits on stored process handles or in-process jobs; `bg` marks the job running.
+- Closing the window no longer treats the login shell `galdr-sh` as a running command.
+- Glyph atlas reset clears the GPU texture so stale glyphs do not linger after a font change or overflow.
+- Grapheme intern recycles slots instead of returning 0 (empty cell) when full.
+- Attach search uses the same line-text / wrap join as the local grid.
+- `[[ =~ ]]` caches compiled regular expressions.
+- Completion matches substrings and abbreviations (`git cko` → checkout), follows aliases, completes `$VARS` / `export` / `help`, and reads git branches from `.git`.
+- `complete -F` / `-C` no longer block the hint on every keystroke.
+- Quoted words and `>` redirections complete as paths. Home / End jump in the menu.
+- Docs match the real defaults (`galdr-dark`; Cascadia on Windows, DejaVu on Unix).
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -108,7 +111,7 @@ Open the homepage, download the latest asset for your platform, put it in `~/.ga
 
 The Windows installer also installs `galdr-sh-*.exe` next to it (console helper so galdr-shell can run under ConPTY).
 
-Linux needs a working Vulkan stack (or another wgpu backend) and fonts. The default config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji.
+Linux needs a working Vulkan stack (or another wgpu backend) and fonts. Zero-config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji, and enables system font fallback.
 
 ### Upgrade
 
@@ -172,7 +175,7 @@ include ~/.profile
 
 `include bashrc`, `zshrc`, `profile`, `bash_profile`, `zprofile`, and `fish` look up the usual home paths and do nothing if the file is missing. A path must exist. The importer runs `export`, `alias`, assignments, and other galdr-shell commands; bash/zsh-only lines (`setopt`, `bindkey`, …) are skipped.
 
-Honest limits: `case` has no `;&` / `;;&`; background `&&`/`||` lists have no real `$!`; Windows has no `setpgid` job control.
+`case` supports `;;` / `;&` / `;;&`. Background `&&`/`||` lists set `$!`. Windows has no POSIX process groups; `fg`/`wait`/`kill` use stored handles or in-process jobs.
 
 ---
 
@@ -195,20 +198,21 @@ Bindings live in `[[keys]]` inside `config.toml`. Settings → Keys lists them.
 | F11 | Fullscreen |
 | Ctrl+= / - / 0 | Font size + / − / reset |
 
-Tab or Enter accepts a completion; Esc / Ctrl+G dismisses the menu. Space does not accept.
+Tab or Enter accepts a completion; Esc / Ctrl+G dismisses the menu. Space does not accept. Completions follow aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu.
 
 ---
 
 ## Config
 
-Optional `~/.config/galdr/config.toml`. Zero-config defaults use DejaVu Sans Mono, Noto Sans CJK SC, Noto Color Emoji, Catppuccin Mocha.
+Optional `~/.config/galdr/config.toml`. Zero-config theme is `galdr-dark`. Windows defaults to Cascadia Mono + Microsoft YaHei / Segoe UI Emoji; Linux / macOS to DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji. `system_fallback = true` also appends a built-in CJK / emoji / mono stack.
 
 ```toml
 [font]
-family = "DejaVu Sans Mono"
+family = "DejaVu Sans Mono"          # Windows default: Cascadia Mono
 size = 15.0
 line_height = 1.0
 fallback = ["Noto Sans CJK SC", "Noto Color Emoji"]
+system_fallback = true
 
 [window]
 padding = 8
@@ -216,7 +220,10 @@ opacity = 1.0
 tab_line_height = 1.5
 
 [theme]
-name = "catppuccin-mocha"
+name = "galdr-dark"
+
+[term]
+name = "xterm-256color"
 
 [shell]
 kind = "galdr"            # galdr | system
@@ -240,7 +247,7 @@ Font size is logical points. Galdr multiplies it by the window scale factor and 
 
 ## Interface
 
-- Themes: Catppuccin, Tokyo Night, Gruvbox, One Dark, Solarized
+- Themes: galdr-dark (default), Catppuccin, Tokyo Night, Gruvbox, One Dark, Solarized
 - OSC 0/2 title, OSC 7 cwd, OSC 8 hyperlinks (Ctrl+click), OSC 52 (confirm by default)
 - Selection, clipboard, scrollbar, context menu
 - WezTerm-style quick select and vi / copy mode
