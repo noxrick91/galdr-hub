@@ -21,9 +21,14 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.5** — 2026-08-21
+**What's new in v0.1.6** — 2026-08-22
 
-- Windows Explorer and Start menu launches no longer open a second system console next to Galdr.
+- GNOME Files on Ubuntu 26.04 / Nautilus 4.1 no longer silently drops the folder context item: the installer pins the Nautilus GI version and installs `python3-nautilus` when it can.
+- Windows Explorer context menu title is written as Unicode code points so “在此处打开 Galdr” is not mojibaked by PowerShell 5.1 / `irm`.
+- Windows galdr-shell login no longer stays on the tab spinner or flash-exits from Explorer: ConPTY now starts the console helper `galdr-sh.exe` instead of GUI-subsystem `galdr.exe --shell`.
+- Linux installer writes a proper Apps entry (`galdr.desktop`) and folder “open here” actions; GNOME can show a top-level item when `python3-nautilus` is installed.
+- Windows installer adds Galdr to the Start menu and Explorer context menu (folder, background, drive). Chinese UI uses “在此处打开 Galdr”.
+- `~/.galdr/uninstall` (Windows: `uninstall.ps1`) removes those menu entries. `rm -rf ~/.galdr` alone leaves them behind.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -66,6 +71,13 @@ source ~/.galdr/env
 # 或把 ~/.galdr/bin 加进 PATH 后新开终端
 ```
 
+安装时还会把 Galdr 接到系统菜单：
+
+- Linux：写入 `~/.local/share/applications/galdr.desktop`，应用菜单（Apps）里会出现 **Galdr**。在文件夹上右键 **在此处打开 Galdr** 会新开终端并 `cd` 到该目录。GNOME Files 的顶层菜单需要 `python3-nautilus`；安装器在能提权时会装上，否则请 `sudo apt install python3-nautilus && nautilus -q`。没装绑定时只在「脚本」里，且要点选文件夹。
+- Windows：开始菜单加入 **Galdr**；资源管理器里右键文件夹 / 空白处 **在此处打开 Galdr**。Windows 11 可能在「显示更多选项」里。
+
+不想加菜单时设 `GALDR_NO_CONTEXT_MENU=1` 或 `GALDR_NO_START_MENU=1`。
+
 Pages 尚未生效时可用：
 
 ```bash
@@ -87,6 +99,8 @@ irm https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install.ps1 | iex
 | Windows x64 | `galdr-x86_64-pc-windows-gnu.exe` |
 | Windows ARM64 | `galdr-aarch64-pc-windows-msvc.exe` |
 
+Windows 安装器还会装同目录的 `galdr-sh-*.exe`（ConPTY 里跑 galdr-shell 的 console 助手）。
+
 Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及字体。默认配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji。
 
 ### 已安装后升级
@@ -95,15 +109,17 @@ Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及�
 
 ### 卸载
 
+用安装器写好的脚本，才会一并去掉应用菜单、右键菜单和开始菜单项：
+
 ```bash
-rm -rf ~/.galdr
+~/.galdr/uninstall
 ```
 
 ```powershell
-Remove-Item -Recurse -Force $HOME\.galdr
+& "$HOME\.galdr\uninstall.ps1"
 ```
 
-Windows 再从用户 PATH 去掉 `%USERPROFILE%\.galdr\bin`。配置目录 `~/.config/galdr/` 不会被安装器删除。
+只删 `~/.galdr` 会留下桌面项和资源管理器右键。配置目录 `~/.config/galdr/` 不会被删除。
 
 ### 从源码安装
 
@@ -254,4 +270,6 @@ galdr --socket /tmp/galdr.sock --server
 | 缺字 / 方框 | 安装 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，或改 `[font]` |
 | Windows `irm …/install.ps1` 无效 | 改用 `irm …/install.txt \| iex` |
 | Windows 仍是旧版本 | 关掉所有 Galdr 窗口再装一次；`Get-Command galdr` 确认 PATH 不是另一份 exe |
+| Linux 应用菜单没有 Galdr | 再跑一次安装器，或注销后重开；确认 `~/.local/share/applications/galdr.desktop` 存在 |
+| 文件夹右键没有「打开 Galdr」 | GNOME：`sudo apt install python3-nautilus && nautilus -q`（没装绑定只有「脚本」子菜单）。Windows 11：在「显示更多选项」里 |
 | 想用系统 bash | `[shell] kind = "system"`，不要指望默认会读 `.bashrc` |
