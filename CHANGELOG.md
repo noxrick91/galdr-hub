@@ -6,6 +6,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-08-22
+
+### Added
+
+- `complete -F` runs the named function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`).
+- `galdr --shell SCRIPT [ARGS...]` and `galdr-sh SCRIPT [ARGS...]` set `$0` / `$1+`.
+- Key bindings can use `action = "none"` to unbind a builtin shortcut.
+- `[term] name` sets `TERM` for new panes. `[font] system_fallback = false` skips the built-in CJK / emoji stack.
+- Combining marks rasterize as a cluster, not just the base letter.
+- Mux attach receives prompt / cwd / busy status so restore and the tab spinner follow the host.
+
+### Changed
+
+- Folder context menu label is always **Open Galdr here**.
+- Vi copy mode tracks the live cursor and `w` / `e` / `b`; Ctrl+Tab notifies attach clients.
+- Windows Quick Select opens `C:\` and UNC paths.
+- Aliases can expand to pipelines / `&&`; Windows `>(cmd)` process substitution works.
+- Pane snapshots are shared so a quiet frame no longer clones the whole grid.
+- galdr-shell accepts redirections on fds 3–15.
+
+### Fixed
+
+- A broken `config.toml` no longer freezes the last-good mtime, so a later valid save reloads.
+
 ## [0.1.6] - 2026-08-22
 
 ### Fixed
