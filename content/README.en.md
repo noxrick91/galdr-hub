@@ -21,9 +21,14 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.5** — 2026-08-21
+**What's new in v0.1.6** — 2026-08-22
 
-- Windows Explorer and Start menu launches no longer open a second system console next to Galdr.
+- GNOME Files on Ubuntu 26.04 / Nautilus 4.1 no longer silently drops the folder context item: the installer pins the Nautilus GI version and installs `python3-nautilus` when it can.
+- Windows Explorer context menu title is written as Unicode code points so “在此处打开 Galdr” is not mojibaked by PowerShell 5.1 / `irm`.
+- Windows galdr-shell login no longer stays on the tab spinner or flash-exits from Explorer: ConPTY now starts the console helper `galdr-sh.exe` instead of GUI-subsystem `galdr.exe --shell`.
+- Linux installer writes a proper Apps entry (`galdr.desktop`) and folder “open here” actions; GNOME can show a top-level item when `python3-nautilus` is installed.
+- Windows installer adds Galdr to the Start menu and Explorer context menu (folder, background, drive). Chinese UI uses “在此处打开 Galdr”.
+- `~/.galdr/uninstall` (Windows: `uninstall.ps1`) removes those menu entries. `rm -rf ~/.galdr` alone leaves them behind.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -66,6 +71,13 @@ source ~/.galdr/env
 # or add ~/.galdr/bin to PATH and open a new terminal
 ```
 
+The installer also hooks Galdr into the desktop:
+
+- Linux: writes `~/.local/share/applications/galdr.desktop` so **Galdr** appears in the app menu. Right-click a folder and choose **Open Galdr here** to start in that directory. GNOME Files needs `python3-nautilus` for a top-level item; the installer installs it when it can elevate, otherwise run `sudo apt install python3-nautilus && nautilus -q`. Without the bindings it only appears under Scripts, and only when a folder is selected.
+- Windows: adds **Galdr** to the Start menu, and **Open Galdr here** to Explorer (folder, background, drive). On Windows 11 it may sit under **Show more options**.
+
+Skip the menus with `GALDR_NO_CONTEXT_MENU=1` or `GALDR_NO_START_MENU=1`.
+
 If Pages is not live yet:
 
 ```bash
@@ -87,6 +99,8 @@ Open the homepage, download the latest asset for your platform, put it in `~/.ga
 | Windows x64 | `galdr-x86_64-pc-windows-gnu.exe` |
 | Windows ARM64 | `galdr-aarch64-pc-windows-msvc.exe` |
 
+The Windows installer also installs `galdr-sh-*.exe` next to it (console helper so galdr-shell can run under ConPTY).
+
 Linux needs a working Vulkan stack (or another wgpu backend) and fonts. The default config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji.
 
 ### Upgrade
@@ -95,15 +109,17 @@ Run the installer again. There is no `galdr upgrade` command.
 
 ### Uninstall
 
+Use the helper the installer wrote so app-menu, context-menu, and Start menu entries are removed too:
+
 ```bash
-rm -rf ~/.galdr
+~/.galdr/uninstall
 ```
 
 ```powershell
-Remove-Item -Recurse -Force $HOME\.galdr
+& "$HOME\.galdr\uninstall.ps1"
 ```
 
-On Windows also remove `%USERPROFILE%\.galdr\bin` from the user PATH. `~/.config/galdr/` is left alone.
+Deleting `~/.galdr` by itself leaves those menu entries behind. `~/.config/galdr/` is left alone.
 
 ### Build from source
 
@@ -254,4 +270,6 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 | Missing glyphs / tofu | Install DejaVu Sans Mono, Noto Sans CJK SC, Noto Color Emoji, or change `[font]` |
 | Windows `irm …/install.ps1` does nothing | Use `irm …/install.txt \| iex` |
 | Windows still shows an old version | Close every Galdr window and install again; `Get-Command galdr` to confirm PATH |
+| Galdr missing from the Linux app menu | Re-run the installer or log out; check `~/.local/share/applications/galdr.desktop` |
+| No “Open Galdr here” on folders | GNOME: `sudo apt install python3-nautilus && nautilus -q` (without bindings it only appears under Scripts). Windows 11: look under **Show more options** |
 | Want system bash | `[shell] kind = "system"` — the default will not read `.bashrc` |
