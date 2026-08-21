@@ -1,15 +1,13 @@
 {
-  "tag": "v0.1.3",
-  "version": "0.1.3",
+  "tag": "v0.1.4",
+  "version": "0.1.4",
   "date": "2026-08-21",
-  "title": "What's new in v0.1.3",
+  "title": "What's new in v0.1.4",
   "notes": [
-    "`galdr --version`",
-    "Windows completion, smart hints, and Enter-to-accept.",
-    "Settings wheel scrolls the list; Left/Right still change the value.",
-    "Faster, more reliable Windows console and mux attach.",
-    "Unix-only builtins report that they are unavailable on Windows."
+    "`galdr --cwd` so a window can start in a chosen folder.",
+    "Installer adds Galdr to the Windows Start menu and Explorer context menu.",
+    "Linux installer adds Galdr to the app menu and folder context menus."
   ],
-  "body": "### Added\n\n- `galdr --version`\n\n### Changed\n\n- Windows completion, smart hints, and Enter-to-accept.\n- Settings wheel scrolls the list; Left/Right still change the value.\n- Faster, more reliable Windows console and mux attach.\n- Unix-only builtins report that they are unavailable on Windows.",
+  "body": "### Added\n\n- `galdr --cwd` so a window can start in a chosen folder.\n- Installer adds Galdr to the Windows Start menu and Explorer context menu.\n- Linux installer adds Galdr to the app menu and folder context menus.",
   "url": "./CHANGELOG.md"
 }
