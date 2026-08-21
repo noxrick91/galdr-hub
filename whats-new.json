@@ -1,17 +1,15 @@
 {
-  "tag": "v0.1.2",
-  "version": "0.1.2",
-  "date": "2026-08-20",
-  "title": "What's new in v0.1.2",
+  "tag": "v0.1.3",
+  "version": "0.1.3",
+  "date": "2026-08-21",
+  "title": "What's new in v0.1.3",
   "notes": [
-    "GPU terminal with wgpu instanced cells, HiDPI, IME, tabs, splits, search, and session restore.",
-    "Builtin galdr-shell as the default login, with `~/.config/galdr/galdrc` as the only startup file.",
-    "Optional `include` in `galdrc` for bashrc, zshrc, profile, and other well-known rc files.",
-    "Frequency-sorted Tab completion and a host-drawn completion menu that opens above the prompt.",
-    "Mux attach on a Unix socket or Windows named pipe (`galdr --server` / `galdr --attach`).",
-    "Default font size is 15pt with line height 1 and tab-line height 1.5.",
-    "Tab or Enter accepts a completion; Space does not."
+    "`galdr --version`",
+    "Windows completion, smart hints, and Enter-to-accept.",
+    "Settings wheel scrolls the list; Left/Right still change the value.",
+    "Faster, more reliable Windows console and mux attach.",
+    "Unix-only builtins report that they are unavailable on Windows."
   ],
-  "body": "### Added\n\n- GPU terminal with wgpu instanced cells, HiDPI, IME, tabs, splits, search, and session restore.\n- Builtin galdr-shell as the default login, with `~/.config/galdr/galdrc` as the only startup file.\n- Optional `include` in `galdrc` for bashrc, zshrc, profile, and other well-known rc files.\n- Frequency-sorted Tab completion and a host-drawn completion menu that opens above the prompt.\n- Mux attach on a Unix socket or Windows named pipe (`galdr --server` / `galdr --attach`).\n\n### Changed\n\n- Default font size is 15pt with line height 1 and tab-line height 1.5.\n- Tab or Enter accepts a completion; Space does not.",
+  "body": "### Added\n\n- `galdr --version`\n\n### Changed\n\n- Windows completion, smart hints, and Enter-to-accept.\n- Settings wheel scrolls the list; Left/Right still change the value.\n- Faster, more reliable Windows console and mux attach.\n- Unix-only builtins report that they are unavailable on Windows.",
   "url": "./CHANGELOG.md"
 }
