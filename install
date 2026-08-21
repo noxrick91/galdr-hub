@@ -4,6 +4,7 @@
 #   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
 # Windows PowerShell: irm https://term.noxcaw.com/install.txt | iex
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN  NO_COLOR
+#      GALDR_NO_CONTEXT_MENU  GALDR_NO_START_MENU
 # Does not edit .bashrc / .zshrc. Writes ~/.galdr/env for you to source if needed.
 set -euo pipefail
 
@@ -25,6 +26,179 @@ fi
 step() { printf '%s▸%s %s\n' "$CD" "$C0" "$1"; }
 ok() { printf '%s✓%s %s\n' "$C2" "$C0" "$1"; }
 die() { printf '%s✗%s %s\n' "$C3" "$C0" "$1" >&2; exit 1; }
+
+desktop_exec() {
+  case "$1" in
+    *[[:space:]]*) printf '"%s"' "$1" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
+write_icon() {
+  local icon="${PREFIX}/galdr.svg"
+  mkdir -p "${PREFIX}"
+  cat >"${icon}" <<'EOF'
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <path fill="#ff9838" d="M14 7h32v5h5v10H19v20h32v10h-5v5H14v-5H9V12h5z"/>
+  <rect x="39" y="27" width="10" height="10" fill="#ffd69c"/>
+</svg>
+EOF
+  local hicolor="${HOME}/.local/share/icons/hicolor/scalable/apps"
+  mkdir -p "${hicolor}"
+  cp -f "${icon}" "${hicolor}/galdr.svg"
+}
+
+write_here_helper() {
+  local helper="${PREFIX}/galdr-here"
+  cat >"${helper}" <<EOF
+#!/bin/sh
+bin='${dest}'
+path="\$1"
+if [ -z "\${path}" ]; then
+  path="\${PWD}"
+fi
+case "\${path}" in
+  file://*) path="\${path#file://}" ;;
+esac
+path=\$(printf '%s' "\${path}" | sed 's/%20/ /g')
+if [ -f "\${path}" ]; then
+  path=\$(dirname "\${path}")
+fi
+if [ ! -d "\${path}" ]; then
+  path="\${PWD}"
+fi
+exec "\$bin" --cwd "\$path"
+EOF
+  chmod +x "${helper}"
+}
+
+write_desktop_entry() {
+  [ -n "${GALDR_NO_START_MENU:-}" ] && return 0
+  local apps="${HOME}/.local/share/applications"
+  mkdir -p "${apps}"
+  local exec
+  exec="$(desktop_exec "${dest}")"
+  cat >"${apps}/galdr.desktop" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Galdr
+Comment=GPU-accelerated terminal
+Exec=${exec}
+TryExec=${dest}
+Icon=galdr
+Terminal=false
+Categories=System;TerminalEmulator;
+Keywords=terminal;shell;console;
+StartupNotify=true
+EOF
+  if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database "${apps}" >/dev/null 2>&1 || true
+  fi
+  ok "App menu: ${apps}/galdr.desktop"
+}
+
+install_file_manager_actions() {
+  [ -n "${GALDR_NO_CONTEXT_MENU:-}" ] && return 0
+  local helper="${PREFIX}/galdr-here"
+  local name="Open Galdr here"
+  local script
+  for script in \
+    "${HOME}/.local/share/nautilus/scripts/${name}" \
+    "${HOME}/.config/caja/scripts/${name}"
+  do
+    mkdir -p "$(dirname "${script}")"
+    cat >"${script}" <<EOF
+#!/bin/sh
+exec "${helper}" "\$1"
+EOF
+    chmod +x "${script}"
+  done
+
+  local nemo="${HOME}/.local/share/nemo/actions"
+  mkdir -p "${nemo}"
+  cat >"${nemo}/galdr-dir.nemo_action" <<EOF
+[Nemo Action]
+Name=${name}
+Comment=Open Galdr in this folder
+Exec="${helper}" %F
+Icon-Name=galdr
+Selection=s
+Extensions=dir;
+Quote=double
+EOF
+  cat >"${nemo}/galdr-bg.nemo_action" <<EOF
+[Nemo Action]
+Name=${name}
+Comment=Open Galdr in this folder
+Exec="${helper}" %P
+Icon-Name=galdr
+Selection=none
+Extensions=any;
+Quote=double
+EOF
+
+  local kde_body
+  kde_body=$(cat <<EOF
+[Desktop Entry]
+Type=Service
+MimeType=inode/directory;
+Actions=openGaldr;
+X-KDE-Priority=TopLevel
+
+[Desktop Action openGaldr]
+Name=${name}
+Icon=galdr
+Exec="${helper}" %f
+EOF
+)
+  local kde
+  for kde in \
+    "${HOME}/.local/share/kio/servicemenus" \
+    "${HOME}/.local/share/kservices5/ServiceMenus"
+  do
+    mkdir -p "${kde}"
+    printf '%s\n' "${kde_body}" >"${kde}/galdr.desktop"
+  done
+
+  local uca="${HOME}/.config/Thunar/uca.xml"
+  mkdir -p "$(dirname "${uca}")"
+  if [ ! -f "${uca}" ]; then
+    cat >"${uca}" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+<action>
+	<icon>galdr</icon>
+	<name>${name}</name>
+	<unique-id>galdr-open-here</unique-id>
+	<command>${helper} %f</command>
+	<description>Open Galdr in this folder</description>
+	<patterns>*</patterns>
+	<directories/>
+</action>
+</actions>
+EOF
+  elif ! grep -q 'galdr-open-here' "${uca}"; then
+    local tmp_uca
+    tmp_uca="$(mktemp)"
+    awk -v cmd="${helper} %f" -v n="${name}" '
+      /<\/actions>/ && !done {
+        print "<action>"
+        print "\t<icon>galdr</icon>"
+        print "\t<name>" n "</name>"
+        print "\t<unique-id>galdr-open-here</unique-id>"
+        print "\t<command>" cmd "</command>"
+        print "\t<description>Open Galdr in this folder</description>"
+        print "\t<patterns>*</patterns>"
+        print "\t<directories/>"
+        print "</action>"
+        done=1
+      }
+      { print }
+    ' "${uca}" >"${tmp_uca}"
+    mv "${tmp_uca}" "${uca}"
+  fi
+  ok "Folder context menu: ${name}"
+}
 
 write_env_file() {
   local env_file="${PREFIX}/env"
@@ -195,6 +369,14 @@ fi
 
 write_env_file
 
+if [ "${os}" = "linux" ]; then
+  if write_icon && write_here_helper && write_desktop_entry && install_file_manager_actions; then
+    :
+  else
+    printf '  warning: desktop integration failed\n'
+  fi
+fi
+
 printf '\n%sInstallation complete.%s\n' "$C1" "$C0"
 if [ -n "${ver}" ]; then
   printf '  version  %s\n' "${ver}"
@@ -205,4 +387,9 @@ printf '  PATH     %s\n' "${BIN_DIR}"
 printf '\n  The installer does not edit .bashrc or .zshrc.\n'
 printf '  source %s/env\n' "${PREFIX}"
 printf '  or add %s to PATH, then open Galdr:\n' "${BIN_DIR}"
-printf '\n  galdr\n  galdr --version\n\n'
+printf '\n  galdr\n  galdr --version\n'
+if [ "${os}" = "linux" ]; then
+  printf '  App menu: Galdr\n'
+  printf '  Right-click a folder: Open Galdr here\n'
+fi
+printf '\n'
