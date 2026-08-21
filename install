@@ -35,11 +35,7 @@ desktop_exec() {
 }
 
 here_menu_title() {
-  local loc="${LC_ALL:-${LC_MESSAGES:-${LANG:-}}}"
-  case "${loc}" in
-    zh*|ZH*|*.zh*|*.ZH*) printf '%s' "在此处打开 Galdr" ;;
-    *) printf '%s' "Open Galdr here" ;;
-  esac
+  printf '%s' "Open Galdr here"
 }
 
 xml_escape() {
@@ -390,10 +386,7 @@ EOF
   cat >"${nemo}/galdr-dir.nemo_action" <<EOF
 [Nemo Action]
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
-Name[zh_TW]=在此處開啟 Galdr
 Comment=Open Galdr in this folder
-Comment[zh_CN]=在此文件夹打开 Galdr
 Exec="${helper}" %F
 Icon-Name=galdr
 Selection=s
@@ -403,10 +396,7 @@ EOF
   cat >"${nemo}/galdr-bg.nemo_action" <<EOF
 [Nemo Action]
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
-Name[zh_TW]=在此處開啟 Galdr
 Comment=Open Galdr in this folder
-Comment[zh_CN]=在此文件夹打开 Galdr
 Exec="${helper}" %P
 Icon-Name=galdr
 Selection=none
@@ -425,8 +415,6 @@ X-KDE-Priority=TopLevel
 
 [Desktop Action openGaldr]
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
-Name[zh_TW]=在此處開啟 Galdr
 Icon=galdr
 Exec="${helper}" %f
 EOF
@@ -447,14 +435,11 @@ EOF
 [Desktop Entry]
 Type=Action
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
-Name[zh_TW]=在此處開啟 Galdr
 Icon=galdr
 Profiles=folder;
 
 [X-Action-Profile folder]
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
 MimeTypes=inode/directory;
 Exec="${helper}" %f
 EOF
@@ -464,8 +449,6 @@ EOF
   cat >"${contractor}/galdr-here.contract" <<EOF
 [Contractor Entry]
 Name=Open Galdr here
-Name[zh_CN]=在此处打开 Galdr
-Name[zh_TW]=在此處開啟 Galdr
 Icon=galdr
 Description=Open Galdr in this folder
 MimeType=inode;
