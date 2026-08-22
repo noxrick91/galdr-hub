@@ -1,8 +1,8 @@
 # Galdr 使用手册
 
-Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文件只有 `~/.config/galdr/galdrc`，不会自动读 `.bashrc`。
+Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文件在 Unix 是 `~/.config/galdr/galdrc`，在 Windows 是 `%APPDATA%\galdr\galdrc`，不会自动读 `.bashrc`。
 
-预编译包从本站 [GitHub Releases](https://github.com/noxrick91/galdr-hub/releases) 装到 `~/.galdr/bin`。源码仓私有，不对外。
+预编译包装到 `~/.galdr/bin`。从本站首页或下面的安装命令获取。
 
 ### 它做什么
 
@@ -21,9 +21,13 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.10** — 2026-08-22
+**What's new in v0.1.12** — 2026-08-23
 
-- Dragging a tab follows the pointer with a ghost chip. Other tabs slide to close the old slot and open a gap at the drop point; the order commits on release.
+- Windows: the login self-check is part of the first rustyline prompt, so ConPTY no longer erases it before the caret appears.
+- Windows: tab (and split/scroll) drag no longer flashes the whole window. The HWND uses `WS_EX_NOREDIRECTIONBITMAP`, DXGI keeps a queued frame, and chrome drags present without `WM_PAINT`.
+- Windows: an exact completion match (`cursor` among `cursor-agent` …) still keeps the host menu navigable; Up/Down/Tab update the highlight immediately.
+- Windows: startup PATH self-check splits on `;` and drive-safe `:`; PATHEXT lookup keeps the on-disk spelling (`git.exe`, not `git.EXE`).
+- Windows: `wait` on a stopped job without process handles stays stopped; process-substitution writers use `PIPE_ACCESS_OUTBOUND`.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -51,7 +55,7 @@ Windows PowerShell：
 irm https://term.noxcaw.com/install.txt | iex
 ```
 
-不要用 `irm …/install.ps1`：GitHub Pages 把 `.ps1` 标成 `application/octet-stream`，Windows PowerShell 5.1 的 `irm` 读不成脚本。`.txt` 是 `text/plain`。若必须拉 `.ps1`：
+不要用 `irm …/install.ps1`：网站把 `.ps1` 标成 `application/octet-stream`，Windows PowerShell 5.1 的 `irm` 读不成脚本。`.txt` 是 `text/plain`。若必须拉 `.ps1`：
 
 ```powershell
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
@@ -72,16 +76,6 @@ source ~/.galdr/env
 - Windows：开始菜单加入 **Galdr**；资源管理器里右键文件夹 / 空白处 **Open Galdr here**。Windows 11 可能在「显示更多选项」里。
 
 不想加菜单时设 `GALDR_NO_CONTEXT_MENU=1` 或 `GALDR_NO_START_MENU=1`。
-
-Pages 尚未生效时可用：
-
-```bash
-curl -fsS https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install | bash
-```
-
-```powershell
-irm https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install.ps1 | iex
-```
 
 ### 官网 / 手动下载
 
@@ -116,17 +110,6 @@ Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及�
 
 只删 `~/.galdr` 会留下桌面项和资源管理器右键。配置目录 `~/.config/galdr/` 不会被删除。
 
-### 从源码安装
-
-源码仓不公开。有权限的开发者：
-
-```bash
-cargo build --release
-./target/release/galdr
-```
-
-需要 GPU 栈（`wgpu`：Vulkan / Metal / D3D12）。
-
 ---
 
 ## 快速开始
@@ -150,17 +133,25 @@ kind = "system"
 
 ## Shell 与 galdrc
 
-启动文件只有 `~/.config/galdr/galdrc`。不会自动读 `.bashrc`。要沿用旧习惯，在 `galdrc` 里显式引入：
+启动文件在 Unix 是 `~/.config/galdr/galdrc`，在 Windows 是 `%APPDATA%\galdr\galdrc`。不会自动读 `.bashrc`。要沿用旧习惯，在 `galdrc` 里显式引入：
 
 ```sh
+# Unix
 include bashrc
 include zshrc
 include ~/.profile
 ```
 
-`include bashrc`、`zshrc`、`profile`、`bash_profile`、`zprofile`、`zlogin`、`zshenv`、`kshrc`、`fish` 会找常见家目录路径（前面加不加 `.` 都行）；文件不存在就跳过。带 `/` 或 `~` 的路径必须存在。导入器会跑 `export`、`alias`、赋值和其它 galdr-shell 命令；bash/zsh 专用行（`setopt`、`bindkey`、`shopt` 等）会被跳过。
+```sh
+# Windows
+include env
+include powershell
+include bashrc
+```
 
-写进 `galdrc` 后要**新开标签或窗口**才生效，已经打开的会话不会重读。提示符里也可以 `source ~/.bashrc`，但启动时请用 `include`。需要完整 bash 行为时设 `[shell] kind = "system"`。
+`include bashrc`、`profile`、`bash_profile` 和带路径的文件按 bash 执行（`export`、`alias`、函数、`shopt`、嵌套 `source`）。解析失败会警告并改走宽松读取。`include zshrc` / `fish` 仍宽松，并跳过 zsh/fish 专用命令（`setopt`、`bindkey` 等）。Windows 上 `include env` 合并注册表用户/系统 `PATH`；`include powershell` 导出 PowerShell profile 的环境。bash rc 里的 `PS1` 会生效；要保留 galdr 提示符，在 `include` 之后写回。`source` 是严格 galdr-shell 读取。
+
+写进 `galdrc` 后要**新开标签或窗口**才生效，已经打开的会话不会重读。要发行版 bash 或完整 PowerShell 会话时设 `[shell] kind = "system"`。
 
 `case` 支持 `;;` / `;&` / `;;&`。后台 `&&` / `||` 列表会设置 `$!`。Windows 没有 POSIX 进程组；`fg` / `wait` / `kill` 走进程句柄或进程内任务。
 
@@ -206,7 +197,9 @@ action = "none"
 
 拖标签可重排，拖分隔条可改分屏，见 [界面](#/ui)。
 
-Tab 或 Enter 接受补全；Esc / Ctrl+G 关掉补全菜单。空格不接受。补全会跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。
+Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空格不接受。打完或确认完整命令名后，菜单会列出参数 / 子命令；回车仍执行当前命令。补全使用 shell 的 `PATH`（`include bashrc` 之后加进来的工具也能对上），并跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。
+
+交互里 Ctrl+Z 会停住前台作业并打印 `[n]+  Stopped  命令`，再用 `fg` / `bg` / `jobs` 管理。
 
 ---
 
@@ -253,7 +246,7 @@ close_behavior = "exit"   # or "detach"
 
 [session]
 restore = false
-restore_mode = "ask"      # ask | wezterm
+restore_mode = "ask"      # ask | wezterm（直接恢复，不弹确认）
 restore_commands = false
 
 scrollback = 10000
@@ -285,7 +278,7 @@ osc52 = "confirm"         # copy | confirm | off
 - 主题：galdr-dark（默认）、Catppuccin、Tokyo Night、Gruvbox、One Dark、Solarized
 - OSC 0/2 标题，OSC 7 cwd，OSC 8 超链接（Ctrl+点击），OSC 52（默认先确认）
 - 选区、剪贴板、滚动条、右键菜单
-- WezTerm 风格 quick select 与 vi / copy mode
+- Quick select 与 vi / copy mode
 
 ---
 
@@ -305,7 +298,7 @@ galdr --socket /tmp/galdr.sock --server
 
 ## 会话恢复
 
-`[session] restore = true` 时，下次启动会重开上次的窗口 / 标签 / 分屏 / cwd。`restore_mode = "ask"` 会先列出上次前台命令再确认；`wezterm` 则按 WezTerm 的方式恢复。
+`[session] restore = true` 时，下次启动会重开上次的窗口 / 标签 / 分屏 / cwd。`restore_mode = "ask"` 会先列出上次前台命令再确认；`wezterm` 则直接恢复、不再弹出确认列表。
 
 ---
 
@@ -314,7 +307,7 @@ galdr --socket /tmp/galdr.sock --server
 | 现象 | 处理 |
 | --- | --- |
 | `galdr: command not found` | `source ~/.galdr/env`，或把 `~/.galdr/bin` 加进 PATH |
-| 安装 HTTP 404 | 该 tag 还没有 Release。看 [Releases](https://github.com/noxrick91/galdr-hub/releases) |
+| 安装 HTTP 404 | 该版本还没有发布资产。看本站首页或 [更新记录](./CHANGELOG.md) |
 | Linux 黑屏 / 立刻退出 | 检查 Vulkan 驱动；`wgpu` 需要可用的 GPU 后端 |
 | 缺字 / 方框 | 安装 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，或改 `[font]` |
 | Windows `irm …/install.ps1` 无效 | 改用 `irm …/install.txt \| iex` |
@@ -322,5 +315,5 @@ galdr --socket /tmp/galdr.sock --server
 | Linux 应用菜单没有 Galdr | 再跑一次安装器，或注销后重开；确认 `~/.local/share/applications/galdr.desktop` 存在 |
 | 文件夹右键没有「打开 Galdr」 | GNOME：`sudo apt install python3-nautilus && nautilus -q`（没装绑定只有「脚本」子菜单）。Windows 11：在「显示更多选项」里 |
 | 想用系统 bash | `[shell] kind = "system"`，不要指望默认会读 `.bashrc` |
-| `include bashrc` 没生效 | 写在 `~/.config/galdr/galdrc`，然后**新开标签**。交互里 `source ~/.bashrc` 只影响当前行编辑会话 |
+| `include bashrc` 没生效 | 写在 `~/.config/galdr/galdrc`，然后**新开标签**。交互里也要用 `include`，不要 `source ~/.bashrc` |
 | 改了 `config.toml` 没反应 / 状态栏报错 | 语法错了会继续用上一份好配置。修好后切回窗口就会重载 |
