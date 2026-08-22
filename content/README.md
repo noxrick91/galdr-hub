@@ -21,9 +21,9 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.9** — 2026-08-22
+**What's new in v0.1.10** — 2026-08-22
 
-- Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles.
+- Dragging a tab follows the pointer with a ghost chip. Other tabs slide to close the old slot and open a gap at the drop point; the order commits on release.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
