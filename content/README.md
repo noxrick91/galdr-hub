@@ -21,24 +21,9 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.8** — 2026-08-22
+**What's new in v0.1.9** — 2026-08-22
 
-- Settings can toggle system font fallback and edit `TERM`.
-- `exec 3>file` (no command) keeps the redirection on the shell.
-- `complete -C` runs an external completer (`COMP_LINE` / `COMP_POINT` / `COMP_CWORD`).
-- Windows children inherit fds 3–15 (CRT `lpReserved2`). Nested `galdr-sh` imports them.
-- `case` fallthrough: `;&` runs the next arm's body; `;;&` keeps testing later arms.
-- Background `&&`/`||` lists set `$!` (same fake-PID range as coproc).
-- Windows `fg` waits on stored process handles or in-process jobs; `bg` marks the job running.
-- Closing the window no longer treats the login shell `galdr-sh` as a running command.
-- Glyph atlas reset clears the GPU texture so stale glyphs do not linger after a font change or overflow.
-- Grapheme intern recycles slots instead of returning 0 (empty cell) when full.
-- Attach search uses the same line-text / wrap join as the local grid.
-- `[[ =~ ]]` caches compiled regular expressions.
-- Completion matches substrings and abbreviations (`git cko` → checkout), follows aliases, completes `$VARS` / `export` / `help`, and reads git branches from `.git`.
-- `complete -F` / `-C` no longer block the hint on every keystroke.
-- Quoted words and `>` redirections complete as paths. Home / End jump in the menu.
-- Docs match the real defaults (`galdr-dark`; Cascadia on Windows, DejaVu on Unix).
+- Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
