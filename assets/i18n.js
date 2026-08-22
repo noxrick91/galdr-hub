@@ -7,7 +7,7 @@ const I18N = {
       docsTitle: "文档 — Galdr",
       docsDesc: "安装、galdrc、快捷键、配置、mux 与会话恢复。",
     },
-    nav: { home: "首页", download: "下载", docs: "文档", github: "GitHub" },
+    nav: { home: "首页", download: "下载", docs: "文档" },
     hero: {
       kicker: "你的桌面上",
       title: "一台\nGPU 加速的终端",
@@ -59,7 +59,7 @@ const I18N = {
       seeT: "标签与分屏",
       see: "拖标签换顺序，拖分割线改大小。放大一栏、搜索、命令面板。窗口只是附着，标签和分栏留在会话里。",
       completeT: "按频率补全",
-      complete: "Tab 在提示符上方弹出菜单，常用命令排在前面。子串和缩写也能对上。回车或 Tab 选中后菜单关掉。",
+      complete: "Tab 在提示符上方弹出菜单，常用命令排在前面。打完命令名会提示参数。Esc 关掉弹出框。",
       modelT: "会话恢复",
       model: "下次打开还是原来的标签、分屏和目录。若还有命令在跑，会先列出来让你确认。",
       extendT: "分离再附着",
@@ -102,9 +102,8 @@ const I18N = {
     footer: {
       tagline: "Galdr · GPU 加速终端",
       docs: "安装文档",
-      releases: "Releases",
+      releases: "下载",
       changelog: "更新记录",
-      feedback: "反馈问题",
     },
     stage: {
       title: "Galdr · ~/Project/galdr",
@@ -122,7 +121,7 @@ const I18N = {
       docsTitle: "Docs — Galdr",
       docsDesc: "Install, galdrc, shortcuts, config, mux, and session restore.",
     },
-    nav: { home: "Home", download: "Download", docs: "Docs", github: "GitHub" },
+    nav: { home: "Home", download: "Download", docs: "Docs" },
     hero: {
       kicker: "On your desktop",
       title: "A GPU-accelerated\nterminal",
@@ -174,7 +173,7 @@ const I18N = {
       seeT: "Tabs and splits",
       see: "Drag tabs to reorder, drag a divider to resize. Zoom a pane, search, command palette. The window attaches; tabs and panes stay in the session.",
       completeT: "Frequency completion",
-      complete: "Tab opens a menu above the prompt, most-used commands first. Substring and abbreviation matches work. Enter or Tab accepts and the menu closes.",
+      complete: "Tab opens a menu above the prompt, most-used commands first. A finished command name offers its arguments. Esc closes the popup.",
       modelT: "Session restore",
       model: "The next launch brings back tabs, splits, and the working directory. If a command is still running, you confirm first.",
       extendT: "Detach and attach",
@@ -217,9 +216,8 @@ const I18N = {
     footer: {
       tagline: "Galdr · a GPU-accelerated terminal",
       docs: "Install docs",
-      releases: "Releases",
+      releases: "Downloads",
       changelog: "Changelog",
-      feedback: "Report an issue",
     },
     stage: {
       title: "Galdr · ~/Project/galdr",
