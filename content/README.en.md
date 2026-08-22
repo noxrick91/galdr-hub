@@ -7,7 +7,7 @@ Prebuilt binaries install from this site’s [GitHub Releases](https://github.co
 ### What it does
 
 - wgpu instanced cell rendering, HiDPI, IME, CJK / emoji fallback fonts
-- Tabs, splits, search, command palette, themes
+- Tabs (drag to reorder), splits, search, command palette, themes
 - Session restore; detach and reattach the mux (Unix socket / Windows named pipe)
 - Builtin bash-shaped shell: functions, arrays, job control (Unix), usual builtins
 
@@ -158,7 +158,9 @@ include zshrc
 include ~/.profile
 ```
 
-`include bashrc`, `zshrc`, `profile`, `bash_profile`, `zprofile`, and `fish` look up the usual home paths and do nothing if the file is missing. A path must exist. The importer runs `export`, `alias`, assignments, and other galdr-shell commands; bash/zsh-only lines (`setopt`, `bindkey`, …) are skipped.
+`include bashrc`, `zshrc`, `profile`, `bash_profile`, `zprofile`, `zlogin`, `zshenv`, `kshrc`, and `fish` look up the usual home paths (a leading `.` is optional) and do nothing if the file is missing. A path must exist. The importer runs `export`, `alias`, assignments, and other galdr-shell commands; bash/zsh-only lines (`setopt`, `bindkey`, `shopt`, …) are skipped.
+
+A change in `galdrc` applies to **new tabs or windows**. Sessions already open do not reread it. You can `source ~/.bashrc` at the prompt; for startup use `include`. For full bash behavior set `[shell] kind = "system"`.
 
 `case` supports `;;` / `;&` / `;;&`. Background `&&`/`||` lists set `$!`. Windows has no POSIX process groups; `fg`/`wait`/`kill` use stored handles or in-process jobs.
 
@@ -166,30 +168,53 @@ include ~/.profile
 
 ## Keyboard shortcuts
 
-Bindings live in `[[keys]]` inside `config.toml`. Settings → Keys lists them.
+Bindings live in `[[keys]]` inside `config.toml`. Settings → Keys lists them; edit the file to change a chord. Join modifiers with `|`, for example `ctrl|shift`. Use `action = "none"` on the same key/mods to unbind a builtin shortcut (later bindings win).
+
+```toml
+[[keys]]
+key = "c"
+mods = "ctrl|shift"
+action = "none"
+```
 
 | Shortcut | Action |
 | --- | --- |
 | Ctrl+Shift+C / V | Copy / paste |
+| Ctrl+Insert / Shift+Insert | Copy / paste |
+| Ctrl+Shift+A | Select all |
 | Ctrl+Shift+T / W | New / close tab |
 | Ctrl+Tab / Ctrl+Shift+Tab | Next / previous tab |
-| Ctrl+Shift+PageUp / PageDown | Move tab |
+| Ctrl+PageDown / Ctrl+PageUp | Next / previous tab |
+| Ctrl+Shift+PageUp / PageDown | Move tab left / right |
 | Ctrl+Shift+D / E | Split down / right |
+| Ctrl+Shift+K | Close pane |
 | Alt+Arrows | Focus pane |
 | Ctrl+Shift+Arrows | Resize pane |
 | Ctrl+Shift+Z | Zoom / unzoom pane |
+| Ctrl+Alt+E | Equalize panes |
 | Ctrl+Shift+F | Search |
 | Ctrl+Shift+P | Command palette |
+| Ctrl+Shift+Space | Quick select |
+| Ctrl+Shift+X | Copy / vi mode |
+| Shift+Up / Down | Scroll line |
+| PageUp / PageDown | Scroll page (primary screen; alt-screen apps keep the keys) |
+| Ctrl+= / - / 0 / wheel | Font size + / − / reset (saved to config) |
+| Ctrl+, | Settings |
 | F11 | Fullscreen |
-| Ctrl+= / - / 0 | Font size + / − / reset |
+| Ctrl+Shift+L | Detach |
+| Ctrl+Shift+O | Cycle theme |
 
-Tab or Enter accepts a completion; Esc / Ctrl+G dismisses the menu. Space does not accept. Completions follow aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu.
+Drag a tab to reorder it, or a split divider to resize; see [Interface](#/ui).
+
+Tab or Enter accepts a completion; Esc / Ctrl+G dismisses the menu. Space does not accept. Completions follow aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke.
 
 ---
 
 ## Config
 
-Optional `~/.config/galdr/config.toml`. Zero-config theme is `galdr-dark`. Windows defaults to Cascadia Mono + Microsoft YaHei / Segoe UI Emoji; Linux / macOS to DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji. `system_fallback = true` also appends a built-in CJK / emoji / mono stack.
+Optional `~/.config/galdr/config.toml`. Galdr starts without it; the first run writes an example. Zero-config theme is `galdr-dark`. Windows defaults to Cascadia Mono + Microsoft YaHei / Segoe UI Emoji; Linux / macOS to DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji. `system_fallback = true` also appends a built-in CJK / emoji / mono stack.
+
+After you save the file, focus the window or wait under half a second and it reloads. `Ctrl+,` opens Settings (Appearance / Terminal / Mux / Keys). Font, theme, cursor, `TERM`, and startup size write back to the same file. Key bindings are edited only in `[[keys]]`.
 
 ```toml
 [font]
@@ -203,6 +228,14 @@ system_fallback = true
 padding = 8
 opacity = 1.0
 tab_line_height = 1.5
+startup_cols = 120
+startup_rows = 32
+
+[cursor]
+style = "bar"             # bar | block | underline
+width = 3.0               # bar / underline thickness in logical pixels
+blink = "always"          # off | app | always
+blink_ms = 530
 
 [theme]
 name = "galdr-dark"
@@ -215,6 +248,7 @@ kind = "galdr"            # galdr | system
 
 [mux]
 unix_socket = false
+# socket_path = "/run/user/1000/galdr/mux.sock"
 close_behavior = "exit"   # or "detach"
 
 [session]
@@ -226,12 +260,28 @@ scrollback = 10000
 osc52 = "confirm"         # copy | confirm | off
 ```
 
-Font size is logical points. Galdr multiplies it by the window scale factor and rasters glyphs in physical pixels.
+Font size is logical points. Galdr multiplies it by the window scale factor and rasters glyphs in physical pixels. `startup_cols` / `startup_rows` are the cell size of a new window.
 
 ---
 
 ## Interface
 
+The window attaches to a session. Close it and the tabs and splits stay. `galdr --attach` puts the window back.
+
+### Tabs
+
+- Click a tab to switch; `+` opens a tab; `×` or middle-click closes it
+- Drag a tab to a new place. The chip follows the pointer, other tabs slide aside to open a gap, and the order **commits on release**
+- Keys: Ctrl+Shift+T / W new / close; Ctrl+Tab switch; Ctrl+Shift+PageUp / PageDown move left / right
+
+### Splits
+
+- Drag a divider to resize; double-click it to equalize that split
+- Ctrl+Shift+D / E split down / right; Alt+arrows focus; Ctrl+Shift+Z zoom a pane; Ctrl+Alt+E equalize all
+
+### Other
+
+- `Ctrl+,` opens Settings: Appearance (theme, fonts, cursor), Terminal (scrollback, OSC 52, `TERM`, session restore), Mux, and a key list
 - Themes: galdr-dark (default), Catppuccin, Tokyo Night, Gruvbox, One Dark, Solarized
 - OSC 0/2 title, OSC 7 cwd, OSC 8 hyperlinks (Ctrl+click), OSC 52 (confirm by default)
 - Selection, clipboard, scrollbar, context menu
@@ -249,7 +299,7 @@ galdr --attach                 # GUI client
 galdr --socket /tmp/galdr.sock --server
 ```
 
-Set `mux.unix_socket = true` to listen from a normal GUI process so another `galdr --attach` can join, and closing the window can detach instead of killing shells. Windows uses a named pipe.
+Set `mux.unix_socket = true` to listen from a normal GUI process so another `galdr --attach` can join, and closing the window can detach instead of killing shells. The default socket is `$XDG_RUNTIME_DIR/galdr/mux.sock`; override it with `mux.socket_path` or `--socket`. Windows uses a named pipe.
 
 ---
 
@@ -272,3 +322,5 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 | Galdr missing from the Linux app menu | Re-run the installer or log out; check `~/.local/share/applications/galdr.desktop` |
 | No “Open Galdr here” on folders | GNOME: `sudo apt install python3-nautilus && nautilus -q` (without bindings it only appears under Scripts). Windows 11: look under **Show more options** |
 | Want system bash | `[shell] kind = "system"` — the default will not read `.bashrc` |
+| `include bashrc` did nothing | Put it in `~/.config/galdr/galdrc`, then **open a new tab**. `source ~/.bashrc` at the prompt only affects that editor session |
+| `config.toml` change ignored / status bar error | A parse error keeps the last-good config. Fix the file and focus the window to reload |
