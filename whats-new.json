@@ -1,11 +1,11 @@
 {
-  "tag": "v0.1.9",
-  "version": "0.1.9",
+  "tag": "v0.1.10",
+  "version": "0.1.10",
   "date": "2026-08-22",
-  "title": "What's new in v0.1.9",
+  "title": "What's new in v0.1.10",
   "notes": [
-    "Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles."
+    "Dragging a tab follows the pointer with a ghost chip. Other tabs slide to close the old slot and open a gap at the drop point; the order commits on release."
   ],
-  "body": "### Fixed\n\n- Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles.",
+  "body": "### Changed\n\n- Dragging a tab follows the pointer with a ghost chip. Other tabs slide to close the old slot and open a gap at the drop point; the order commits on release.",
   "url": "./CHANGELOG.md"
 }
