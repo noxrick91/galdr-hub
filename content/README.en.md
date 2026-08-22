@@ -1,8 +1,8 @@
 # Galdr user guide
 
-Galdr is a GPU-accelerated terminal. The default login is the builtin **galdr-shell**. The only startup file is `~/.config/galdr/galdrc` — it does not read `.bashrc` unless you `include` it.
+Galdr is a GPU-accelerated terminal. The default login is the builtin **galdr-shell**. The startup file is `~/.config/galdr/galdrc` on Unix and `%APPDATA%\galdr\galdrc` on Windows — it does not read `.bashrc` unless you `include` it.
 
-Prebuilt binaries install from this site’s [GitHub Releases](https://github.com/noxrick91/galdr-hub/releases) into `~/.galdr/bin`. The source repo is private.
+Prebuilt binaries install into `~/.galdr/bin`. Get them from this site’s homepage or the commands below.
 
 ### What it does
 
@@ -21,9 +21,13 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.10** — 2026-08-22
+**What's new in v0.1.12** — 2026-08-23
 
-- Dragging a tab follows the pointer with a ghost chip. Other tabs slide to close the old slot and open a gap at the drop point; the order commits on release.
+- Windows: the login self-check is part of the first rustyline prompt, so ConPTY no longer erases it before the caret appears.
+- Windows: tab (and split/scroll) drag no longer flashes the whole window. The HWND uses `WS_EX_NOREDIRECTIONBITMAP`, DXGI keeps a queued frame, and chrome drags present without `WM_PAINT`.
+- Windows: an exact completion match (`cursor` among `cursor-agent` …) still keeps the host menu navigable; Up/Down/Tab update the highlight immediately.
+- Windows: startup PATH self-check splits on `;` and drive-safe `:`; PATHEXT lookup keeps the on-disk spelling (`git.exe`, not `git.EXE`).
+- Windows: `wait` on a stopped job without process handles stays stopped; process-substitution writers use `PIPE_ACCESS_OUTBOUND`.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -51,7 +55,7 @@ Windows PowerShell:
 irm https://term.noxcaw.com/install.txt | iex
 ```
 
-Do not use `irm …/install.ps1`: GitHub Pages serves `.ps1` as `application/octet-stream`, and Windows PowerShell 5.1 `irm` will not treat it as a script. `.txt` is `text/plain`. If you must fetch `.ps1`:
+Do not use `irm …/install.ps1`: the site serves `.ps1` as `application/octet-stream`, and Windows PowerShell 5.1 `irm` will not treat it as a script. `.txt` is `text/plain`. If you must fetch `.ps1`:
 
 ```powershell
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
@@ -72,16 +76,6 @@ The installer also hooks Galdr into the desktop:
 - Windows: adds **Galdr** to the Start menu, and **Open Galdr here** to Explorer (folder, background, drive). On Windows 11 it may sit under **Show more options**.
 
 Skip the menus with `GALDR_NO_CONTEXT_MENU=1` or `GALDR_NO_START_MENU=1`.
-
-If Pages is not live yet:
-
-```bash
-curl -fsS https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install | bash
-```
-
-```powershell
-irm https://raw.githubusercontent.com/noxrick91/galdr-hub/main/install.ps1 | iex
-```
 
 ### Manual download
 
@@ -116,17 +110,6 @@ Use the helper the installer wrote so app-menu, context-menu, and Start menu ent
 
 Deleting `~/.galdr` by itself leaves those menu entries behind. `~/.config/galdr/` is left alone.
 
-### Build from source
-
-The source repo is not public. Developers with access:
-
-```bash
-cargo build --release
-./target/release/galdr
-```
-
-Requires a GPU stack (`wgpu`: Vulkan / Metal / D3D12).
-
 ---
 
 ## Quick start
@@ -150,17 +133,25 @@ Optional config lives at `~/.config/galdr/config.toml`. Galdr starts with zero-c
 
 ## Shell and galdrc
 
-The only startup file is `~/.config/galdr/galdrc`. It does not read `.bashrc` automatically. Opt in from `galdrc`:
+The startup file is `~/.config/galdr/galdrc` on Unix and `%APPDATA%\galdr\galdrc` on Windows. It does not read `.bashrc` automatically. Opt in from `galdrc`:
 
 ```sh
+# Unix
 include bashrc
 include zshrc
 include ~/.profile
 ```
 
-`include bashrc`, `zshrc`, `profile`, `bash_profile`, `zprofile`, `zlogin`, `zshenv`, `kshrc`, and `fish` look up the usual home paths (a leading `.` is optional) and do nothing if the file is missing. A path must exist. The importer runs `export`, `alias`, assignments, and other galdr-shell commands; bash/zsh-only lines (`setopt`, `bindkey`, `shopt`, …) are skipped.
+```sh
+# Windows
+include env
+include powershell
+include bashrc
+```
 
-A change in `galdrc` applies to **new tabs or windows**. Sessions already open do not reread it. You can `source ~/.bashrc` at the prompt; for startup use `include`. For full bash behavior set `[shell] kind = "system"`.
+`include bashrc`, `profile`, `bash_profile`, and paths execute as bash (`export`, `alias`, functions, `shopt`, nested `source`). A failed strict parse falls back to a warned lenient read. `include zshrc` / `fish` stay lenient and skip zsh/fish-only commands (`setopt`, `bindkey`, …). On Windows, `include env` merges the user/machine registry `PATH`; `include powershell` dumps the PowerShell profile environment. Prompt variables from a bash rc apply; set `PS1` after `include` to keep the galdr prompt. `source` is a strict galdr-shell read.
+
+A change in `galdrc` applies to **new tabs or windows**. Sessions already open do not reread it. For distro bash or a full PowerShell session set `[shell] kind = "system"`.
 
 `case` supports `;;` / `;&` / `;;&`. Background `&&`/`||` lists set `$!`. Windows has no POSIX process groups; `fg`/`wait`/`kill` use stored handles or in-process jobs.
 
@@ -206,7 +197,9 @@ action = "none"
 
 Drag a tab to reorder it, or a split divider to resize; see [Interface](#/ui).
 
-Tab or Enter accepts a completion; Esc / Ctrl+G dismisses the menu. Space does not accept. Completions follow aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke.
+Tab or Enter accepts a completion; **Esc** (or Ctrl+G) closes the popup. Space does not accept. After you type or accept a full command name, the menu lists arguments / subcommands; Enter still runs the current command. Completions use the shell `PATH` (tools added after `include bashrc` are included), plus aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke.
+
+Interactive Ctrl+Z stops the foreground job and prints `[n]+  Stopped  command`. Use `fg` / `bg` / `jobs` after that.
 
 ---
 
@@ -253,7 +246,7 @@ close_behavior = "exit"   # or "detach"
 
 [session]
 restore = false
-restore_mode = "ask"      # ask | wezterm
+restore_mode = "ask"      # ask | wezterm (restore without the confirm list)
 restore_commands = false
 
 scrollback = 10000
@@ -285,7 +278,7 @@ The window attaches to a session. Close it and the tabs and splits stay. `galdr 
 - Themes: galdr-dark (default), Catppuccin, Tokyo Night, Gruvbox, One Dark, Solarized
 - OSC 0/2 title, OSC 7 cwd, OSC 8 hyperlinks (Ctrl+click), OSC 52 (confirm by default)
 - Selection, clipboard, scrollbar, context menu
-- WezTerm-style quick select and vi / copy mode
+- Quick select and vi / copy mode
 
 ---
 
@@ -305,7 +298,7 @@ Set `mux.unix_socket = true` to listen from a normal GUI process so another `gal
 
 ## Session restore
 
-With `[session] restore = true`, the next launch reopens the last window / tabs / splits / cwd. `restore_mode = "ask"` lists last foreground commands first; `wezterm` restores the WezTerm way.
+With `[session] restore = true`, the next launch reopens the last window / tabs / splits / cwd. `restore_mode = "ask"` lists last foreground commands first; `wezterm` restores them without that confirm list.
 
 ---
 
@@ -314,7 +307,7 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 | Symptom | What to do |
 | --- | --- |
 | `galdr: command not found` | `source ~/.galdr/env`, or add `~/.galdr/bin` to PATH |
-| Install HTTP 404 | That tag has no Release yet. See [Releases](https://github.com/noxrick91/galdr-hub/releases) |
+| Install HTTP 404 | That version has no published assets yet. See the homepage or [CHANGELOG.md](./CHANGELOG.md) |
 | Linux black window / instant exit | Check Vulkan drivers; wgpu needs a working GPU backend |
 | Missing glyphs / tofu | Install DejaVu Sans Mono, Noto Sans CJK SC, Noto Color Emoji, or change `[font]` |
 | Windows `irm …/install.ps1` does nothing | Use `irm …/install.txt \| iex` |
@@ -322,5 +315,5 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 | Galdr missing from the Linux app menu | Re-run the installer or log out; check `~/.local/share/applications/galdr.desktop` |
 | No “Open Galdr here” on folders | GNOME: `sudo apt install python3-nautilus && nautilus -q` (without bindings it only appears under Scripts). Windows 11: look under **Show more options** |
 | Want system bash | `[shell] kind = "system"` — the default will not read `.bashrc` |
-| `include bashrc` did nothing | Put it in `~/.config/galdr/galdrc`, then **open a new tab**. `source ~/.bashrc` at the prompt only affects that editor session |
+| `include bashrc` did nothing | Put it in `~/.config/galdr/galdrc`, then **open a new tab**. At the prompt use `include`, not `source ~/.bashrc` |
 | `config.toml` change ignored / status bar error | A parse error keeps the last-good config. Fix the file and focus the window to reload |
