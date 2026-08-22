@@ -1,26 +1,11 @@
 {
-  "tag": "v0.1.8",
-  "version": "0.1.8",
+  "tag": "v0.1.9",
+  "version": "0.1.9",
   "date": "2026-08-22",
-  "title": "What's new in v0.1.8",
+  "title": "What's new in v0.1.9",
   "notes": [
-    "Settings can toggle system font fallback and edit `TERM`.",
-    "`exec 3>file` (no command) keeps the redirection on the shell.",
-    "`complete -C` runs an external completer (`COMP_LINE` / `COMP_POINT` / `COMP_CWORD`).",
-    "Windows children inherit fds 3–15 (CRT `lpReserved2`). Nested `galdr-sh` imports them.",
-    "`case` fallthrough: `;&` runs the next arm's body; `;;&` keeps testing later arms.",
-    "Background `&&`/`||` lists set `$!` (same fake-PID range as coproc).",
-    "Windows `fg` waits on stored process handles or in-process jobs; `bg` marks the job running.",
-    "Closing the window no longer treats the login shell `galdr-sh` as a running command.",
-    "Glyph atlas reset clears the GPU texture so stale glyphs do not linger after a font change or overflow.",
-    "Grapheme intern recycles slots instead of returning 0 (empty cell) when full.",
-    "Attach search uses the same line-text / wrap join as the local grid.",
-    "`[[ =~ ]]` caches compiled regular expressions.",
-    "Completion matches substrings and abbreviations (`git cko` → checkout), follows aliases, completes `$VARS` / `export` / `help`, and reads git branches from `.git`.",
-    "`complete -F` / `-C` no longer block the hint on every keystroke.",
-    "Quoted words and `>` redirections complete as paths. Home / End jump in the menu.",
-    "Docs match the real defaults (`galdr-dark`; Cascadia on Windows, DejaVu on Unix)."
+    "Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles."
   ],
-  "body": "### Added\n\n- Settings can toggle system font fallback and edit `TERM`.\n- `exec 3>file` (no command) keeps the redirection on the shell.\n- `complete -C` runs an external completer (`COMP_LINE` / `COMP_POINT` / `COMP_CWORD`).\n- Windows children inherit fds 3–15 (CRT `lpReserved2`). Nested `galdr-sh` imports them.\n- `case` fallthrough: `;&` runs the next arm's body; `;;&` keeps testing later arms.\n- Background `&&`/`||` lists set `$!` (same fake-PID range as coproc).\n- Windows `fg` waits on stored process handles or in-process jobs; `bg` marks the job running.\n\n### Fixed\n\n- Closing the window no longer treats the login shell `galdr-sh` as a running command.\n- Glyph atlas reset clears the GPU texture so stale glyphs do not linger after a font change or overflow.\n- Grapheme intern recycles slots instead of returning 0 (empty cell) when full.\n- Attach search uses the same line-text / wrap join as the local grid.\n- `[[ =~ ]]` caches compiled regular expressions.\n\n### Changed\n\n- Completion matches substrings and abbreviations (`git cko` → checkout), follows aliases, completes `$VARS` / `export` / `help`, and reads git branches from `.git`.\n- `complete -F` / `-C` no longer block the hint on every keystroke.\n- Quoted words and `>` redirections complete as paths. Home / End jump in the menu.\n- Docs match the real defaults (`galdr-dark`; Cascadia on Windows, DejaVu on Unix).",
+  "body": "### Fixed\n\n- Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles.",
   "url": "./CHANGELOG.md"
 }
