@@ -6,6 +6,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+## [0.1.9] - 2026-08-22
+
+### Fixed
+
+- Windows no longer flashes a white window at startup: the HWND stays hidden until the first GPU frame, then opacity, rounded corners, and the drop shadow are reapplied after winit rebuilds the window styles.
+
 ## [0.1.8] - 2026-08-22
 
 ### Added
