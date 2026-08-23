@@ -638,6 +638,10 @@ esac
 ok "Detected ${os}/${arch} → ${asset}"
 
 dest="${BIN_DIR}/${bin_name}"
+shell_dest=""
+if [ "${os}" = "linux" ]; then
+  shell_dest="${BIN_DIR}/galdr-sh"
+fi
 if [ "${TAG}" = "latest" ]; then
   base="https://github.com/${REPO}/releases/latest/download"
 else
@@ -706,18 +710,34 @@ if [ "${expect}" != "${got}" ]; then
 fi
 ok "Checksum verified"
 
-had_dest=0
-if [ -e "${dest}" ]; then
-  had_dest=1
-  cp -f "${dest}" "${dest}.bak" 2>/dev/null || true
-fi
+[ ! -d "${dest}" ] || die "install target is a directory: ${dest}"
 chmod +x "${tmp}/${asset}"
-mv "${tmp}/${asset}" "${dest}"
+had_dest=0
+if [ -e "${dest}" ] || [ -L "${dest}" ]; then
+  had_dest=1
+  rm -f "${dest}.bak"
+  mv -f "${dest}" "${dest}.bak" || die "could not back up ${dest}"
+fi
+if ! mv "${tmp}/${asset}" "${dest}"; then
+  if [ "${had_dest}" = "1" ] && { [ -e "${dest}.bak" ] || [ -L "${dest}.bak" ]; }; then
+    mv -f "${dest}.bak" "${dest}"
+  fi
+  die "could not install ${dest}"
+fi
 ok "Installed ${dest}"
+
+had_shell_dest=0
+rollback_shell_wrapper() {
+  [ -n "${shell_dest}" ] || return 0
+  rm -f "${shell_dest}"
+  if [ "${had_shell_dest}" = "1" ] && { [ -e "${shell_dest}.bak" ] || [ -L "${shell_dest}.bak" ]; }; then
+    mv -f "${shell_dest}.bak" "${shell_dest}"
+  fi
+}
 
 rollback_binary() {
   rm -f "${dest}"
-  if [ "${had_dest}" = "1" ] && [ -e "${dest}.bak" ]; then
+  if [ "${had_dest}" = "1" ] && { [ -e "${dest}.bak" ] || [ -L "${dest}.bak" ]; }; then
     mv -f "${dest}.bak" "${dest}"
   fi
 }
@@ -726,14 +746,62 @@ if ! "${dest}" --help >/dev/null 2>&1; then
   die "downloaded binary did not run: ${dest} --help"
 fi
 ver="$("${dest}" --version 2>/dev/null || true)"
+installed_ver_num="${ver##* }"
+installed_ver_num="${installed_ver_num#v}"
 if [ -n "${ver}" ] && [ "${TAG}" != "latest" ]; then
   expect_ver="${TAG#v}"
-  ver_num="${ver##* }"
-  ver_num="${ver_num#v}"
-  if [ "${ver_num}" != "${expect_ver}" ]; then
+  if [ "${installed_ver_num}" != "${expect_ver}" ]; then
     rollback_binary
     die "${dest} --version is \`${ver}\`, expected ${expect_ver}"
   fi
+fi
+
+if [ -n "${shell_dest}" ]; then
+  if [ -d "${shell_dest}" ]; then
+    rollback_binary
+    die "install target is a directory: ${shell_dest}"
+  fi
+  if [ -e "${shell_dest}" ] || [ -L "${shell_dest}" ]; then
+    had_shell_dest=1
+    old_shell_ver="$("${shell_dest}" --version 2>/dev/null || true)"
+    old_shell_ver_num="${old_shell_ver##* }"
+    old_shell_ver_num="${old_shell_ver_num#v}"
+    if [ -z "${old_shell_ver}" ] || [ "${old_shell_ver_num}" != "${installed_ver_num}" ]; then
+      step "Replacing old ${old_shell_ver:-unversioned galdr-sh} at ${shell_dest}"
+    fi
+    rm -f "${shell_dest}.bak"
+    if ! mv -f "${shell_dest}" "${shell_dest}.bak"; then
+      rollback_binary
+      die "could not back up ${shell_dest}"
+    fi
+  fi
+  if ! cat >"${tmp}/galdr-sh" <<'EOF'
+#!/bin/sh
+bin_dir=$(CDPATH= cd -P "$(dirname "$0")" && pwd) || exit 1
+exec "${bin_dir}/galdr" --shell "$@"
+EOF
+  then
+    rollback_shell_wrapper
+    rollback_binary
+    die "could not create galdr-sh wrapper"
+  fi
+  if ! chmod +x "${tmp}/galdr-sh"; then
+    rollback_shell_wrapper
+    rollback_binary
+    die "could not make galdr-sh wrapper executable"
+  fi
+  if ! mv "${tmp}/galdr-sh" "${shell_dest}"; then
+    rollback_shell_wrapper
+    rollback_binary
+    die "could not install ${shell_dest}"
+  fi
+  shell_ver="$("${shell_dest}" --version 2>/dev/null || true)"
+  if [ -z "${shell_ver}" ] || [ "${shell_ver}" != "${ver}" ]; then
+    rollback_shell_wrapper
+    rollback_binary
+    die "${shell_dest} version \`${shell_ver:-unavailable}\` does not match ${dest} \`${ver:-unavailable}\`"
+  fi
+  ok "Installed matching ${shell_dest}"
 fi
 
 write_env_file
@@ -754,6 +822,9 @@ if [ -n "${ver}" ]; then
   printf '  version  %s\n' "${ver}"
 fi
 printf '  binary   %s\n' "${dest}"
+if [ -n "${shell_dest}" ]; then
+  printf '  shell    %s\n' "${shell_dest}"
+fi
 printf '  sha256   %s\n' "${got}"
 printf '  PATH     %s\n' "${BIN_DIR}"
 printf '\n  The installer does not edit .bashrc or .zshrc.\n'
