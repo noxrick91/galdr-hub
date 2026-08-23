@@ -4,6 +4,19 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.1.14] - 2026-08-23
+
+### Added
+
+- Galdr Shell now has an explicit native language identity: `GALDR_SHELL`, `GALDR_SHELL_VERSION`, and `GALDR_COMPAT=native`.
+- `galdr-sh --compat bash` and `galdr --shell --compat bash` enable the Bash identity compatibility layer deliberately.
+- `docs/galdr-shell-language.md` defines the native 0.1 language contract and the boundary of configuration imports.
+- DEC private mode 1007 alternate scrolling, so the mouse wheel drives full-screen applications such as Codex that own their scroll history.
+
+### Changed
+
+- Native sessions no longer initialize `BASH`, `BASH_VERSION`, or `BASH_VERSINFO`. Bash-family `include` imports receive those identities only while the import runs; imported functions that require them later can use global Bash compatibility mode.
+
 ## [0.1.13] - 2026-08-23
 
 ### Fixed
@@ -40,7 +53,7 @@ User-facing changes to Galdr. Versions match Git tags.
 - Windows: `<(…)` is a named pipe so the reader can start before the producer finishes. `>(…)` no longer stops pumping after 30s.
 - Windows: background jobs from extra-fd / `winspawn` children are waited on; `exec` uses the same Ctrl+C-aware wait as a normal spawn.
 - Windows: PATH lookup uses PATHEXT and does not let an extensionless file shadow `foo.exe`.
-- Windows: missing `galdr-sh.exe` no longer falls back to GUI `galdr.exe --shell` (ConPTY hang). Search includes `~/.galdr/bin` and PATH. `cargo build -p galdr` / `cargo install -p galdr` also emit `galdr-sh`.
+- Windows: missing or mismatched `galdr-sh.exe` no longer falls back to another copy on PATH. The helper is built only by the `galdr` package and installed next to the same-version GUI.
 - Programmable completion: a panicked completer clears inflight so Tab can retry; cache keys include `COMP_POINT`; loader redefinitions merge into the REPL.
 - Interactive `$-` includes `i`, so `include bashrc` no longer hits the Debian/Ubuntu early `return`.
 - Up-arrow history no longer sticks on lines that open a completion menu (for example `source ~/.config/galdr/galdrc`). Up from the first menu item continues through history.
