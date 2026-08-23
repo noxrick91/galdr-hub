@@ -4,6 +4,12 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.1.13] - 2026-08-23
+
+### Fixed
+
+- Windows: typing `cd` no longer parks the caret between `c` and `d`. The host-menu dummy hint is a space (not U+200B), and the grid gives ZWSP a cell so a ConPTY CUB cannot walk back onto the last character.
+
 ## [0.1.12] - 2026-08-23
 
 ### Fixed
