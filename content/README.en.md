@@ -21,9 +21,13 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.13** — 2026-08-23
+**What's new in v0.1.14** — 2026-08-23
 
-- Windows: typing `cd` no longer parks the caret between `c` and `d`. The host-menu dummy hint is a space (not U+200B), and the grid gives ZWSP a cell so a ConPTY CUB cannot walk back onto the last character.
+- Galdr Shell now has an explicit native language identity: `GALDR_SHELL`, `GALDR_SHELL_VERSION`, and `GALDR_COMPAT=native`.
+- `galdr-sh --compat bash` and `galdr --shell --compat bash` enable the Bash identity compatibility layer deliberately.
+- `docs/galdr-shell-language.md` defines the native 0.1 language contract and the boundary of configuration imports.
+- DEC private mode 1007 alternate scrolling, so the mouse wheel drives full-screen applications such as Codex that own their scroll history.
+- Native sessions no longer initialize `BASH`, `BASH_VERSION`, or `BASH_VERSINFO`. Bash-family `include` imports receive those identities only while the import runs; imported functions that require them later can use global Bash compatibility mode.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
