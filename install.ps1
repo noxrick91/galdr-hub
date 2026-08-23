@@ -68,10 +68,16 @@ function Get-GaldrRemoteFile([string]$Url, [string]$OutFile) {
 
 function Install-GaldrBinary([string]$Src, [string]$Dest) {
     $bak = "$Dest.bak"
+    if (Test-Path -LiteralPath $Dest -PathType Container) {
+        throw "Install target is a directory: $Dest"
+    }
+    if (Test-Path -LiteralPath $bak -PathType Container) {
+        throw "Backup target is a directory: $bak"
+    }
+    if (Test-Path -LiteralPath $bak) {
+        Remove-Item -LiteralPath $bak -Force -ErrorAction SilentlyContinue
+    }
     if (Test-Path -LiteralPath $Dest) {
-        if (Test-Path -LiteralPath $bak) {
-            Remove-Item -LiteralPath $bak -Force -ErrorAction SilentlyContinue
-        }
         try {
             Move-Item -LiteralPath $Dest -Destination $bak -Force
         } catch {
@@ -102,6 +108,23 @@ function Restore-GaldrBinary([string]$Dest) {
     if (Test-Path -LiteralPath $bak) {
         Move-Item -LiteralPath $bak -Destination $Dest -Force
     }
+}
+
+function Get-GaldrBinaryVersion([string]$Path, [string]$Program) {
+    try {
+        $line = (& $Path --version 2>$null | Select-Object -First 1)
+    } catch {
+        throw "$Path --version failed"
+    }
+    if ($LASTEXITCODE -ne 0 -or -not $line) {
+        throw "$Path --version failed"
+    }
+    $pattern = '^' + [regex]::Escape($Program) + '\s+v?([^\s]+)\s*$'
+    $match = [regex]::Match([string]$line, $pattern)
+    if (-not $match.Success) {
+        throw "$Path returned an invalid version: $line"
+    }
+    return $match.Groups[1].Value
 }
 
 function Get-GaldrChecksum($Lines, [string]$Asset) {
@@ -233,6 +256,7 @@ switch ($Kind) {
 }
 
 $Dest = Join-Path $BinDir "galdr.exe"
+$ShDest = Join-Path $BinDir "galdr-sh.exe"
 if ($Tag -eq "latest") {
     $Base = "https://github.com/$Repo/releases/latest/download"
 } else {
@@ -274,19 +298,43 @@ try {
     if ($Got -ne $Expect.ToLowerInvariant()) {
         throw "SHA256 mismatch: got $Got expected $Expect"
     }
-    Install-GaldrBinary $Bin $Dest
     $ShAsset = $Asset -replace '^galdr-','galdr-sh-'
     $ShExpect = Get-GaldrChecksum $SumLines $ShAsset
-    if ($ShExpect) {
-        $ShBin = Join-Path $Tmp $ShAsset
-        Get-GaldrRemoteFile "$Base/$ShAsset" $ShBin
-        $ShGot = (Get-FileHash -Algorithm SHA256 -Path $ShBin).Hash.ToLowerInvariant()
-        if ($ShGot -ne $ShExpect.ToLowerInvariant()) {
-            throw "SHA256 mismatch: got $ShGot expected $ShExpect"
+    if (-not $ShExpect) {
+        throw "SHA256SUMS has no entry for required Windows shell helper $ShAsset"
+    }
+    $ShBin = Join-Path $Tmp $ShAsset
+    Get-GaldrRemoteFile "$Base/$ShAsset" $ShBin
+    $ShGot = (Get-FileHash -Algorithm SHA256 -Path $ShBin).Hash.ToLowerInvariant()
+    if ($ShGot -ne $ShExpect.ToLowerInvariant()) {
+        throw "SHA256 mismatch for ${ShAsset}: got $ShGot expected $ShExpect"
+    }
+    try { Unblock-File -LiteralPath $Bin -ErrorAction SilentlyContinue } catch { }
+    try { Unblock-File -LiteralPath $ShBin -ErrorAction SilentlyContinue } catch { }
+
+    $DownloadedVersion = Get-GaldrBinaryVersion $Bin "galdr"
+    $DownloadedShVersion = Get-GaldrBinaryVersion $ShBin "galdr-sh"
+    if ($DownloadedShVersion -ne $DownloadedVersion) {
+        throw "$ShAsset version $DownloadedShVersion does not match $Asset version $DownloadedVersion"
+    }
+    if ($Tag -ne "latest" -and $DownloadedVersion -ne $Tag.TrimStart('v')) {
+        throw "$Asset version $DownloadedVersion does not match requested $Tag"
+    }
+    if (Test-Path -LiteralPath $ShDest) {
+        $OldShVersion = $null
+        try { $OldShVersion = Get-GaldrBinaryVersion $ShDest "galdr-sh" } catch { }
+        if (-not $OldShVersion -or $OldShVersion -ne $DownloadedVersion) {
+            $shown = if ($OldShVersion) { $OldShVersion } else { "unknown" }
+            Write-Host "Replacing old galdr-sh $shown at $ShDest"
         }
+    }
+
+    Install-GaldrBinary $Bin $Dest
+    try {
         Install-GaldrShellHelper $ShBin $BinDir
-    } else {
-        Write-Host "Warning: $ShAsset is not in this Release; galdr-shell may fail on Windows"
+    } catch {
+        Restore-GaldrBinary $Dest
+        throw
     }
 } finally {
     Remove-Item $Tmp -Recurse -Force -ErrorAction SilentlyContinue
@@ -307,22 +355,37 @@ try {
     if ($LASTEXITCODE -eq 0) { $Ran = $true }
 } catch { }
 if (-not $Ran) {
+    Restore-GaldrBinary $ShDest
     Restore-GaldrBinary $Dest
     throw "Downloaded binary did not run: $Dest --help"
 }
-$Ver = ""
-try { $Ver = (& $Dest --version 2>$null) } catch { }
-if ($Tag -ne "latest" -and $Ver) {
+$Ver = $null
+$ShVer = $null
+try {
+    $Ver = Get-GaldrBinaryVersion $Dest "galdr"
+    $ShVer = Get-GaldrBinaryVersion $ShDest "galdr-sh"
+} catch {
+    Restore-GaldrBinary $ShDest
+    Restore-GaldrBinary $Dest
+    throw
+}
+if ($ShVer -ne $Ver) {
+    Restore-GaldrBinary $ShDest
+    Restore-GaldrBinary $Dest
+    throw "$ShDest version $ShVer does not match $Dest version $Ver"
+}
+if ($Tag -ne "latest") {
     $ExpectedVersion = $Tag.TrimStart('v')
-    $ActualVersion = (($Ver | Select-Object -First 1) -split '\s+' | Select-Object -Last 1).TrimStart('v')
-    if ($ActualVersion -ne $ExpectedVersion) {
+    if ($Ver -ne $ExpectedVersion) {
+        Restore-GaldrBinary $ShDest
         Restore-GaldrBinary $Dest
         throw "$Dest --version is '$Ver', expected $ExpectedVersion"
     }
 }
 Write-Host "Installation complete."
-if ($Ver) { Write-Host "  version  $Ver" }
+Write-Host "  version  $Ver"
 Write-Host "  binary   $Dest"
+Write-Host "  shell    $ShDest"
 if ($Got) { Write-Host "  sha256   $Got" }
 Write-Host ""
 $Icon = $null
