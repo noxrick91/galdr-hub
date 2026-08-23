@@ -2,6 +2,17 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.1.16] - 2026-08-24
+
+### Changed
+
+- Galdr Shell startup diagnostics are now opt-in with `GALDR_STARTUP=1`, so routine sessions reach the prompt without a synchronous PATH self-check.
+
+### Fixed
+
+- Windows no longer launches `galdr-sh.exe --version` before creating every pane. Release installers already validate the GUI/helper version pair, avoiding redundant process startup on the GUI thread.
+- The PowerShell installer now explicitly waits for GUI-subsystem executables and captures their output when checking `--version` and `--help`, preventing valid Windows packages from being rejected.
+
 ## [0.1.15] - 2026-08-24
 
 ### Added

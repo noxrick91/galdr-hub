@@ -142,14 +142,45 @@ function Restore-GaldrBinary([string]$Dest) {
     }
 }
 
-function Get-GaldrBinaryVersion([string]$Path, [string]$Program) {
+function Invoke-GaldrBinary([string]$Path, [string]$Arguments) {
+    $info = New-Object System.Diagnostics.ProcessStartInfo
+    $info.FileName = $Path
+    $info.Arguments = $Arguments
+    $info.UseShellExecute = $false
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
+    $info.CreateNoWindow = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $info
     try {
-        $line = (& $Path --version 2>$null | Select-Object -First 1)
+        if (-not $process.Start()) {
+            throw "process did not start"
+        }
+        $stdout = $process.StandardOutput.ReadToEnd()
+        $stderr = $process.StandardError.ReadToEnd()
+        $process.WaitForExit()
+        $exitCode = $process.ExitCode
     } catch {
-        throw "$Path --version failed"
+        throw "$Path $Arguments failed: $($_.Exception.Message)"
+    } finally {
+        $process.Dispose()
     }
-    if ($LASTEXITCODE -ne 0 -or -not $line) {
-        throw "$Path --version failed"
+    return [pscustomobject]@{
+        ExitCode = $exitCode
+        Stdout = $stdout
+        Stderr = $stderr
+    }
+}
+
+function Get-GaldrBinaryVersion([string]$Path, [string]$Program) {
+    $result = Invoke-GaldrBinary $Path "--version"
+    $line = ($result.Stdout -split '\r?\n' | Select-Object -First 1)
+    if ($result.ExitCode -ne 0 -or -not $line) {
+        $detail = ([string]$result.Stderr).Trim()
+        if ($detail) {
+            throw "$Path --version failed (exit $($result.ExitCode)): $detail"
+        }
+        throw "$Path --version failed (exit $($result.ExitCode))"
     }
     $pattern = '^' + [regex]::Escape($Program) + '\s+v?([^\s]+)\s*$'
     $match = [regex]::Match([string]$line, $pattern)
@@ -423,8 +454,8 @@ try {
 
 $Ran = $false
 try {
-    $null = & $Dest --help 2>$null
-    if ($LASTEXITCODE -eq 0) { $Ran = $true }
+    $helpResult = Invoke-GaldrBinary $Dest "--help"
+    if ($helpResult.ExitCode -eq 0) { $Ran = $true }
 } catch { }
 if (-not $Ran) {
     Restore-GaldrBinary $ShDest
