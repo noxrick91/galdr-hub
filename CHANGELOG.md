@@ -2,7 +2,28 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
-## [Unreleased]
+## [0.1.15] - 2026-08-24
+
+### Added
+
+- Settings → Terminal can enable or disable DEC 1007 alternate-screen wheel translation. It is enabled by default so full-screen applications such as Codex can receive wheel movement even when they do not request mode 1007 themselves.
+- Opt-in real-window performance reports (`GALDR_PERF_OUTPUT`) capture startup-to-first-present, frame percentiles, input-to-present samples, GPU identity, synchronization mode, and visible pane load. The release benchmark also covers dirty-row snapshots, eight-pane output, and scrollback reflow.
+- Bash-compatibility differential tests compare the supported quoting, expansion, array, control-flow, pipeline, command-substitution, and here-document subset with the system Bash.
+- Continuous verification now runs for branches and pull requests, enforces formatting and strict Clippy, tests every workspace target, cross-builds Linux and Windows, and checks both macOS Rust targets.
+
+### Changed
+
+- Galdr Shell carries file descriptors 0 through 63 across both Unix and Windows child processes, up from 0 through 15.
+- Release builds use the pinned Rust 1.98.0 toolchain, keep pull-request verification away from the persistent release cache, enforce the Rust 1.85 MSRV, validate exact Forgejo asset metadata, and download/hash every staged GitHub asset before publishing.
+- Hub pages and installers publish as one commit using non-persistent Git credentials and retry transient GitHub transport failures. Installers verify the GUI/helper version pair before replacing an existing installation.
+
+### Fixed
+
+- Command-help completion performs a final cache read after an in-flight probe finishes, eliminating a race that could briefly hide freshly parsed options and subcommands.
+- Primary and alternate screens now preserve rows displaced by top-anchored scroll regions, so TUIs such as Codex expose real, wheel-, PageUp-, and drag-scrollable message history. DECSTBM treats a zero bound as the window edge, and the mouse wheel prefers that host history even if the application also enabled mouse reporting.
+- Interactive galdr-shell writes its idle title and self-check before sourcing galdrc on Unix, so a slow `include bashrc` no longer leaves the new-tab spinner up for a second.
+- Startup no longer wakes a discrete GPU on hybrid systems. Linux limits Vulkan discovery to the display GPU when possible, font styles share loaded face data, render pipelines reuse an adapter-keyed cache, and redundant Wayland/DPI startup frames are skipped.
+- Git Bash now installs the required `galdr-sh.exe`. Windows ARM64 falls back to the x64 package when an older native package cannot run, and uninstallers remove only Galdr-owned files instead of recursively deleting a custom installation prefix.
 
 ## [0.1.14] - 2026-08-23
 

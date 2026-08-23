@@ -21,13 +21,20 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.14** — 2026-08-23
+**What's new in v0.1.15** — 2026-08-24
 
-- Galdr Shell now has an explicit native language identity: `GALDR_SHELL`, `GALDR_SHELL_VERSION`, and `GALDR_COMPAT=native`.
-- `galdr-sh --compat bash` and `galdr --shell --compat bash` enable the Bash identity compatibility layer deliberately.
-- `docs/galdr-shell-language.md` defines the native 0.1 language contract and the boundary of configuration imports.
-- DEC private mode 1007 alternate scrolling, so the mouse wheel drives full-screen applications such as Codex that own their scroll history.
-- Native sessions no longer initialize `BASH`, `BASH_VERSION`, or `BASH_VERSINFO`. Bash-family `include` imports receive those identities only while the import runs; imported functions that require them later can use global Bash compatibility mode.
+- Settings → Terminal can enable or disable DEC 1007 alternate-screen wheel translation. It is enabled by default so full-screen applications such as Codex can receive wheel movement even when they do not request mode 1007 themselves.
+- Opt-in real-window performance reports (`GALDR_PERF_OUTPUT`) capture startup-to-first-present, frame percentiles, input-to-present samples, GPU identity, synchronization mode, and visible pane load. The release benchmark also covers dirty-row snapshots, eight-pane output, and scrollback reflow.
+- Bash-compatibility differential tests compare the supported quoting, expansion, array, control-flow, pipeline, command-substitution, and here-document subset with the system Bash.
+- Continuous verification now runs for branches and pull requests, enforces formatting and strict Clippy, tests every workspace target, cross-builds Linux and Windows, and checks both macOS Rust targets.
+- Galdr Shell carries file descriptors 0 through 63 across both Unix and Windows child processes, up from 0 through 15.
+- Release builds use the pinned Rust 1.98.0 toolchain, keep pull-request verification away from the persistent release cache, enforce the Rust 1.85 MSRV, validate exact Forgejo asset metadata, and download/hash every staged GitHub asset before publishing.
+- Hub pages and installers publish as one commit using non-persistent Git credentials and retry transient GitHub transport failures. Installers verify the GUI/helper version pair before replacing an existing installation.
+- Command-help completion performs a final cache read after an in-flight probe finishes, eliminating a race that could briefly hide freshly parsed options and subcommands.
+- Primary and alternate screens now preserve rows displaced by top-anchored scroll regions, so TUIs such as Codex expose real, wheel-, PageUp-, and drag-scrollable message history. DECSTBM treats a zero bound as the window edge, and the mouse wheel prefers that host history even if the application also enabled mouse reporting.
+- Interactive galdr-shell writes its idle title and self-check before sourcing galdrc on Unix, so a slow `include bashrc` no longer leaves the new-tab spinner up for a second.
+- Startup no longer wakes a discrete GPU on hybrid systems. Linux limits Vulkan discovery to the display GPU when possible, font styles share loaded face data, render pipelines reuse an adapter-keyed cache, and redundant Wayland/DPI startup frames are skipped.
+- Git Bash now installs the required `galdr-sh.exe`. Windows ARM64 falls back to the x64 package when an older native package cannot run, and uninstallers remove only Galdr-owned files instead of recursively deleting a custom installation prefix.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -61,7 +68,7 @@ irm https://term.noxcaw.com/install.txt | iex
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 没有 ARM64 资产时回退到 x64 系统模拟。macOS 预编译包暂不提供。再跑一次安装器会覆盖当前文件（Windows 先把正在用的 exe 改名为 `.bak`）。
+脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，并在替换旧版本前实际运行版本检查，再装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 缺少 ARM64 资产或原生包因 VC++ 运行库不能启动时，会回退到 x64 系统模拟。macOS 预编译包暂不提供。再跑一次安装器会原子替换当前文件。
 
 安装器**不会**改 `.bashrc` / `.zshrc`。它写入 `~/.galdr/env`。`curl | bash` 也改不了你当前已经打开的 shell，请：
 
@@ -90,7 +97,7 @@ source ~/.galdr/env
 
 Windows 安装器还会装同目录的 `galdr-sh-*.exe`（ConPTY 里跑 galdr-shell 的 console 助手）。
 
-Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及字体。零配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，并打开系统字体回退。
+Linux 预编译包要求 glibc 2.35 或更新版本，还需要可用的 Vulkan（或 wgpu 支持的 GPU 后端）和字体。零配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，并打开系统字体回退。
 
 ### 已安装后升级
 
@@ -108,7 +115,7 @@ Linux 运行需要可用的 Vulkan（或 wgpu 支持的 GPU 后端），以及�
 & "$HOME\.galdr\uninstall.ps1"
 ```
 
-只删 `~/.galdr` 会留下桌面项和资源管理器右键。配置目录 `~/.config/galdr/` 不会被删除。
+只删 `~/.galdr` 会留下桌面项和资源管理器右键。卸载脚本只移除 Galdr 创建的文件；自定义 `PREFIX` 内的其他文件会保留。配置目录 `~/.config/galdr/` 不会被删除。
 
 ---
 
@@ -235,6 +242,7 @@ name = "galdr-dark"
 
 [term]
 name = "xterm-256color"
+dec1007 = true              # alternate-screen wheel → cursor keys
 
 [shell]
 kind = "galdr"            # galdr | system

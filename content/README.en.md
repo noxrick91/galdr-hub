@@ -21,13 +21,20 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.14** — 2026-08-23
+**What's new in v0.1.15** — 2026-08-24
 
-- Galdr Shell now has an explicit native language identity: `GALDR_SHELL`, `GALDR_SHELL_VERSION`, and `GALDR_COMPAT=native`.
-- `galdr-sh --compat bash` and `galdr --shell --compat bash` enable the Bash identity compatibility layer deliberately.
-- `docs/galdr-shell-language.md` defines the native 0.1 language contract and the boundary of configuration imports.
-- DEC private mode 1007 alternate scrolling, so the mouse wheel drives full-screen applications such as Codex that own their scroll history.
-- Native sessions no longer initialize `BASH`, `BASH_VERSION`, or `BASH_VERSINFO`. Bash-family `include` imports receive those identities only while the import runs; imported functions that require them later can use global Bash compatibility mode.
+- Settings → Terminal can enable or disable DEC 1007 alternate-screen wheel translation. It is enabled by default so full-screen applications such as Codex can receive wheel movement even when they do not request mode 1007 themselves.
+- Opt-in real-window performance reports (`GALDR_PERF_OUTPUT`) capture startup-to-first-present, frame percentiles, input-to-present samples, GPU identity, synchronization mode, and visible pane load. The release benchmark also covers dirty-row snapshots, eight-pane output, and scrollback reflow.
+- Bash-compatibility differential tests compare the supported quoting, expansion, array, control-flow, pipeline, command-substitution, and here-document subset with the system Bash.
+- Continuous verification now runs for branches and pull requests, enforces formatting and strict Clippy, tests every workspace target, cross-builds Linux and Windows, and checks both macOS Rust targets.
+- Galdr Shell carries file descriptors 0 through 63 across both Unix and Windows child processes, up from 0 through 15.
+- Release builds use the pinned Rust 1.98.0 toolchain, keep pull-request verification away from the persistent release cache, enforce the Rust 1.85 MSRV, validate exact Forgejo asset metadata, and download/hash every staged GitHub asset before publishing.
+- Hub pages and installers publish as one commit using non-persistent Git credentials and retry transient GitHub transport failures. Installers verify the GUI/helper version pair before replacing an existing installation.
+- Command-help completion performs a final cache read after an in-flight probe finishes, eliminating a race that could briefly hide freshly parsed options and subcommands.
+- Primary and alternate screens now preserve rows displaced by top-anchored scroll regions, so TUIs such as Codex expose real, wheel-, PageUp-, and drag-scrollable message history. DECSTBM treats a zero bound as the window edge, and the mouse wheel prefers that host history even if the application also enabled mouse reporting.
+- Interactive galdr-shell writes its idle title and self-check before sourcing galdrc on Unix, so a slow `include bashrc` no longer leaves the new-tab spinner up for a second.
+- Startup no longer wakes a discrete GPU on hybrid systems. Linux limits Vulkan discovery to the display GPU when possible, font styles share loaded face data, render pipelines reuse an adapter-keyed cache, and redundant Wayland/DPI startup frames are skipped.
+- Git Bash now installs the required `galdr-sh.exe`. Windows ARM64 falls back to the x64 package when an older native package cannot run, and uninstallers remove only Galdr-owned files instead of recursively deleting a custom installation prefix.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -61,7 +68,7 @@ Do not use `irm …/install.ps1`: the site serves `.ps1` as `application/octet-s
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and installs into `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation for older Releases without an ARM64 asset. macOS prebuilt packages are temporarily unavailable. Running the installer again replaces the current file (on Windows it renames a running exe to `.bak` first).
+The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and runs its version check before replacing the old copy in `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation when an older Release lacks ARM64 assets or its native package cannot start without a VC++ runtime. macOS prebuilt packages are temporarily unavailable. Running the installer again atomically replaces the current files.
 
 The installer **does not** edit `.bashrc` / `.zshrc`. It writes `~/.galdr/env`. `curl | bash` cannot update the shell you already have open:
 
@@ -90,7 +97,7 @@ Open the homepage, download the latest asset for your platform, put it in `~/.ga
 
 The Windows installer also installs `galdr-sh-*.exe` next to it (console helper so galdr-shell can run under ConPTY).
 
-Linux needs a working Vulkan stack (or another wgpu backend) and fonts. Zero-config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji, and enables system font fallback.
+Linux prebuilt packages require glibc 2.35 or newer, a working Vulkan stack (or another wgpu backend), and fonts. Zero-config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji, and enables system font fallback.
 
 ### Upgrade
 
@@ -108,7 +115,7 @@ Use the helper the installer wrote so app-menu, context-menu, and Start menu ent
 & "$HOME\.galdr\uninstall.ps1"
 ```
 
-Deleting `~/.galdr` by itself leaves those menu entries behind. `~/.config/galdr/` is left alone.
+Deleting `~/.galdr` by itself leaves those menu entries behind. The uninstaller removes only Galdr-owned files and preserves unrelated files in a custom `PREFIX`. `~/.config/galdr/` is left alone.
 
 ---
 
@@ -235,6 +242,7 @@ name = "galdr-dark"
 
 [term]
 name = "xterm-256color"
+dec1007 = true              # alternate-screen wheel → cursor keys
 
 [shell]
 kind = "galdr"            # galdr | system

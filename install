@@ -27,6 +27,31 @@ step() { printf '%s▸%s %s\n' "$CD" "$C0" "$1"; }
 ok() { printf '%s✓%s %s\n' "$C2" "$C0" "$1"; }
 die() { printf '%s✗%s %s\n' "$C3" "$C0" "$1" >&2; exit 1; }
 
+validate_install_paths() {
+  case "${PREFIX}${BIN_DIR}" in
+    *$'\n'*) die "PREFIX and BIN_DIR must not contain newlines" ;;
+  esac
+  mkdir -p "${PREFIX}" "${BIN_DIR}"
+  local prefix_real bin_real home_real
+  prefix_real="$(CDPATH= cd -P "${PREFIX}" && pwd)" \
+    || die "cannot resolve PREFIX ${PREFIX}"
+  bin_real="$(CDPATH= cd -P "${BIN_DIR}" && pwd)" \
+    || die "cannot resolve BIN_DIR ${BIN_DIR}"
+  home_real="$(CDPATH= cd -P "${HOME}" && pwd)" \
+    || die "cannot resolve HOME ${HOME}"
+  case "${prefix_real}" in
+    / | "${home_real}")
+      die "unsafe PREFIX ${prefix_real}; use a dedicated install directory"
+      ;;
+  esac
+  case "${bin_real}" in
+    "${prefix_real}" | "${prefix_real}"/*) ;;
+    *) die "BIN_DIR must be inside PREFIX so uninstall remains safe" ;;
+  esac
+  PREFIX="${prefix_real}"
+  BIN_DIR="${bin_real}"
+}
+
 desktop_exec() {
   case "$1" in
     *[[:space:]]*) printf '"%s"' "$1" ;;
@@ -82,7 +107,8 @@ EOF
 write_here_helper() {
   local helper="${PREFIX}/galdr-here"
   mkdir -p "${PREFIX}"
-  printf '%s\n' "#!/bin/sh" "bin='${dest}'" >"${helper}"
+  printf '%s\n' '#!/usr/bin/env bash' >"${helper}"
+  printf 'bin=%q\n' "${dest}" >>"${helper}"
   cat >>"${helper}" <<'EOF'
 first_line() {
   printf '%s' "$1" | tr -d '\r' | sed -n '1p'
@@ -509,36 +535,55 @@ EOF
 
 write_uninstall() {
   local uninst="${PREFIX}/uninstall"
-  cat >"${uninst}" <<EOF
-#!/bin/sh
-set -eu
-PREFIX='${PREFIX}'
-rm -f \\
-  "\${HOME}/.local/share/applications/galdr.desktop" \\
-  "\${HOME}/.local/share/icons/hicolor/scalable/apps/galdr.svg" \\
-  "\${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \\
-  "\${HOME}/.local/share/nautilus-python/extensions/galdr-here.py" \\
-  "\${HOME}/.local/share/nemo/actions/galdr-dir.nemo_action" \\
-  "\${HOME}/.local/share/nemo/actions/galdr-bg.nemo_action" \\
-  "\${HOME}/.local/share/kio/servicemenus/galdr.desktop" \\
-  "\${HOME}/.local/share/kservices5/ServiceMenus/galdr.desktop" \\
-  "\${HOME}/.local/share/file-manager/actions/galdr-here.desktop" \\
-  "\${HOME}/.local/share/contractor/galdr-here.contract"
+  local bin_rel
+  if [ "${BIN_DIR}" = "${PREFIX}" ]; then
+    bin_rel="."
+  else
+    bin_rel="${BIN_DIR#"${PREFIX}/"}"
+  fi
+  {
+    printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
+    printf 'EXPECTED_PREFIX=%q\n' "${PREFIX}"
+    printf 'BIN_REL=%q\n' "${bin_rel}"
+    cat <<'EOF'
+PREFIX=$(CDPATH= cd -P "$(dirname "$0")" && pwd) || exit 1
+if [ "${PREFIX}" != "${EXPECTED_PREFIX}" ]; then
+  printf 'Refusing to uninstall from unexpected path: %s\n' "${PREFIX}" >&2
+  exit 1
+fi
+if [ "$(cat "${PREFIX}/.galdr-install-root" 2>/dev/null || true)" != "galdr-install-v1" ]; then
+  printf 'Refusing to remove an unmarked install root: %s\n' "${PREFIX}" >&2
+  exit 1
+fi
+BIN_DIR="${PREFIX}/${BIN_REL}"
+rm -f \
+  "${BIN_DIR}/galdr" "${BIN_DIR}/galdr.bak" \
+  "${BIN_DIR}/galdr-sh" "${BIN_DIR}/galdr-sh.bak" \
+  "${BIN_DIR}/galdr.exe" "${BIN_DIR}/galdr.exe.bak" \
+  "${BIN_DIR}/galdr-sh.exe" "${BIN_DIR}/galdr-sh.exe.bak" \
+  "${HOME}/.local/share/applications/galdr.desktop" \
+  "${HOME}/.local/share/icons/hicolor/scalable/apps/galdr.svg" \
+  "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \
+  "${HOME}/.local/share/nautilus-python/extensions/galdr-here.py" \
+  "${HOME}/.local/share/nemo/actions/galdr-dir.nemo_action" \
+  "${HOME}/.local/share/nemo/actions/galdr-bg.nemo_action" \
+  "${HOME}/.local/share/kio/servicemenus/galdr.desktop" \
+  "${HOME}/.local/share/kservices5/ServiceMenus/galdr.desktop" \
+  "${HOME}/.local/share/file-manager/actions/galdr-here.desktop" \
+  "${HOME}/.local/share/contractor/galdr-here.contract"
 for title in "Open Galdr here" "在此处打开 Galdr" "在此處開啟 Galdr"; do
-  rm -f "\${HOME}/.local/share/nautilus/scripts/\${title}" \\
-    "\${HOME}/.config/caja/scripts/\${title}"
+  rm -f "${HOME}/.local/share/nautilus/scripts/${title}" \
+    "${HOME}/.config/caja/scripts/${title}"
 done
 if command -v xdg-desktop-menu >/dev/null 2>&1; then
   xdg-desktop-menu uninstall --novendor galdr.desktop >/dev/null 2>&1 || true
 fi
 if command -v update-desktop-database >/dev/null 2>&1; then
-  update-desktop-database "\${HOME}/.local/share/applications" >/dev/null 2>&1 || true
+  update-desktop-database "${HOME}/.local/share/applications" >/dev/null 2>&1 || true
 fi
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
-  gtk-update-icon-cache -f -t "\${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
+  gtk-update-icon-cache -f -t "${HOME}/.local/share/icons/hicolor" >/dev/null 2>&1 || true
 fi
-EOF
-  cat >>"${uninst}" <<'EOF'
 remove_thunar() {
   uca="${HOME}/.config/Thunar/uca.xml"
   [ -f "${uca}" ] || return 0
@@ -560,23 +605,38 @@ remove_thunar() {
   mv "${tmp}" "${uca}"
 }
 remove_thunar
-EOF
-  cat >>"${uninst}" <<EOF
-rm -rf "\${PREFIX}"
-printf 'Removed %s\n' "\${PREFIX}"
+rm -f \
+  "${PREFIX}/env" "${PREFIX}/galdr-here" \
+  "${PREFIX}/galdr.svg" "${PREFIX}/galdr.png" \
+  "${PREFIX}/.galdr-install-root" "${PREFIX}/uninstall"
+if [ "${BIN_DIR}" != "${PREFIX}/." ]; then
+  rmdir "${BIN_DIR}" 2>/dev/null || true
+fi
+if rmdir "${PREFIX}" 2>/dev/null; then
+  printf 'Removed %s\n' "${PREFIX}"
+else
+  printf 'Removed Galdr files; kept non-Galdr files in %s\n' "${PREFIX}"
+fi
 printf 'Config in ~/.config/galdr/ was left in place.\n'
 EOF
+  } >"${uninst}"
   chmod +x "${uninst}"
+}
+
+write_install_marker() {
+  printf '%s\n' galdr-install-v1 > "${PREFIX}/.galdr-install-root"
 }
 
 write_env_file() {
   local env_file="${PREFIX}/env"
+  local quoted_bin_dir
+  quoted_bin_dir="${BIN_DIR//\'/\'\\\'\'}"
   mkdir -p "${PREFIX}"
   cat >"${env_file}" <<EOF
 # Generated by the Galdr installer. Source this file; it is not hooked into rc files.
 case ":\${PATH}:" in
-  *":${BIN_DIR}:"*) ;;
-  *) export PATH="${BIN_DIR}:\${PATH}" ;;
+  *":${quoted_bin_dir}:"*) ;;
+  *) export PATH='${quoted_bin_dir}':"\${PATH}" ;;
 esac
 EOF
   set +eu
@@ -612,12 +672,15 @@ os="$(uname -s | tr '[:upper:]' '[:lower:]')"
 arch="$(uname -m)"
 bin_name="galdr"
 fallback_asset=""
+platform=""
 case "${os}-${arch}" in
   linux-x86_64 | linux-amd64)
     asset="galdr-x86_64-unknown-linux-gnu"
+    platform="linux"
     ;;
   linux-aarch64 | linux-arm64)
     asset="galdr-aarch64-unknown-linux-gnu"
+    platform="linux"
     ;;
   darwin-*)
     die "macOS prebuilt packages are temporarily unavailable"
@@ -626,10 +689,12 @@ case "${os}-${arch}" in
     asset="galdr-aarch64-pc-windows-msvc.exe"
     fallback_asset="galdr-x86_64-pc-windows-gnu.exe"
     bin_name="galdr.exe"
+    platform="windows"
     ;;
   mingw* | msys* | cygwin* | windows*)
     asset="galdr-x86_64-pc-windows-gnu.exe"
     bin_name="galdr.exe"
+    platform="windows"
     ;;
   *)
     die "unsupported platform ${os}-${arch}. See https://github.com/${REPO}/releases"
@@ -637,10 +702,14 @@ case "${os}-${arch}" in
 esac
 ok "Detected ${os}/${arch} → ${asset}"
 
+validate_install_paths
 dest="${BIN_DIR}/${bin_name}"
 shell_dest=""
-if [ "${os}" = "linux" ]; then
+shell_asset=""
+if [ "${platform}" = "linux" ]; then
   shell_dest="${BIN_DIR}/galdr-sh"
+elif [ "${platform}" = "windows" ]; then
+  shell_dest="${BIN_DIR}/galdr-sh.exe"
 fi
 if [ "${TAG}" = "latest" ]; then
   base="https://github.com/${REPO}/releases/latest/download"
@@ -657,8 +726,12 @@ fi
 download() {
   local url="$1" out="$2" label="$3"
   step "${label}"
-  local code
-  code="$(curl -L --progress-bar -A "galdr-installer" "${auth[@]}" -o "${out}" -w "%{http_code}" "${url}" || true)"
+  local code status=0
+  code="$(curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+    -fL --progress-bar --connect-timeout 20 --max-time 600 \
+    --retry 2 --retry-delay 2 --retry-all-errors \
+    -A "galdr-installer" "${auth[@]}" -o "${out}" \
+    -w "%{http_code}" "${url}")" || status=$?
   if [ "${code}" = "404" ]; then
     die "not found: ${url}
   no public Release yet — https://github.com/${REPO}/releases"
@@ -666,8 +739,9 @@ download() {
   if [ "${code}" = "403" ] || [ "${code}" = "429" ]; then
     die "GitHub HTTP ${code}. Set GH_TOKEN or GALDR_GITHUB_TOKEN and retry."
   fi
-  if [ "${code}" != "200" ]; then
-    die "HTTP ${code} for ${url}"
+  if [ "${status}" -ne 0 ] || [ "${code}" != "200" ]; then
+    rm -f "${out}"
+    die "download failed (curl ${status}, HTTP ${code:-000}) for ${url}"
   fi
 }
 
@@ -685,7 +759,6 @@ tmp="$(mktemp -d)"
 cleanup() { rm -rf "${tmp}"; }
 trap cleanup EXIT
 
-mkdir -p "${BIN_DIR}"
 download "${base}/SHA256SUMS" "${tmp}/SHA256SUMS" "Fetching SHA256SUMS…"
 tr -d '\r' <"${tmp}/SHA256SUMS" >"${tmp}/SHA256SUMS.lf"
 mv "${tmp}/SHA256SUMS.lf" "${tmp}/SHA256SUMS"
@@ -694,24 +767,68 @@ sum_for() {
   awk -v a="$1" '$NF==a || $NF=="*"a {print $1; exit}' "${tmp}/SHA256SUMS"
 }
 
-expect="$(sum_for "${asset}")"
-if [ -z "${expect}" ] && [ -n "${fallback_asset}" ]; then
-  step "No ${asset} in this release — using ${fallback_asset}"
-  asset="${fallback_asset}"
-  expect="$(sum_for "${asset}")"
-fi
-[ -n "${expect}" ] || die "SHA256SUMS has no entry for ${asset}"
-download "${base}/${asset}" "${tmp}/${asset}" "Downloading ${asset}…"
-got="$(sha256_of "${tmp}/${asset}")"
-if [ "${expect}" != "${got}" ]; then
-  die "SHA256 mismatch for ${asset}
+fetch_candidate() {
+  local candidate="$1"
+  expect="$(sum_for "${candidate}")"
+  [ -n "${expect}" ] || return 1
+  asset="${candidate}"
+  download "${base}/${asset}" "${tmp}/${asset}" "Downloading ${asset}…"
+  got="$(sha256_of "${tmp}/${asset}")"
+  if [ "${expect}" != "${got}" ]; then
+    die "SHA256 mismatch for ${asset}
   expected ${expect}
   got      ${got}"
+  fi
+  shell_asset=""
+  if [ "${platform}" = "windows" ]; then
+    shell_asset="${asset/galdr-/galdr-sh-}"
+    shell_expect="$(sum_for "${shell_asset}")"
+    [ -n "${shell_expect}" ] \
+      || die "SHA256SUMS has no entry for required Windows helper ${shell_asset}"
+    download "${base}/${shell_asset}" "${tmp}/${shell_asset}" \
+      "Downloading ${shell_asset}…"
+    shell_got="$(sha256_of "${tmp}/${shell_asset}")"
+    if [ "${shell_expect}" != "${shell_got}" ]; then
+      die "SHA256 mismatch for ${shell_asset}
+  expected ${shell_expect}
+  got      ${shell_got}"
+    fi
+  fi
+}
+
+if ! fetch_candidate "${asset}"; then
+  if [ -z "${fallback_asset}" ]; then
+    die "SHA256SUMS has no entry for ${asset}"
+  fi
+  step "No ${asset} in this release — using ${fallback_asset}"
+  fetch_candidate "${fallback_asset}" \
+    || die "SHA256SUMS has no entry for ${fallback_asset}"
 fi
-ok "Checksum verified"
+chmod +x "${tmp}/${asset}"
+if [ -n "${shell_asset}" ]; then
+  chmod +x "${tmp}/${shell_asset}"
+fi
+candidate_error=""
+if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
+  if [ -n "${fallback_asset}" ] && [ "${asset}" != "${fallback_asset}" ]; then
+    step "${asset} cannot run here — trying ${fallback_asset} through Windows emulation"
+    fetch_candidate "${fallback_asset}" \
+      || die "SHA256SUMS has no entry for ${fallback_asset}"
+    chmod +x "${tmp}/${asset}" "${tmp}/${shell_asset}"
+    if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
+      die "neither native nor emulated Windows build runs: ${candidate_error:-unknown error}"
+    fi
+  else
+    runtime_hint=""
+    if [ "${platform}" = "linux" ]; then
+      runtime_hint=" (the release requires glibc 2.35 or newer)"
+    fi
+    die "downloaded binary did not run${runtime_hint}: ${candidate_error:-unknown error}"
+  fi
+fi
+ok "Checksums and executable verified"
 
 [ ! -d "${dest}" ] || die "install target is a directory: ${dest}"
-chmod +x "${tmp}/${asset}"
 had_dest=0
 if [ -e "${dest}" ] || [ -L "${dest}" ]; then
   had_dest=1
@@ -746,9 +863,16 @@ if ! "${dest}" --help >/dev/null 2>&1; then
   die "downloaded binary did not run: ${dest} --help"
 fi
 ver="$("${dest}" --version 2>/dev/null || true)"
+case "${ver}" in
+  "galdr "*) ;;
+  *)
+    rollback_binary
+    die "${dest} returned an invalid version: ${ver:-unavailable}"
+    ;;
+esac
 installed_ver_num="${ver##* }"
 installed_ver_num="${installed_ver_num#v}"
-if [ -n "${ver}" ] && [ "${TAG}" != "latest" ]; then
+if [ "${TAG}" != "latest" ]; then
   expect_ver="${TAG#v}"
   if [ "${installed_ver_num}" != "${expect_ver}" ]; then
     rollback_binary
@@ -775,28 +899,34 @@ if [ -n "${shell_dest}" ]; then
       die "could not back up ${shell_dest}"
     fi
   fi
-  if ! cat >"${tmp}/galdr-sh" <<'EOF'
+  if [ "${platform}" = "windows" ]; then
+    helper_source="${tmp}/${shell_asset}"
+  elif cat >"${tmp}/galdr-sh" <<'EOF'
 #!/bin/sh
 bin_dir=$(CDPATH= cd -P "$(dirname "$0")" && pwd) || exit 1
 exec "${bin_dir}/galdr" --shell "$@"
 EOF
   then
+    helper_source="${tmp}/galdr-sh"
+  else
     rollback_shell_wrapper
     rollback_binary
     die "could not create galdr-sh wrapper"
   fi
-  if ! chmod +x "${tmp}/galdr-sh"; then
+  if ! chmod +x "${helper_source}"; then
     rollback_shell_wrapper
     rollback_binary
     die "could not make galdr-sh wrapper executable"
   fi
-  if ! mv "${tmp}/galdr-sh" "${shell_dest}"; then
+  if ! mv "${helper_source}" "${shell_dest}"; then
     rollback_shell_wrapper
     rollback_binary
     die "could not install ${shell_dest}"
   fi
   shell_ver="$("${shell_dest}" --version 2>/dev/null || true)"
-  if [ -z "${shell_ver}" ] || [ "${shell_ver}" != "${ver}" ]; then
+  shell_ver_num="${shell_ver##* }"
+  shell_ver_num="${shell_ver_num#v}"
+  if [ -z "${shell_ver}" ] || [ "${shell_ver_num}" != "${installed_ver_num}" ]; then
     rollback_shell_wrapper
     rollback_binary
     die "${shell_dest} version \`${shell_ver:-unavailable}\` does not match ${dest} \`${ver:-unavailable}\`"
@@ -804,16 +934,37 @@ EOF
   ok "Installed matching ${shell_dest}"
 fi
 
+rm -f "${dest}.bak"
+if [ -n "${shell_dest}" ]; then
+  rm -f "${shell_dest}.bak"
+fi
+
 write_env_file
+write_install_marker
+write_uninstall || printf '  warning: could not write uninstall helper\n'
 
 if [ "${os}" = "linux" ]; then
-  write_uninstall || printf '  warning: could not write uninstall helper\n'
-  if write_icon && write_here_helper && write_desktop_entry \
-    && write_nautilus_extension && install_file_manager_actions; then
+  desktop_integration=0
+  context_integration=0
+  if [ -z "${GALDR_NO_START_MENU:-}" ] || [ -z "${GALDR_NO_CONTEXT_MENU:-}" ]; then
+    write_icon || printf '  warning: could not write desktop icon\n'
+  fi
+  if [ -z "${GALDR_NO_START_MENU:-}" ]; then
+    if write_desktop_entry; then
+      desktop_integration=1
+    else
+      printf '  warning: application menu integration failed\n'
+    fi
+  fi
+  if [ -z "${GALDR_NO_CONTEXT_MENU:-}" ] \
+    && write_here_helper && write_nautilus_extension && install_file_manager_actions; then
     ensure_nautilus_python || true
     reload_nautilus || true
+    context_integration=1
   else
-    printf '  warning: desktop integration failed\n'
+    if [ -z "${GALDR_NO_CONTEXT_MENU:-}" ]; then
+      printf '  warning: folder context menu integration failed\n'
+    fi
   fi
 fi
 
@@ -832,11 +983,16 @@ printf '  source %s/env\n' "${PREFIX}"
 printf '  or add %s to PATH, then open Galdr:\n' "${BIN_DIR}"
 printf '\n  galdr\n  galdr --version\n'
 if [ "${os}" = "linux" ]; then
-  printf '  App menu: Galdr\n'
-  printf '  Right-click a folder: %s\n' "$(here_menu_title)"
-  if command -v nautilus >/dev/null 2>&1 && ! nautilus_gi_ok; then
+  if [ "${desktop_integration:-0}" = "1" ]; then
+    printf '  App menu: Galdr\n'
+  fi
+  if [ "${context_integration:-0}" = "1" ]; then
+    printf '  Right-click a folder: %s\n' "$(here_menu_title)"
+  fi
+  if [ "${context_integration:-0}" = "1" ] \
+    && command -v nautilus >/dev/null 2>&1 && ! nautilus_gi_ok; then
     printf '  GNOME Files: %s\n' "$(nautilus_python_hint)"
   fi
-  printf '  uninstall %s/uninstall\n' "${PREFIX}"
 fi
+printf '  uninstall %s/uninstall\n' "${PREFIX}"
 printf '\n'
