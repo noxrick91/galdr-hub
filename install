@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Galdr one-line installer.
 #   curl -fsS https://term.noxcaw.com/install | bash
-#   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
+#   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.1
 # Windows PowerShell: irm https://term.noxcaw.com/install.txt | iex
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN  NO_COLOR
 #      GALDR_NO_CONTEXT_MENU  GALDR_NO_START_MENU
@@ -86,20 +86,24 @@ write_icon() {
   cat >"${icon}" <<'EOF'
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <title>Galdr</title>
-  <rect width="64" height="64" rx="12" fill="#f1efe9"/>
+  <rect width="64" height="64" rx="12" fill="#fff"/>
   <path d="M6 32h8l6-14v28l9-36v44l9-28v12l8-12v12h12" fill="none" stroke="#171816" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
   <rect x="49" y="28" width="10" height="10" fill="#e64024"/>
 </svg>
 EOF
   local hicolor="${HOME}/.local/share/icons/hicolor/scalable/apps"
   mkdir -p "${hicolor}"
-  cp -f "${icon}" "${hicolor}/galdr.svg"
+  cp -f "${icon}" "${hicolor}/galdr-pixel.svg"
+  rm -f "${hicolor}/galdr.svg" "${hicolor}/galdr-wordmark.svg"
 
   local png="${PREFIX}/galdr.png"
-  if printf '%s' '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9ts/hTvuuAO+77c0vl55RV9/H1auWIEoipooISJorbF7z79DCDqLaOlO5VpOfYnWGo7j4MH770Nc2yucPBAA2hisXr0KP7d6dTNcWg2QiBAEIS69+GLYto0jR48hnUpB11nFGINSqTRr/DccOVNhhdE+BdTGTWeXBBvbWdde+65JOmCqqAjDEMViEbmcO+Ps1OoCEdauvRI//vFPYIyeJkQsq329QFoWTp0uYOON70MYRvj+rt3oyeUmhZQkIEFnJmjScKn2SmP02bMAM8P3/bYDE0LAsqy20GxUhn7xmqvxyiuvtry33TuICFEco7+/D39211fwpS/dWbv/Dc9hAEVde4biVkIIYMXIpjOgFt98yHYGnk0mbzf4OI4xMDCAKy6/DN954O9aDqDle5nB9ZVnoVDAt775daxafSkKxQkIYUEIAa01JAFlzfjtn5RBdEYaTy3clEtlPPj5b2LdokF4XmnSqrFrxbpG/F9y8c9jydLlCMNw1kRGRCiVy6iGIYwxeO21/8F73/sbuHXrRxGFJXx4yy0IwwDVarXJRiQEPCYUDcEzhIkp3TO1azrtzA0B86aXZvyvhSXtWaUzESGKIqx7168inx/FSD6P2z9zG774hT+GUgoqqGLzpo3wSz62b78XJ0fyTQRS40cLQApLICyXYOKo8xsjs4VHI/4bMnq2+6VM4Btf+yqGhpahUChiaGgIQRBAKQUhLFQqFWz72K14/2/9Jl48fKS2/p8NVfWF3GWXvR3V6vQdKtkt+Dfi//LL3wGYqG1OsSwLnufjV375l7BixQoopTA4OAjf90FEk7RDsViE67q4fv064GykQZ21qtUqVAtal50wdppWqMf/misux88sXw4VR20R0HDYDTf8GtJOBqfGxiGlbOk0y7KglMKE58/C/NNDstUY5HyNV0ohDCcb2Ij/q9ZeiUwmgzAM2z4njmP09vbiunXXIgrCWemViGBZnVGGYr6JLghClMqlSYKmFv8S11xzNZjbf38khEAYhli9aiVWr16JIAwXdCdpXm9SSsF1XfT39UEpBcs6w9F9fb1455orWiaeVk687rp1yPX21j7IfjPsDL0xe9+0eROiKEKlUoUxBvmRUXzwpk1YtWoVgiBom6i11kin03j3DddDzXFJ3fHF0FybZVkolUrYvLnGz/fcswNBGOCzn/007vzyF1Epl2ed/Uqlire97dIaWirVBf98tiMsUClXsO3Wrbjx/e9DFEVYunQpqtUqtNazxn8QBLj+uvXI9fbi9PgpSCnfXA5o8vPEBDKZDLLZ7CT+brdeqG2znT/4A4DgDpVhLMuC1hpxHM/IuVNnv1oN8AuXXHLe4M/MLKSU1KlSVCtR1M4BURTiqquuhJvrOaet9PkmbyklCaXifL0e19WCHE0pazX2Gtavu3ZOiq5TM59IJKBUnBcEet62kyCirpVka5sqGgA3l7FxHGPZsmW4+qq1qFaqCyp+iMjYdhIEel6woKcbVd5uQQ1EuPnmDyIMw6ZWGBsdx6aNG7Bi5QoEQbjQZwZqlW1BTy/IgQlmRsbJ4P7vPFjXClXcuGED7vzyF2AJgW59rj8T/N94YIIAoHh65Ns9fYNbi6fHlBBCdsvrOdfF2Pj4nLRCp5sxRvX2L5IThfH7e/uX3Lqgh6a01kgkEnUGiObEGh0yfvqhKQDCdZfkgyjYYqdSJKVkY7grCXGuWqGzxrORUrKdSlEQBVtcd0kegBBEpJnZGhwc2uNNFLZlMo5l20lhjFHdoMaFnnVmZmOMsu2kyGQcy5sobGueGSTSoj4ozbzT6hsYus/3Cu8hwkhv/yJZF0mamQ1fyF87tjC6PmYtpaTe/kWSCCO+V3hP7dTozub54f8/PN3Ce/+njs//L3AtZkEm3XY7AAAAAElFTkSuQmCC' | base64 -d >"${png}" 2>/dev/null; then
-    local hicolor64="${HOME}/.local/share/icons/hicolor/64x64/apps"
-    mkdir -p "${hicolor64}"
-    cp -f "${png}" "${hicolor64}/galdr.png"
+  if printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAQAAAAEABAMAAACuXLVVAAAAMFBMVEX///8XGBYAAADmQCQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADudl4MAAAAEHRSTlP//wD/AAAAAAAAAAAAAAAAMuVjIAAAA+VJREFUeNrtnVty4yAQReke/Q/aAePZ/1JmCyrtQKxAzI9jy4jECPUDGfhIFFfFfbi3m0eXqww3kxiT4RjJULB/dZ0N10D3HoAxfBIBZePv3z8CmJjjG7NOPwFMRmBM3wOIxI/CbAFWIzTmNMA6SwFsI2Gai5sgBbAawTHvAdZZEuAZDRUMeNEbNQzYThh1BHjOGJUEeEwZlQR4zBm1BPiaNBrlgVoOfMmOag7cp41qAtznXUUOrFrB5zvArAWwVmLBqhd9rkOBWS/6asxQ+r9gjVnIluKy+GYkASjLQbv5eSoLCxUYNzqcVWDWrIG1UAHYPQgnoU08CVcB3UK0lqcghQdzJWfCiwFAOh+vqsCsG3+9ZA7Y5qugeQDoFjQPYLsFrQNAt6B5ANplILc/QNUNKFWArBtQCmA5xD8AsO0GQItVQNgNKAOwXCWYCQCcy8DBHAAVBax6EioDvHYDoEEFrGk9B5j1QIXSv5gFti4FQBwAjOllqAtgW1cAms8B26tAGQAaUGCgy8G4h5DXU6BTIO4hZPYUkCwFbPIeacUUiD9RkPsJg7rL8EAOxj2EMddGKgUi7yF7Fqi7DJEpANGjzZ4GsmyFIK6A1bYggrH5cMiRgyCuALBUgRXJCI6lGGgUAJEiYFHAKgMcy8iBdCtMjr+J1/5d4DwA2gDCx/Lt6XU5nMr2PEDieNnvhiJbUb+e0wDYboEyAPQk1AawH6+Ar9wC4AYIzVeBZy2C9wDBNG5B8G9cAWYAr6zAwm7BsA005uhPMsZHzKFgvqGpKrgqgGcF8JRZ8qEWeGWAwKtAqN8CrwxwSKKBP88nagU8pQMcFoQK1gFdAH9IBSRXOJgqLPB6AP6YDqhbAyUAPu8esYgr4CM8LwwQgn+dd+aZnnAvCEv895hx3xs4k2yRtKD0EtUvJkgkdTDdAmUALwUQugXUwlxOAV+pBf6jLbA15UDQAPCsXH0zQpJy890CVoDwNtvDpyehp0i2MwDhndT+49eB5dB9l0MB/6PSgR8gvvsTjszreVhUc4DznNj3AgKAYLoFygC+W6AMEHoSNg/guwXKAGc7BomvuZIVoOcAKldhBQqgbhE41Ij6AUlI2DFA4854cHodrMGCIgSqjoErVsDTZEB5FZB1DAZj3FxEQPQdIjWsA4oMrpKV0GkGR839wFWzGTnF2Ki4J7tnbKcmQC0HElRz4Cu005p69EtegEdkpyTA7re0AM/ATkeAzYMowTMa6lxRXCqsUzDg9dHJG/AqPMobEAW9ycS/fX8vuInHN79eP/s7/vbc/v/5+WbEnYm794e96oxfPp2YHiRtnwTMv4//l0a9nWL1KekAAAAASUVORK5CYII=' | base64 -d >"${png}" 2>/dev/null; then
+    local hicolor256="${HOME}/.local/share/icons/hicolor/256x256/apps"
+    mkdir -p "${hicolor256}"
+    cp -f "${png}" "${hicolor256}/galdr-pixel.png"
+    rm -f "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \
+      "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr-pixel.png" \
+      "${hicolor256}/galdr-wordmark.png"
   else
     rm -f "${png}"
   fi
@@ -280,7 +284,7 @@ Comment[zh_CN]=GPU 加速终端
 Comment[zh_TW]=GPU 加速終端
 Exec=${exec}
 TryExec=${dest}
-Icon=galdr
+Icon=galdr-pixel
 Terminal=false
 Categories=System;TerminalEmulator;
 Keywords=terminal;shell;console;
@@ -356,7 +360,7 @@ class GaldrHere(GObject.GObject, Nautilus.MenuProvider):
             path = os.path.dirname(path)
         if not os.path.isdir(path):
             return []
-        item = Nautilus.MenuItem(name="GaldrHere::Open", label=LABEL, icon="galdr")
+        item = Nautilus.MenuItem(name="GaldrHere::Open", label=LABEL, icon="galdr-pixel")
         item.connect("activate", self._open, path)
         return [item]
 
@@ -415,7 +419,7 @@ EOF
 Name=Open Galdr here
 Comment=Open Galdr in this folder
 Exec="${helper}" %F
-Icon-Name=galdr
+Icon-Name=galdr-pixel
 Selection=s
 Extensions=dir;
 Quote=double
@@ -425,7 +429,7 @@ EOF
 Name=Open Galdr here
 Comment=Open Galdr in this folder
 Exec="${helper}" %P
-Icon-Name=galdr
+Icon-Name=galdr-pixel
 Selection=none
 Extensions=any;
 Quote=double
@@ -442,7 +446,7 @@ X-KDE-Priority=TopLevel
 
 [Desktop Action openGaldr]
 Name=Open Galdr here
-Icon=galdr
+Icon=galdr-pixel
 Exec="${helper}" %f
 EOF
 )
@@ -462,7 +466,7 @@ EOF
 [Desktop Entry]
 Type=Action
 Name=Open Galdr here
-Icon=galdr
+Icon=galdr-pixel
 Profiles=folder;
 
 [X-Action-Profile folder]
@@ -476,7 +480,7 @@ EOF
   cat >"${contractor}/galdr-here.contract" <<EOF
 [Contractor Entry]
 Name=Open Galdr here
-Icon=galdr
+Icon=galdr-pixel
 Description=Open Galdr in this folder
 MimeType=inode;
 Exec="${helper}" %U
@@ -501,7 +505,7 @@ EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
 <action>
-	<icon>galdr</icon>
+	<icon>galdr-pixel</icon>
 	<name>${uca_name}</name>
 	<unique-id>galdr-open-here</unique-id>
 	<command>${helper} %f</command>
@@ -517,7 +521,7 @@ EOF
     awk -v cmd="${helper} %f" -v n="${uca_name}" '
       /<\/actions>/ && !done {
         print "<action>"
-        print "\t<icon>galdr</icon>"
+        print "\t<icon>galdr-pixel</icon>"
         print "\t<name>" n "</name>"
         print "\t<unique-id>galdr-open-here</unique-id>"
         print "\t<command>" cmd "</command>"
@@ -568,7 +572,12 @@ rm -f \
   "${BIN_DIR}/galdr-plugin.exe" "${BIN_DIR}/galdr-plugin.exe.bak" \
   "${HOME}/.local/share/applications/galdr.desktop" \
   "${HOME}/.local/share/icons/hicolor/scalable/apps/galdr.svg" \
+  "${HOME}/.local/share/icons/hicolor/scalable/apps/galdr-pixel.svg" \
+  "${HOME}/.local/share/icons/hicolor/scalable/apps/galdr-wordmark.svg" \
   "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \
+  "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr-pixel.png" \
+  "${HOME}/.local/share/icons/hicolor/256x256/apps/galdr-pixel.png" \
+  "${HOME}/.local/share/icons/hicolor/256x256/apps/galdr-wordmark.png" \
   "${HOME}/.local/share/nautilus-python/extensions/galdr-here.py" \
   "${HOME}/.local/share/nemo/actions/galdr-dir.nemo_action" \
   "${HOME}/.local/share/nemo/actions/galdr-bg.nemo_action" \
@@ -803,20 +812,17 @@ fetch_candidate() {
   got      ${companion_got}"
     fi
   done
-  shell_asset=""
-  if [ "${platform}" = "windows" ]; then
-    shell_asset="${asset/galdr-/galdr-sh-}"
-    shell_expect="$(sum_for "${shell_asset}")"
-    [ -n "${shell_expect}" ] \
-      || die "SHA256SUMS has no entry for required Windows helper ${shell_asset}"
-    download "${base}/${shell_asset}" "${tmp}/${shell_asset}" \
-      "Downloading ${shell_asset}…"
-    shell_got="$(sha256_of "${tmp}/${shell_asset}")"
-    if [ "${shell_expect}" != "${shell_got}" ]; then
-      die "SHA256 mismatch for ${shell_asset}
+  shell_asset="${asset/galdr-/galdr-sh-}"
+  shell_expect="$(sum_for "${shell_asset}")"
+  [ -n "${shell_expect}" ] \
+    || die "SHA256SUMS has no entry for required shell helper ${shell_asset}"
+  download "${base}/${shell_asset}" "${tmp}/${shell_asset}" \
+    "Downloading ${shell_asset}…"
+  shell_got="$(sha256_of "${tmp}/${shell_asset}")"
+  if [ "${shell_expect}" != "${shell_got}" ]; then
+    die "SHA256 mismatch for ${shell_asset}
   expected ${shell_expect}
   got      ${shell_got}"
-    fi
   fi
 }
 
@@ -965,20 +971,7 @@ if [ -n "${shell_dest}" ]; then
       die "could not back up ${shell_dest}"
     fi
   fi
-  if [ "${platform}" = "windows" ]; then
-    helper_source="${tmp}/${shell_asset}"
-  elif cat >"${tmp}/galdr-sh" <<'EOF'
-#!/bin/sh
-bin_dir=$(CDPATH= cd -P "$(dirname "$0")" && pwd) || exit 1
-exec "${bin_dir}/galdr" --shell "$@"
-EOF
-  then
-    helper_source="${tmp}/galdr-sh"
-  else
-    rollback_shell_wrapper
-    rollback_binary
-    die "could not create galdr-sh wrapper"
-  fi
+  helper_source="${tmp}/${shell_asset}"
   if ! chmod +x "${helper_source}"; then
     rollback_shell_wrapper
     rollback_binary

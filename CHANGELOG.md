@@ -2,6 +2,26 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.1] - 2026-08-25
+
+### Added
+
+- Settings now includes an About page with author/contact information, the complete config path, manual update checks, and a background startup update notification.
+- Galdr Shell startup can select `auto`, native `galdr-sh`, or integrated `galdr --shell`; the automatic mode verifies and prefers the matching helper.
+- The automatic completion dialog can be disabled independently without changing Tab completion or inline ghost hints.
+
+### Changed
+
+- Linux releases now ship native x86_64 and ARM64 `galdr-sh` binaries instead of installing a wrapper around the full GUI executable.
+- Plugin command discovery uses an atomic, schema-versioned cache and hot-refreshes at the next prompt, removing supervisor IPC from new-shell and command-palette startup.
+- The Downloader plugin is now v0.3.1: it automatically uses system `yt-dlp`, recognizes JSON-LD/player URLs, escaped stream URLs, and embedded player pages, and documents its expanded site compatibility path.
+- The title bar, website wordmark/favicon, desktop icon, and application icon now share a pixel-style Galdr mark; the title animation wakes only for its occasional short glitch cycle. Website body, terminal demo, marketplace, and download typography is larger.
+
+### Fixed
+
+- Settings no longer truncates the config path; long paths are wrapped in About.
+- `galdr-sh -c` without a command now fails with a clear usage error instead of silently entering another mode.
+
 ## [0.2.0] - 2026-08-25
 
 ### Added

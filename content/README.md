@@ -22,18 +22,17 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.0** — 2026-08-25
+**What's new in v0.2.1** — 2026-08-25
 
-- A versioned plugin platform with process, WebAssembly component, and explicitly trusted native runtimes; capability grants, isolated storage, lifecycle supervision, shell integration, events, and declarative UI are built in.
-- The `galdr plugin` management CLI, in-app marketplace, and official Downloader plugin with concurrent and resumable transfers, media discovery, HLS capture, Magnet/BitTorrent support, and a native Galdr interface.
-- Plugin API, SDK, host crates, a complete example plugin, marketplace publishing automation, and bilingual documentation for using, securing, developing, and publishing plugins.
-- The website, documentation shell, logo, favicon, and application icon now share a new Galdr visual system. The homepage terminal demo has larger type, live session/runtime details, and responsive mobile layout.
-- Install, update, and uninstall commands now expose platform-specific one-click copy actions with accessible success and failure feedback.
-- Release packages now ship the plugin supervisor and management CLI beside Galdr, and the Linux and Windows installers install, validate, update, and remove the complete runtime together.
-- Hub and marketplace publishing now creates atomic commits through GitHub's Git Data API, avoiding unreliable long-lived Git clone and push connections from the release runner.
-- Plugin publishing now verifies GitHub's server-side asset digest when available and uses an unambiguous binary media type for fallback downloads.
-- Plugin releases no longer replace Galdr as the repository's latest release, and Hub metadata selects only versioned Galdr releases.
-- Windows ARM64 and macOS marketplace downloads use the operating system TLS provider, avoiding upstream `ring` cross-compilation limitations while retaining rustls on other targets.
+- Settings now includes an About page with author/contact information, the complete config path, manual update checks, and a background startup update notification.
+- Galdr Shell startup can select `auto`, native `galdr-sh`, or integrated `galdr --shell`; the automatic mode verifies and prefers the matching helper.
+- The automatic completion dialog can be disabled independently without changing Tab completion or inline ghost hints.
+- Linux releases now ship native x86_64 and ARM64 `galdr-sh` binaries instead of installing a wrapper around the full GUI executable.
+- Plugin command discovery uses an atomic, schema-versioned cache and hot-refreshes at the next prompt, removing supervisor IPC from new-shell and command-palette startup.
+- The Downloader plugin is now v0.3.1: it automatically uses system `yt-dlp`, recognizes JSON-LD/player URLs, escaped stream URLs, and embedded player pages, and documents its expanded site compatibility path.
+- The title bar, website wordmark/favicon, desktop icon, and application icon now share a pixel-style Galdr mark; the title animation wakes only for its occasional short glitch cycle. Website body, terminal demo, marketplace, and download typography is larger.
+- Settings no longer truncates the config path; long paths are wrapped in About.
+- `galdr-sh -c` without a command now fails with a clear usage error instead of silently entering another mode.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -50,9 +49,9 @@ curl -fsS https://term.noxcaw.com/install | bash
 指定版本：
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.1
 # 或
-GALDR_TAG=v0.2.0 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=v0.2.1 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell：
@@ -94,7 +93,7 @@ source ~/.galdr/env
 | Windows x64 | `galdr-x86_64-pc-windows-gnu.exe` |
 | Windows ARM64 | `galdr-aarch64-pc-windows-msvc.exe` |
 
-Windows 安装器还会装同目录的 `galdr-sh-*.exe`（ConPTY 里跑 galdr-shell 的 console 助手）。
+安装器还会装同架构、同版本的 `galdr-sh-*`；它是启动内置 Shell 的轻量原生助手。Windows 版本使用 console subsystem 以适配 ConPTY。
 
 Linux 预编译包要求 glibc 2.35 或更新版本，还需要可用的 Vulkan（或 wgpu 支持的 GPU 后端）和字体。零配置找 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，并打开系统字体回退。
 
@@ -132,6 +131,16 @@ galdr
 [shell]
 kind = "system"
 ```
+
+内置 Shell 也可选择启动方式：
+
+```toml
+[shell]
+kind = "galdr"
+launcher = "auto" # auto | helper | integrated
+```
+
+`auto` 优先使用同目录、同版本的原生 `galdr-sh`，缺失或版本不符时回退到 `galdr --shell`；`helper` 强制使用助手；`integrated` 强制使用完整 Galdr 可执行文件。Windows 因 ConPTY 无法附加 GUI subsystem 程序，始终使用 `galdr-sh.exe`。插件命令从带版本的本地缓存启动，安装、更新、启用/禁用或卸载后由宿主原子刷新，已打开的 Shell 会在下一个提示符同步新列表。
 
 可选配置在 `~/.config/galdr/config.toml`。没有这份文件也能启动。
 
@@ -204,7 +213,7 @@ action = "none"
 
 拖标签可重排，拖分隔条可改分屏，见 [界面](#/ui)。
 
-Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空格不接受。打完或确认完整命令名后，菜单会列出参数 / 子命令；回车仍执行当前命令。补全使用 shell 的 `PATH`（`include bashrc` 之后加进来的工具也能对上），并跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。
+Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空格不接受。打完或确认完整命令名后，菜单会列出参数 / 子命令；回车仍执行当前命令。补全使用 shell 的 `PATH`（`include bashrc` 之后加进来的工具也能对上），并跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。设置里的“自动建议弹窗”可以单独关闭；Tab 和幽灵提示不受影响。
 
 交互里 Ctrl+Z 会停住前台作业并打印 `[n]+  Stopped  命令`，再用 `fg` / `bg` / `jobs` 管理。
 
@@ -214,7 +223,7 @@ Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空�
 
 可选 `~/.config/galdr/config.toml`。没有这份文件也能启动；首次运行会写入一份示例。零配置主题是 `galdr-dark`。Windows 默认 Cascadia Mono + 微软雅黑 / Segoe UI Emoji；Linux / macOS 默认 DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji。`system_fallback = true` 还会追加内置 CJK / emoji / mono 列表。
 
-改完文件后切回窗口，或等不到半秒会自动重载。`Ctrl+,` 打开设置（外观 / 终端 / Mux / 快捷键）；字体、主题、光标、`TERM`、启动行列等会写回同一份文件。快捷键只能在 `[[keys]]` 里改。
+改完文件后切回窗口，或等不到半秒会自动重载。`Ctrl+,` 打开设置（外观 / 终端 / Mux / 网络 / 快捷键 / 关于）；字体、主题、光标、`TERM`、启动行列等会写回同一份文件。“关于”会完整显示配置路径、作者与邮箱，并可手动检查更新；Galdr 启动后也会在后台检查并提示新版本。快捷键只能在 `[[keys]]` 里改。
 
 ```toml
 [font]
@@ -246,6 +255,10 @@ dec1007 = true              # alternate-screen wheel → cursor keys
 
 [shell]
 kind = "galdr"            # galdr | system
+launcher = "auto"         # auto | helper | integrated
+
+[completion]
+auto_popup = true          # false 仍保留 Tab 和幽灵提示
 
 [mux]
 unix_socket = false

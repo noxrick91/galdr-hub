@@ -22,18 +22,17 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.0** — 2026-08-25
+**What's new in v0.2.1** — 2026-08-25
 
-- A versioned plugin platform with process, WebAssembly component, and explicitly trusted native runtimes; capability grants, isolated storage, lifecycle supervision, shell integration, events, and declarative UI are built in.
-- The `galdr plugin` management CLI, in-app marketplace, and official Downloader plugin with concurrent and resumable transfers, media discovery, HLS capture, Magnet/BitTorrent support, and a native Galdr interface.
-- Plugin API, SDK, host crates, a complete example plugin, marketplace publishing automation, and bilingual documentation for using, securing, developing, and publishing plugins.
-- The website, documentation shell, logo, favicon, and application icon now share a new Galdr visual system. The homepage terminal demo has larger type, live session/runtime details, and responsive mobile layout.
-- Install, update, and uninstall commands now expose platform-specific one-click copy actions with accessible success and failure feedback.
-- Release packages now ship the plugin supervisor and management CLI beside Galdr, and the Linux and Windows installers install, validate, update, and remove the complete runtime together.
-- Hub and marketplace publishing now creates atomic commits through GitHub's Git Data API, avoiding unreliable long-lived Git clone and push connections from the release runner.
-- Plugin publishing now verifies GitHub's server-side asset digest when available and uses an unambiguous binary media type for fallback downloads.
-- Plugin releases no longer replace Galdr as the repository's latest release, and Hub metadata selects only versioned Galdr releases.
-- Windows ARM64 and macOS marketplace downloads use the operating system TLS provider, avoiding upstream `ring` cross-compilation limitations while retaining rustls on other targets.
+- Settings now includes an About page with author/contact information, the complete config path, manual update checks, and a background startup update notification.
+- Galdr Shell startup can select `auto`, native `galdr-sh`, or integrated `galdr --shell`; the automatic mode verifies and prefers the matching helper.
+- The automatic completion dialog can be disabled independently without changing Tab completion or inline ghost hints.
+- Linux releases now ship native x86_64 and ARM64 `galdr-sh` binaries instead of installing a wrapper around the full GUI executable.
+- Plugin command discovery uses an atomic, schema-versioned cache and hot-refreshes at the next prompt, removing supervisor IPC from new-shell and command-palette startup.
+- The Downloader plugin is now v0.3.1: it automatically uses system `yt-dlp`, recognizes JSON-LD/player URLs, escaped stream URLs, and embedded player pages, and documents its expanded site compatibility path.
+- The title bar, website wordmark/favicon, desktop icon, and application icon now share a pixel-style Galdr mark; the title animation wakes only for its occasional short glitch cycle. Website body, terminal demo, marketplace, and download typography is larger.
+- Settings no longer truncates the config path; long paths are wrapped in About.
+- `galdr-sh -c` without a command now fails with a clear usage error instead of silently entering another mode.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -50,9 +49,9 @@ curl -fsS https://term.noxcaw.com/install | bash
 Pin a version:
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.1
 # or
-GALDR_TAG=v0.2.0 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=v0.2.1 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell:
@@ -94,7 +93,7 @@ Open the homepage, download the latest asset for your platform, put it in `~/.ga
 | Windows x64 | `galdr-x86_64-pc-windows-gnu.exe` |
 | Windows ARM64 | `galdr-aarch64-pc-windows-msvc.exe` |
 
-The Windows installer also installs `galdr-sh-*.exe` next to it (console helper so galdr-shell can run under ConPTY).
+The installer also places the matching native `galdr-sh-*` helper beside Galdr. The Windows helper uses the console subsystem so galdr-shell can run under ConPTY.
 
 Linux prebuilt packages require glibc 2.35 or newer, a working Vulkan stack (or another wgpu backend), and fonts. Zero-config looks for DejaVu Sans Mono, Noto Sans CJK SC, and Noto Color Emoji, and enables system font fallback.
 
@@ -132,6 +131,16 @@ Default login is **galdr-shell** (`galdr --shell`). To use the system shell:
 [shell]
 kind = "system"
 ```
+
+The builtin shell also has a selectable launcher:
+
+```toml
+[shell]
+kind = "galdr"
+launcher = "auto" # auto | helper | integrated
+```
+
+`auto` prefers an adjacent, exactly matching native `galdr-sh` and falls back to `galdr --shell`; `helper` requires the helper; `integrated` always uses the full Galdr executable. Windows always uses `galdr-sh.exe` because ConPTY cannot attach the GUI-subsystem executable. Plugin commands start from a versioned local cache. The host atomically refreshes it after install, update, enable/disable, or removal, and an open shell adopts the new list at its next prompt.
 
 Optional config lives at `~/.config/galdr/config.toml`. Galdr starts with zero-config defaults if that file is missing.
 
@@ -204,7 +213,7 @@ action = "none"
 
 Drag a tab to reorder it, or a split divider to resize; see [Interface](#/ui).
 
-Tab or Enter accepts a completion; **Esc** (or Ctrl+G) closes the popup. Space does not accept. After you type or accept a full command name, the menu lists arguments / subcommands; Enter still runs the current command. Completions use the shell `PATH` (tools added after `include bashrc` are included), plus aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke.
+Tab or Enter accepts a completion; **Esc** (or Ctrl+G) closes the popup. Space does not accept. After you type or accept a full command name, the menu lists arguments / subcommands; Enter still runs the current command. Completions use the shell `PATH` (tools added after `include bashrc` are included), plus aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke. The Automatic suggestion popup setting hides only the dialog; Tab and ghost hints remain active.
 
 Interactive Ctrl+Z stops the foreground job and prints `[n]+  Stopped  command`. Use `fg` / `bg` / `jobs` after that.
 
@@ -214,7 +223,7 @@ Interactive Ctrl+Z stops the foreground job and prints `[n]+  Stopped  command`.
 
 Optional `~/.config/galdr/config.toml`. Galdr starts without it; the first run writes an example. Zero-config theme is `galdr-dark`. Windows defaults to Cascadia Mono + Microsoft YaHei / Segoe UI Emoji; Linux / macOS to DejaVu Sans Mono + Noto Sans CJK SC / Noto Color Emoji. `system_fallback = true` also appends a built-in CJK / emoji / mono stack.
 
-After you save the file, focus the window or wait under half a second and it reloads. `Ctrl+,` opens Settings (Appearance / Terminal / Mux / Keys). Font, theme, cursor, `TERM`, and startup size write back to the same file. Key bindings are edited only in `[[keys]]`.
+After you save the file, focus the window or wait under half a second and it reloads. `Ctrl+,` opens Settings (Appearance / Terminal / Mux / Network / Keys / About). Font, theme, cursor, `TERM`, and startup size write back to the same file. About shows the complete config path, author and email, and offers a manual update check; Galdr also checks in the background after startup and prompts when a newer release exists. Key bindings are edited only in `[[keys]]`.
 
 ```toml
 [font]
@@ -246,6 +255,10 @@ dec1007 = true              # alternate-screen wheel → cursor keys
 
 [shell]
 kind = "galdr"            # galdr | system
+launcher = "auto"         # auto | helper | integrated
+
+[completion]
+auto_popup = true          # false keeps Tab and ghost hints
 
 [mux]
 unix_socket = false
