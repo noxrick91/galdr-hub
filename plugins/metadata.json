@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "plugins": [
+    {
+      "id": "com.noxcaw.term.downloader",
+      "name": "Galdr Downloader",
+      "description": "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
+      "license": "MIT",
+      "capabilities": [
+        "http",
+        "p2p_network",
+        "files_write",
+        "ui"
+      ]
+    }
+  ]
+}
