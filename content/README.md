@@ -31,6 +31,7 @@ This page lists changes in the **current public release**.
 - Install, update, and uninstall commands now expose platform-specific one-click copy actions with accessible success and failure feedback.
 - Release packages now ship the plugin supervisor and management CLI beside Galdr, and the Linux and Windows installers install, validate, update, and remove the complete runtime together.
 - Hub and marketplace publishing now creates atomic commits through GitHub's Git Data API, avoiding unreliable long-lived Git clone and push connections from the release runner.
+- Plugin publishing now verifies GitHub's server-side asset digest when available and uses an unambiguous binary media type for fallback downloads.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
