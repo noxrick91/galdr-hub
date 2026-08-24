@@ -1,10 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
-  <style>
-    .cursor { animation: galdr-cursor 3.6s steps(1, end) infinite; }
-    @keyframes galdr-cursor { 75% { opacity: 0.42; } }
-    @media (prefers-reduced-motion: reduce) { .cursor { animation: none; } }
-  </style>
-  <!-- Galdr: a terminal block with a blinking cell. -->
-  <path fill="#ff9838" d="M14 7h32v5h5v10H19v20h32v10h-5v5H14v-5H9V12h5z"/>
-  <rect class="cursor" x="39" y="27" width="10" height="10" fill="#ffd69c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Galdr</title>
+  <!-- A chant waveform resolves into a terminal cursor. -->
+  <rect width="64" height="64" rx="12" fill="#f1efe9"/>
+  <path d="M6 32h8l6-14v28l9-36v44l9-28v12l8-12v12h12" fill="none" stroke="#171816" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+  <rect x="49" y="28" width="10" height="10" fill="#e64024"/>
 </svg>

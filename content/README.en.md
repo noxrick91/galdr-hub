@@ -10,6 +10,7 @@ Prebuilt binaries install into `~/.galdr/bin`. Get them from this site’s homep
 - Tabs (drag to reorder), splits, search, command palette, themes
 - Session restore; detach and reattach the mux (Unix socket / Windows named pipe)
 - Builtin bash-shaped shell: functions, arrays, job control (Unix), usual builtins
+- Versioned plugin API for commands, shell integration, events, and declarative UI with capability grants
 
 ### How to read this guide
 
@@ -21,11 +22,15 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.16** — 2026-08-24
+**What's new in v0.2.0** — 2026-08-25
 
-- Galdr Shell startup diagnostics are now opt-in with `GALDR_STARTUP=1`, so routine sessions reach the prompt without a synchronous PATH self-check.
-- Windows no longer launches `galdr-sh.exe --version` before creating every pane. Release installers already validate the GUI/helper version pair, avoiding redundant process startup on the GUI thread.
-- The PowerShell installer now explicitly waits for GUI-subsystem executables and captures their output when checking `--version` and `--help`, preventing valid Windows packages from being rejected.
+- A versioned plugin platform with process, WebAssembly component, and explicitly trusted native runtimes; capability grants, isolated storage, lifecycle supervision, shell integration, events, and declarative UI are built in.
+- The `galdr plugin` management CLI, in-app marketplace, and official Downloader plugin with concurrent and resumable transfers, media discovery, HLS capture, Magnet/BitTorrent support, and a native Galdr interface.
+- Plugin API, SDK, host crates, a complete example plugin, marketplace publishing automation, and bilingual documentation for using, securing, developing, and publishing plugins.
+- The website, documentation shell, logo, favicon, and application icon now share a new Galdr visual system. The homepage terminal demo has larger type, live session/runtime details, and responsive mobile layout.
+- Install, update, and uninstall commands now expose platform-specific one-click copy actions with accessible success and failure feedback.
+- Release packages now ship the plugin supervisor and management CLI beside Galdr, and the Linux and Windows installers install, validate, update, and remove the complete runtime together.
+- Hub and marketplace publishing now creates atomic commits through GitHub's Git Data API, avoiding unreliable long-lived Git clone and push connections from the release runner.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -42,9 +47,9 @@ curl -fsS https://term.noxcaw.com/install | bash
 Pin a version:
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
 # or
-GALDR_TAG=v0.1.2 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=v0.2.0 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell:
@@ -183,6 +188,7 @@ action = "none"
 | Ctrl+Alt+E | Equalize panes |
 | Ctrl+Shift+F | Search |
 | Ctrl+Shift+P | Command palette |
+| Ctrl+Shift+M | Plugin marketplace |
 | Ctrl+Shift+Space | Quick select |
 | Ctrl+Shift+X | Copy / vi mode |
 | Shift+Up / Down | Scroll line |
@@ -301,6 +307,169 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 
 ---
 
+## Plugin overview
+
+A Galdr plugin is a versioned `.zip` package that communicates through `galdr-plugin-host`. The GUI and shell exchange size-limited protocol frames; they **do not load ordinary third-party plugins into the Galdr process**. The current plugin API major is `1`.
+
+Plugins can contribute:
+
+- Commands available to the GUI, shell, or both
+- Command-palette entries, key bindings, and `plugin:<plugin-id>/<command-id>` actions
+- Tab, pane, command-lifecycle, and other declared events
+- Declarative UI rendered by Galdr rather than arbitrary window or GPU code
+- Directory, variable, export, and alias changes that are validated before reaching the parent shell
+
+Choose a runtime for the work and trust boundary:
+
+| Runtime | Best for | Isolation boundary |
+| --- | --- | --- |
+| `process` | Typical plugins, external libraries, background workers | Separate process; strict Bubblewrap sandbox on Linux |
+| `wasm` | Portable, deterministic logic | Wasmtime component with a 64 MiB memory ceiling and epoch deadline |
+| `native` | Host-level performance or system integration that is truly required | Runs inside the plugin host; each binary change requires explicit trust |
+
+Visit the [plugin marketplace](./plugins.html) for the official catalog, or continue with [Install and manage plugins](#/plugin-management).
+
+---
+
+## Install and manage plugins
+
+Press `Ctrl+Shift+M`, choose **Plugin marketplace** from the command palette, or open **Plugins** from the terminal context menu. The built-in view supports search, install, update, enable / disable, permission changes, and removal. Its local cache keeps installed plugins manageable offline.
+
+### Install from the official marketplace
+
+Search and install first, then grant only the capabilities you need:
+
+```bash
+galdr plugin search downloader
+galdr plugin install-from com.noxcaw.term.downloader
+galdr plugin inspect com.noxcaw.term.downloader
+galdr plugin grant com.noxcaw.term.downloader http files_write ui
+```
+
+Requested capabilities are **not granted automatically**. `inspect` reports requested and granted access separately. Grant `p2p_network` only when you need P2P or magnet downloads:
+
+```bash
+galdr plugin grant com.noxcaw.term.downloader p2p_network
+```
+
+The default official index is `https://term.noxcaw.com/plugins/index.json`. Use `--marketplace INDEX` for a development or community index.
+
+### Daily management
+
+```text
+galdr plugin list [--json]
+galdr plugin inspect ID
+galdr plugin enable|disable ID
+galdr plugin grant|revoke ID CAPABILITY...
+galdr plugin update [ID] [--marketplace INDEX] [--trust-native]
+galdr plugin uninstall ID [--keep-data]
+```
+
+Updates preserve enablement, grants, and plugin order. Pinned entries are skipped. A changed native binary requires a fresh `--trust-native`. Uninstalling removes private plugin data by default; `--keep-data` preserves it.
+
+### Install a local or HTTPS package
+
+```bash
+galdr plugin install ./hello.zip --grant ui
+galdr plugin install https://example.com/hello.zip \
+  --sha256 <64-hex-digest> --grant ui
+```
+
+A direct HTTPS install requires `--sha256`. Every platform package in a marketplace index also needs a SHA-256 digest. Marketplace and package URLs must use HTTPS; paths and `file://` are accepted for local development.
+
+---
+
+## Permissions and isolation
+
+The manifest's `capabilities` are what a plugin **requests**. Grants in local install state are what the user **allows**. The host removes context fields a plugin cannot read, then rejects shell patches and actions it is not allowed to return.
+
+| Capability | Access |
+| --- | --- |
+| `context_read` | Read invocation context |
+| `terminal_read` / `terminal_write` | Read terminal content / write to the terminal |
+| `tabs_manage` / `panes_manage` | Manage tabs / panes |
+| `clipboard_read` / `clipboard_write` | Read / write the clipboard |
+| `notifications` | Send system notifications |
+| `shell_state` | Read or return validated shell-state changes |
+| `events` | Subscribe to declared terminal events |
+| `ui` | Provide declarative UI and receive typed UI events |
+| `files_read` / `files_write` | Read / read-write access to the user's Downloads directory |
+| `http` | HTTP(S), DNS, and configured proxies |
+| `p2p_network` | Peer-to-peer network connections |
+
+On Linux, a `process` package is mounted read-only, its private data directory is separately writable, and the environment is cleared before approved values are restored. `files_read` / `files_write` expose only Downloads at `GALDR_PLUGIN_DOWNLOADS`. Network sharing, DNS files, and standard proxy variables appear only when `http` or `p2p_network` is granted. A process plugin is refused when a strict platform sandbox is unavailable.
+
+Frames and UI trees have size limits. The host restarts a plugin after a crash or timeout; three failures in 60 seconds disable it for the current session. Packages cannot use absolute paths or parent traversal, and Linux packages cannot contain symlinks.
+
+> A `native` plugin does not have process or Wasm code isolation. Use `--trust-native` only for a source you trust.
+
+---
+
+## Build a plugin
+
+Every package has `plugin.toml` at its root, and its ID uses reverse-domain form. This is a minimal process plugin:
+
+```toml
+schema = 1
+id = "com.example.hello"
+name = "Hello"
+version = "0.1.0"
+api = "^1.0"
+galdr = ">=0.2.0"
+entrypoints = [
+  { os = "linux", arch = "x86_64", runtime = "process", path = "bin/hello" },
+]
+capabilities = ["ui", "shell_state"]
+
+[[contributions.commands]]
+id = "hello"
+title = "Hello from plugin"
+scope = "both"
+shell_name = "galdr-hello"
+
+[[contributions.ui]]
+id = "hello-view"
+slot = "modal_pane"
+title = "Hello"
+```
+
+`scope` is `gui`, `shell`, or `both`. A command is always addressable as `plugin:com.example.hello/hello`; bind that same action to a key:
+
+```toml
+[[keys]]
+key = "h"
+mods = "ctrl|shift"
+action = "plugin:com.example.hello/hello"
+```
+
+The repository's `galdr-plugin-api` crate defines the stable protocol. `galdr-plugin-sdk` provides process JSON framing, the Wasm WIT, and the native v1 vtable. Build and package the example like this:
+
+```bash
+cargo build --release --manifest-path examples/plugins/hello-process/Cargo.toml
+mkdir -p /tmp/galdr-hello/bin
+cp examples/plugins/hello-process/target/release/galdr-hello-plugin /tmp/galdr-hello/bin/hello
+cp examples/plugins/hello-process/plugin.toml /tmp/galdr-hello/plugin.toml
+(cd /tmp/galdr-hello && zip -r ../galdr-hello.zip .)
+galdr plugin install /tmp/galdr-hello.zip --grant ui --grant shell_state
+```
+
+A shell invocation can change the parent shell only after a successful, non-timeout, non-subshell result; Galdr validates the complete patch first. Put long work on plugin-owned background workers instead of occupying the supervisor request deadline, and report progress through later requests or declarative UI.
+
+---
+
+## Publish plugins
+
+Each first-party plugin directory contains a validated `plugin.toml` and a `publish.toml` describing reproducible platform packages. The protected publishing workflow:
+
+1. builds and tests changed plugins;
+2. creates an immutable `plugin-<id>-v<version>` Release;
+3. downloads every uploaded package again and verifies its SHA-256;
+4. merges `plugins/index.json` plus the website's `plugins/metadata.json`.
+
+A package cannot be replaced under the same version. Bump both `plugin.toml` and the plugin crate version before publishing a new binary. Community indexes should follow the same schema-1, HTTPS, and per-package SHA-256 constraints; users then opt in explicitly with `--marketplace`.
+
+---
+
 ## Troubleshooting
 
 | Symptom | What to do |
@@ -316,3 +485,6 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 | Want system bash | `[shell] kind = "system"` — the default will not read `.bashrc` |
 | `include bashrc` did nothing | Put it in `~/.config/galdr/galdrc`, then **open a new tab**. At the prompt use `include`, not `source ~/.bashrc` |
 | `config.toml` change ignored / status bar error | A parse error keeps the last-good config. Fix the file and focus the window to reload |
+| An installed plugin reports a missing capability | Compare requested and granted access with `galdr plugin inspect ID`, then grant only what is needed with `galdr plugin grant ID CAPABILITY` |
+| A Linux process plugin will not start | Install and verify `bwrap` (Bubblewrap). Galdr does not fall back to running a plugin unsandboxed |
+| A plugin stops responding after repeated crashes | Three failures in 60 seconds disabled it for this session. Check its log or version, then restart Galdr |

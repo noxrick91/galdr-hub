@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Galdr one-line installer.
 #   curl -fsS https://term.noxcaw.com/install | bash
-#   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
+#   curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
 # Windows PowerShell: irm https://term.noxcaw.com/install.txt | iex
 # Env: GALDR_TAG  GALDR_GITHUB  PREFIX  BIN_DIR  GH_TOKEN  GALDR_GITHUB_TOKEN  NO_COLOR
 #      GALDR_NO_CONTEXT_MENU  GALDR_NO_START_MENU
@@ -84,9 +84,11 @@ write_icon() {
   local icon="${PREFIX}/galdr.svg"
   mkdir -p "${PREFIX}"
   cat >"${icon}" <<'EOF'
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
-  <path fill="#ff9838" d="M14 7h32v5h5v10H19v20h32v10h-5v5H14v-5H9V12h5z"/>
-  <rect x="39" y="27" width="10" height="10" fill="#ffd69c"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Galdr</title>
+  <rect width="64" height="64" rx="12" fill="#f1efe9"/>
+  <path d="M6 32h8l6-14v28l9-36v44l9-28v12l8-12v12h12" fill="none" stroke="#171816" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+  <rect x="49" y="28" width="10" height="10" fill="#e64024"/>
 </svg>
 EOF
   local hicolor="${HOME}/.local/share/icons/hicolor/scalable/apps"
@@ -94,8 +96,7 @@ EOF
   cp -f "${icon}" "${hicolor}/galdr.svg"
 
   local png="${PREFIX}/galdr.png"
-  # 64x64 PNG of the same mark, for file managers that skip SVG.
-  if printf '%s' 'iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAo0lEQVR42u3awQ2EIBRAQTFWYwUW5MGSPFiQFdgOtkBAI8i8+xozgR/IOgySJHVbyP1h3Jf4+ctvZyh9xtj7CgAAwBBsY+C9NRhtAQAAAAAAAAAAgF6baryjWwEAALQ7A54sXkfSNTzMa7ACAAAAAAAAAAAA/nQSLDnhWQEAAABImjNJ11L/DtsCAAAAAAAAAAAAfR6Faz0e+1rcFgAAQJKk/G6SQRYrPnCSeAAAAABJRU5ErkJggg==' | base64 -d >"${png}" 2>/dev/null; then
+  if printf '%s' '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9ts/hTvuuAO+77c0vl55RV9/H1auWIEoipooISJorbF7z79DCDqLaOlO5VpOfYnWGo7j4MH770Nc2yucPBAA2hisXr0KP7d6dTNcWg2QiBAEIS69+GLYto0jR48hnUpB11nFGINSqTRr/DccOVNhhdE+BdTGTWeXBBvbWdde+65JOmCqqAjDEMViEbmcO+Ps1OoCEdauvRI//vFPYIyeJkQsq329QFoWTp0uYOON70MYRvj+rt3oyeUmhZQkIEFnJmjScKn2SmP02bMAM8P3/bYDE0LAsqy20GxUhn7xmqvxyiuvtry33TuICFEco7+/D39211fwpS/dWbv/Dc9hAEVde4biVkIIYMXIpjOgFt98yHYGnk0mbzf4OI4xMDCAKy6/DN954O9aDqDle5nB9ZVnoVDAt775daxafSkKxQkIYUEIAa01JAFlzfjtn5RBdEYaTy3clEtlPPj5b2LdokF4XmnSqrFrxbpG/F9y8c9jydLlCMNw1kRGRCiVy6iGIYwxeO21/8F73/sbuHXrRxGFJXx4yy0IwwDVarXJRiQEPCYUDcEzhIkp3TO1azrtzA0B86aXZvyvhSXtWaUzESGKIqx7168inx/FSD6P2z9zG774hT+GUgoqqGLzpo3wSz62b78XJ0fyTQRS40cLQApLICyXYOKo8xsjs4VHI/4bMnq2+6VM4Btf+yqGhpahUChiaGgIQRBAKQUhLFQqFWz72K14/2/9Jl48fKS2/p8NVfWF3GWXvR3V6vQdKtkt+Dfi//LL3wGYqG1OsSwLnufjV375l7BixQoopTA4OAjf90FEk7RDsViE67q4fv064GykQZ21qtUqVAtal50wdppWqMf/misux88sXw4VR20R0HDYDTf8GtJOBqfGxiGlbOk0y7KglMKE58/C/NNDstUY5HyNV0ohDCcb2Ij/q9ZeiUwmgzAM2z4njmP09vbiunXXIgrCWemViGBZnVGGYr6JLghClMqlSYKmFv8S11xzNZjbf38khEAYhli9aiVWr16JIAwXdCdpXm9SSsF1XfT39UEpBcs6w9F9fb1455orWiaeVk687rp1yPX21j7IfjPsDL0xe9+0eROiKEKlUoUxBvmRUXzwpk1YtWoVgiBom6i11kin03j3DddDzXFJ3fHF0FybZVkolUrYvLnGz/fcswNBGOCzn/007vzyF1Epl2ed/Uqlire97dIaWirVBf98tiMsUClXsO3Wrbjx/e9DFEVYunQpqtUqtNazxn8QBLj+uvXI9fbi9PgpSCnfXA5o8vPEBDKZDLLZ7CT+brdeqG2znT/4A4DgDpVhLMuC1hpxHM/IuVNnv1oN8AuXXHLe4M/MLKSU1KlSVCtR1M4BURTiqquuhJvrOaet9PkmbyklCaXifL0e19WCHE0pazX2Gtavu3ZOiq5TM59IJKBUnBcEet62kyCirpVka5sqGgA3l7FxHGPZsmW4+qq1qFaqCyp+iMjYdhIEel6woKcbVd5uQQ1EuPnmDyIMw6ZWGBsdx6aNG7Bi5QoEQbjQZwZqlW1BTy/IgQlmRsbJ4P7vPFjXClXcuGED7vzyF2AJgW59rj8T/N94YIIAoHh65Ns9fYNbi6fHlBBCdsvrOdfF2Pj4nLRCp5sxRvX2L5IThfH7e/uX3Lqgh6a01kgkEnUGiObEGh0yfvqhKQDCdZfkgyjYYqdSJKVkY7grCXGuWqGzxrORUrKdSlEQBVtcd0kegBBEpJnZGhwc2uNNFLZlMo5l20lhjFHdoMaFnnVmZmOMsu2kyGQcy5sobGueGSTSoj4ozbzT6hsYus/3Cu8hwkhv/yJZF0mamQ1fyF87tjC6PmYtpaTe/kWSCCO+V3hP7dTozub54f8/PN3Ce/+njs//L3AtZkEm3XY7AAAAAElFTkSuQmCC' | base64 -d >"${png}" 2>/dev/null; then
     local hicolor64="${HOME}/.local/share/icons/hicolor/64x64/apps"
     mkdir -p "${hicolor64}"
     cp -f "${png}" "${hicolor64}/galdr.png"
@@ -561,6 +562,10 @@ rm -f \
   "${BIN_DIR}/galdr-sh" "${BIN_DIR}/galdr-sh.bak" \
   "${BIN_DIR}/galdr.exe" "${BIN_DIR}/galdr.exe.bak" \
   "${BIN_DIR}/galdr-sh.exe" "${BIN_DIR}/galdr-sh.exe.bak" \
+  "${BIN_DIR}/galdr-plugin-host" "${BIN_DIR}/galdr-plugin-host.bak" \
+  "${BIN_DIR}/galdr-plugin-host.exe" "${BIN_DIR}/galdr-plugin-host.exe.bak" \
+  "${BIN_DIR}/galdr-plugin" "${BIN_DIR}/galdr-plugin.bak" \
+  "${BIN_DIR}/galdr-plugin.exe" "${BIN_DIR}/galdr-plugin.exe.bak" \
   "${HOME}/.local/share/applications/galdr.desktop" \
   "${HOME}/.local/share/icons/hicolor/scalable/apps/galdr.svg" \
   "${HOME}/.local/share/icons/hicolor/64x64/apps/galdr.png" \
@@ -706,10 +711,14 @@ validate_install_paths
 dest="${BIN_DIR}/${bin_name}"
 shell_dest=""
 shell_asset=""
+plugin_host_dest="${BIN_DIR}/galdr-plugin-host"
+plugin_cli_dest="${BIN_DIR}/galdr-plugin"
 if [ "${platform}" = "linux" ]; then
   shell_dest="${BIN_DIR}/galdr-sh"
 elif [ "${platform}" = "windows" ]; then
   shell_dest="${BIN_DIR}/galdr-sh.exe"
+  plugin_host_dest="${plugin_host_dest}.exe"
+  plugin_cli_dest="${plugin_cli_dest}.exe"
 fi
 if [ "${TAG}" = "latest" ]; then
   base="https://github.com/${REPO}/releases/latest/download"
@@ -779,6 +788,21 @@ fetch_candidate() {
   expected ${expect}
   got      ${got}"
   fi
+  plugin_host_asset="${asset/galdr-/galdr-plugin-host-}"
+  plugin_cli_asset="${asset/galdr-/galdr-plugin-}"
+  for companion_asset in "${plugin_host_asset}" "${plugin_cli_asset}"; do
+    companion_expect="$(sum_for "${companion_asset}")"
+    [ -n "${companion_expect}" ] \
+      || die "SHA256SUMS has no entry for required plugin binary ${companion_asset}"
+    download "${base}/${companion_asset}" "${tmp}/${companion_asset}" \
+      "Downloading ${companion_asset}…"
+    companion_got="$(sha256_of "${tmp}/${companion_asset}")"
+    if [ "${companion_expect}" != "${companion_got}" ]; then
+      die "SHA256 mismatch for ${companion_asset}
+  expected ${companion_expect}
+  got      ${companion_got}"
+    fi
+  done
   shell_asset=""
   if [ "${platform}" = "windows" ]; then
     shell_asset="${asset/galdr-/galdr-sh-}"
@@ -805,6 +829,7 @@ if ! fetch_candidate "${asset}"; then
     || die "SHA256SUMS has no entry for ${fallback_asset}"
 fi
 chmod +x "${tmp}/${asset}"
+chmod +x "${tmp}/${plugin_host_asset}" "${tmp}/${plugin_cli_asset}"
 if [ -n "${shell_asset}" ]; then
   chmod +x "${tmp}/${shell_asset}"
 fi
@@ -814,7 +839,8 @@ if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
     step "${asset} cannot run here — trying ${fallback_asset} through Windows emulation"
     fetch_candidate "${fallback_asset}" \
       || die "SHA256SUMS has no entry for ${fallback_asset}"
-    chmod +x "${tmp}/${asset}" "${tmp}/${shell_asset}"
+    chmod +x "${tmp}/${asset}" "${tmp}/${shell_asset}" \
+      "${tmp}/${plugin_host_asset}" "${tmp}/${plugin_cli_asset}"
     if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
       die "neither native nor emulated Windows build runs: ${candidate_error:-unknown error}"
     fi
@@ -826,9 +852,33 @@ if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
     die "downloaded binary did not run${runtime_hint}: ${candidate_error:-unknown error}"
   fi
 fi
+candidate_ver="$("${tmp}/${asset}" --version 2>/dev/null || true)"
+candidate_host_ver="$("${tmp}/${plugin_host_asset}" --version 2>/dev/null || true)"
+candidate_plugin_ver="$("${tmp}/${plugin_cli_asset}" --version 2>/dev/null || true)"
+case "${candidate_ver}" in
+  "galdr "*) candidate_ver_num="${candidate_ver##* }" ;;
+  *) die "${asset} returned an invalid version: ${candidate_ver:-unavailable}" ;;
+esac
+candidate_ver_num="${candidate_ver_num#v}"
+case "${candidate_host_ver}" in
+  "galdr-plugin-host "*) candidate_host_ver_num="${candidate_host_ver##* }" ;;
+  *) die "${plugin_host_asset} returned an invalid version: ${candidate_host_ver:-unavailable}" ;;
+esac
+case "${candidate_plugin_ver}" in
+  "galdr-plugin "*) candidate_plugin_ver_num="${candidate_plugin_ver##* }" ;;
+  *) die "${plugin_cli_asset} returned an invalid version: ${candidate_plugin_ver:-unavailable}" ;;
+esac
+candidate_host_ver_num="${candidate_host_ver_num#v}"
+candidate_plugin_ver_num="${candidate_plugin_ver_num#v}"
+if [ "${candidate_host_ver_num}" != "${candidate_ver_num}" ] \
+  || [ "${candidate_plugin_ver_num}" != "${candidate_ver_num}" ]; then
+  die "plugin binary versions do not match ${asset} ${candidate_ver_num}"
+fi
 ok "Checksums and executable verified"
 
 [ ! -d "${dest}" ] || die "install target is a directory: ${dest}"
+[ ! -d "${plugin_host_dest}" ] || die "install target is a directory: ${plugin_host_dest}"
+[ ! -d "${plugin_cli_dest}" ] || die "install target is a directory: ${plugin_cli_dest}"
 had_dest=0
 if [ -e "${dest}" ] || [ -L "${dest}" ]; then
   had_dest=1
@@ -856,6 +906,22 @@ rollback_binary() {
   rm -f "${dest}"
   if [ "${had_dest}" = "1" ] && { [ -e "${dest}.bak" ] || [ -L "${dest}.bak" ]; }; then
     mv -f "${dest}.bak" "${dest}"
+  fi
+}
+had_plugin_host_dest=0
+had_plugin_cli_dest=0
+rollback_plugin_host() {
+  rm -f "${plugin_host_dest}"
+  if [ "${had_plugin_host_dest}" = "1" ] \
+    && { [ -e "${plugin_host_dest}.bak" ] || [ -L "${plugin_host_dest}.bak" ]; }; then
+    mv -f "${plugin_host_dest}.bak" "${plugin_host_dest}"
+  fi
+}
+rollback_plugin_cli() {
+  rm -f "${plugin_cli_dest}"
+  if [ "${had_plugin_cli_dest}" = "1" ] \
+    && { [ -e "${plugin_cli_dest}.bak" ] || [ -L "${plugin_cli_dest}.bak" ]; }; then
+    mv -f "${plugin_cli_dest}.bak" "${plugin_cli_dest}"
   fi
 }
 if ! "${dest}" --help >/dev/null 2>&1; then
@@ -934,10 +1000,62 @@ EOF
   ok "Installed matching ${shell_dest}"
 fi
 
+if [ -e "${plugin_host_dest}" ] || [ -L "${plugin_host_dest}" ]; then
+  had_plugin_host_dest=1
+  rm -f "${plugin_host_dest}.bak"
+  if ! mv -f "${plugin_host_dest}" "${plugin_host_dest}.bak"; then
+    rollback_shell_wrapper
+    rollback_binary
+    die "could not back up ${plugin_host_dest}"
+  fi
+fi
+if ! mv "${tmp}/${plugin_host_asset}" "${plugin_host_dest}"; then
+  rollback_plugin_host
+  rollback_shell_wrapper
+  rollback_binary
+  die "could not install ${plugin_host_dest}"
+fi
+
+if [ -e "${plugin_cli_dest}" ] || [ -L "${plugin_cli_dest}" ]; then
+  had_plugin_cli_dest=1
+  rm -f "${plugin_cli_dest}.bak"
+  if ! mv -f "${plugin_cli_dest}" "${plugin_cli_dest}.bak"; then
+    rollback_plugin_host
+    rollback_shell_wrapper
+    rollback_binary
+    die "could not back up ${plugin_cli_dest}"
+  fi
+fi
+if ! mv "${tmp}/${plugin_cli_asset}" "${plugin_cli_dest}"; then
+  rollback_plugin_cli
+  rollback_plugin_host
+  rollback_shell_wrapper
+  rollback_binary
+  die "could not install ${plugin_cli_dest}"
+fi
+
+host_ver="$("${plugin_host_dest}" --version 2>/dev/null || true)"
+plugin_ver="$("${plugin_cli_dest}" --version 2>/dev/null || true)"
+host_ver_num="${host_ver##* }"
+plugin_ver_num="${plugin_ver##* }"
+host_ver_num="${host_ver_num#v}"
+plugin_ver_num="${plugin_ver_num#v}"
+if [ "${host_ver_num}" != "${installed_ver_num}" ] \
+  || [ "${plugin_ver_num}" != "${installed_ver_num}" ]; then
+  rollback_plugin_cli
+  rollback_plugin_host
+  rollback_shell_wrapper
+  rollback_binary
+  die "installed plugin binary versions do not match ${dest} ${installed_ver_num}"
+fi
+ok "Installed matching ${plugin_host_dest}"
+ok "Installed matching ${plugin_cli_dest}"
+
 rm -f "${dest}.bak"
 if [ -n "${shell_dest}" ]; then
   rm -f "${shell_dest}.bak"
 fi
+rm -f "${plugin_host_dest}.bak" "${plugin_cli_dest}.bak"
 
 write_env_file
 write_install_marker
@@ -976,6 +1094,8 @@ printf '  binary   %s\n' "${dest}"
 if [ -n "${shell_dest}" ]; then
   printf '  shell    %s\n' "${shell_dest}"
 fi
+printf '  host     %s\n' "${plugin_host_dest}"
+printf '  plugins  %s\n' "${plugin_cli_dest}"
 printf '  sha256   %s\n' "${got}"
 printf '  PATH     %s\n' "${BIN_DIR}"
 printf '\n  The installer does not edit .bashrc or .zshrc.\n'

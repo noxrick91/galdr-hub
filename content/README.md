@@ -10,6 +10,7 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 - 标签（可拖动重排）、分屏、搜索、命令面板、主题
 - 会话恢复；mux 可分离再附着（Unix socket / Windows named pipe）
 - 内置 bash 形 shell：函数、数组、作业控制（Unix）、常用 builtin
+- 版本化插件 API：命令、Shell 集成、事件与声明式 UI；权限按能力单独授予
 
 ### 怎么读这份手册
 
@@ -21,11 +22,15 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.1.16** — 2026-08-24
+**What's new in v0.2.0** — 2026-08-25
 
-- Galdr Shell startup diagnostics are now opt-in with `GALDR_STARTUP=1`, so routine sessions reach the prompt without a synchronous PATH self-check.
-- Windows no longer launches `galdr-sh.exe --version` before creating every pane. Release installers already validate the GUI/helper version pair, avoiding redundant process startup on the GUI thread.
-- The PowerShell installer now explicitly waits for GUI-subsystem executables and captures their output when checking `--version` and `--help`, preventing valid Windows packages from being rejected.
+- A versioned plugin platform with process, WebAssembly component, and explicitly trusted native runtimes; capability grants, isolated storage, lifecycle supervision, shell integration, events, and declarative UI are built in.
+- The `galdr plugin` management CLI, in-app marketplace, and official Downloader plugin with concurrent and resumable transfers, media discovery, HLS capture, Magnet/BitTorrent support, and a native Galdr interface.
+- Plugin API, SDK, host crates, a complete example plugin, marketplace publishing automation, and bilingual documentation for using, securing, developing, and publishing plugins.
+- The website, documentation shell, logo, favicon, and application icon now share a new Galdr visual system. The homepage terminal demo has larger type, live session/runtime details, and responsive mobile layout.
+- Install, update, and uninstall commands now expose platform-specific one-click copy actions with accessible success and failure feedback.
+- Release packages now ship the plugin supervisor and management CLI beside Galdr, and the Linux and Windows installers install, validate, update, and remove the complete runtime together.
+- Hub and marketplace publishing now creates atomic commits through GitHub's Git Data API, avoiding unreliable long-lived Git clone and push connections from the release runner.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -42,9 +47,9 @@ curl -fsS https://term.noxcaw.com/install | bash
 指定版本：
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.1.2
+curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.0
 # 或
-GALDR_TAG=v0.1.2 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=v0.2.0 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell：
@@ -183,6 +188,7 @@ action = "none"
 | Ctrl+Alt+E | 均分 pane |
 | Ctrl+Shift+F | 搜索 |
 | Ctrl+Shift+P | 命令面板 |
+| Ctrl+Shift+M | 插件市场 |
 | Ctrl+Shift+Space | Quick select |
 | Ctrl+Shift+X | 复制 / vi 模式 |
 | Shift+Up / Down | 滚一行 |
@@ -301,6 +307,169 @@ galdr --socket /tmp/galdr.sock --server
 
 ---
 
+## 插件概览
+
+Galdr 插件是带版本的 `.zip` 包，通过 `galdr-plugin-host` 与终端通信。GUI 和 Shell 只收发有大小限制的协议消息，**不会把普通第三方插件直接加载进 Galdr 进程**。当前插件 API 主版本是 `1`。
+
+插件可以贡献：
+
+- GUI、Shell 或两边都能调用的命令
+- 命令面板、快捷键和 `plugin:<插件 ID>/<命令 ID>` 动作
+- 标签、pane、命令生命周期等事件
+- 由 Galdr 渲染的声明式 UI，而不是任意窗口或 GPU 代码
+- 经校验后应用到父 Shell 的目录、变量、导出变量和别名变更
+
+三种运行时对应不同需求：
+
+| 运行时 | 适合 | 隔离边界 |
+| --- | --- | --- |
+| `process` | 常规插件、外部库与后台任务 | 独立进程；Linux 使用 Bubblewrap 严格沙箱 |
+| `wasm` | 可移植、确定的逻辑 | Wasmtime component，64 MiB 内存上限与 epoch deadline |
+| `native` | 确实需要宿主内性能或系统集成 | 在插件宿主进程内运行；每次二进制变更都要显式信任 |
+
+到[插件市场](./plugins.html)查看官方目录，或继续阅读[安装与管理插件](#/plugin-management)。
+
+---
+
+## 安装与管理插件
+
+按 `Ctrl+Shift+M`、在命令面板选择 **Plugin marketplace**，或从终端右键菜单进入 **Plugins**。内置市场支持搜索、安装、更新、启用 / 禁用、权限调整和卸载；本地缓存让已安装插件在离线时仍可管理。
+
+### 从官方市场安装
+
+先搜索和安装，再按实际需要授予权限：
+
+```bash
+galdr plugin search downloader
+galdr plugin install-from com.noxcaw.term.downloader
+galdr plugin inspect com.noxcaw.term.downloader
+galdr plugin grant com.noxcaw.term.downloader http files_write ui
+```
+
+请求的权限**不会自动授予**。`inspect` 会分别显示 requested 和 granted。需要 P2P / Magnet 下载时再额外授予 `p2p_network`：
+
+```bash
+galdr plugin grant com.noxcaw.term.downloader p2p_network
+```
+
+官方索引默认为 `https://term.noxcaw.com/plugins/index.json`。开发和社区索引可用 `--marketplace INDEX` 指定。
+
+### 日常管理
+
+```text
+galdr plugin list [--json]
+galdr plugin inspect ID
+galdr plugin enable|disable ID
+galdr plugin grant|revoke ID CAPABILITY...
+galdr plugin update [ID] [--marketplace INDEX] [--trust-native]
+galdr plugin uninstall ID [--keep-data]
+```
+
+更新会保留启用状态、已授予权限和插件顺序；被固定版本的条目不会更新。原生插件二进制发生变化时必须重新传 `--trust-native`。卸载默认同时移除插件私有数据，`--keep-data` 会保留它。
+
+### 安装本地包或 HTTPS 包
+
+```bash
+galdr plugin install ./hello.zip --grant ui
+galdr plugin install https://example.com/hello.zip \
+  --sha256 <64位十六进制摘要> --grant ui
+```
+
+直接 HTTPS 安装必须给 `--sha256`。市场索引中的每个平台包也必须有 SHA-256；市场和包 URL 必须是 HTTPS，本地开发可用路径或 `file://`。
+
+---
+
+## 权限与隔离
+
+manifest 的 `capabilities` 是插件**请求**的能力，安装状态里的 grants 才是用户**授予**的能力。宿主会先裁掉插件无权读取的上下文字段，再拒绝无权返回的 Shell 修改或 UI 动作。
+
+| 能力 | 允许的操作 |
+| --- | --- |
+| `context_read` | 读取调用上下文 |
+| `terminal_read` / `terminal_write` | 读取终端内容 / 写入终端 |
+| `tabs_manage` / `panes_manage` | 管理标签 / pane |
+| `clipboard_read` / `clipboard_write` | 读取 / 写入剪贴板 |
+| `notifications` | 发送系统通知 |
+| `shell_state` | 读取或返回受校验的 Shell 状态变更 |
+| `events` | 订阅声明的终端事件 |
+| `ui` | 提供声明式界面与 UI 事件 |
+| `files_read` / `files_write` | 只读 / 读写用户下载目录 |
+| `http` | 使用 HTTP(S)、DNS 和已配置的代理 |
+| `p2p_network` | 建立 P2P 网络连接 |
+
+Linux 上的 `process` 插件包只读挂载，私有数据目录单独可写，环境变量先清空再按能力恢复。`files_read` / `files_write` 只把下载目录挂到 `GALDR_PLUGIN_DOWNLOADS`；只有授予 `http` 或 `p2p_network` 才会共享网络并暴露 DNS 文件和标准代理变量。如果平台上没有严格沙箱，进程插件会被拒绝启动。
+
+插件帧与 UI 树都有大小上限。崩溃或超时后宿主会重启插件；同一插件 60 秒内失败三次，会在本次会话中停用。插件包不接受绝对路径、父目录穿越；Linux 包也不接受符号链接。
+
+> `native` 插件不具备进程或 Wasm 的代码隔离。只对可信来源使用 `--trust-native`。
+
+---
+
+## 插件开发
+
+插件包根目录必须有 `plugin.toml`，ID 使用反向域名。下面是一个最小 process 插件：
+
+```toml
+schema = 1
+id = "com.example.hello"
+name = "Hello"
+version = "0.1.0"
+api = "^1.0"
+galdr = ">=0.2.0"
+entrypoints = [
+  { os = "linux", arch = "x86_64", runtime = "process", path = "bin/hello" },
+]
+capabilities = ["ui", "shell_state"]
+
+[[contributions.commands]]
+id = "hello"
+title = "Hello from plugin"
+scope = "both"
+shell_name = "galdr-hello"
+
+[[contributions.ui]]
+id = "hello-view"
+slot = "modal_pane"
+title = "Hello"
+```
+
+`scope` 可以是 `gui`、`shell` 或 `both`。命令始终可以写成 `plugin:com.example.hello/hello`；要绑快捷键：
+
+```toml
+[[keys]]
+key = "h"
+mods = "ctrl|shift"
+action = "plugin:com.example.hello/hello"
+```
+
+仓库里的 `galdr-plugin-api` 定义稳定协议，`galdr-plugin-sdk` 提供 process JSON framing、Wasm WIT 和 native v1 vtable。示例插件可以这样构建和打包：
+
+```bash
+cargo build --release --manifest-path examples/plugins/hello-process/Cargo.toml
+mkdir -p /tmp/galdr-hello/bin
+cp examples/plugins/hello-process/target/release/galdr-hello-plugin /tmp/galdr-hello/bin/hello
+cp examples/plugins/hello-process/plugin.toml /tmp/galdr-hello/plugin.toml
+(cd /tmp/galdr-hello && zip -r ../galdr-hello.zip .)
+galdr plugin install /tmp/galdr-hello.zip --grant ui --grant shell_state
+```
+
+Shell 调用只有在成功、非超时且不是子 Shell 时才可能修改父 Shell；完整 patch 会先整体校验。长任务不要占住 supervisor 请求期限，应放到插件自己的后台 worker，并把进度通过后续请求或声明式 UI 返回。
+
+---
+
+## 插件发布
+
+每个第一方插件目录包含经过校验的 `plugin.toml` 和描述可复现平台包的 `publish.toml`。受保护的发布工作流会：
+
+1. 构建并测试发生变化的插件；
+2. 创建不可变的 `plugin-<id>-v<version>` Release；
+3. 上传后重新下载每个包并核对 SHA-256；
+4. 合并 `plugins/index.json` 和网站使用的 `plugins/metadata.json`。
+
+同一版本对应的包不可替换。发布新二进制前，同时提升 `plugin.toml` 与插件 crate 的版本。社区索引应使用相同的 schema 1、HTTPS 与每包 SHA-256 约束；用户再通过 `--marketplace` 明确选择。
+
+---
+
 ## 故障排除
 
 | 现象 | 处理 |
@@ -316,3 +485,6 @@ galdr --socket /tmp/galdr.sock --server
 | 想用系统 bash | `[shell] kind = "system"`，不要指望默认会读 `.bashrc` |
 | `include bashrc` 没生效 | 写在 `~/.config/galdr/galdrc`，然后**新开标签**。交互里也要用 `include`，不要 `source ~/.bashrc` |
 | 改了 `config.toml` 没反应 / 状态栏报错 | 语法错了会继续用上一份好配置。修好后切回窗口就会重载 |
+| 插件已安装但命令提示缺少能力 | `galdr plugin inspect ID` 对照 requested / granted，再用 `galdr plugin grant ID CAPABILITY` 授予需要的最小权限 |
+| Linux process 插件无法启动 | 安装并确认 `bwrap`（Bubblewrap）可执行；Galdr 不会在缺少严格沙箱时降级裸跑插件 |
+| 插件连续崩溃后不再响应 | 该插件在 60 秒内失败三次，已对本次会话停用。检查插件日志或版本后重启 Galdr |

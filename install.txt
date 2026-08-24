@@ -205,7 +205,7 @@ function Get-GaldrHereTitle {
 
 function Install-GaldrIcon([string]$Prefix) {
     $ico = Join-Path $Prefix "galdr.ico"
-    $b64 = "AAABAAMAEBAAAAEAIACJAAAANgAAACAgAAABACAAmAAAAL8AAAAwMAAAAQAgALoAAABXAQAAiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAUElEQVR42mNgGGjAiMz5P8PiP0ENGSdQ9DCRohmbOiZKvUCxASzE+JMqLvh/bc7//9fm/KePF7B6SyuFEW86IDYa0cNo4KORidSoIyWK6QMAhy0Yva2RH/oAAAAASUVORK5CYIKJUE5HDQoaCgAAAA1JSERSAAAAIAAAACAIBgAAAHN6evQAAABfSURBVHjaY2AYBQMMGPFJ/p9h8Z8iwzNOMBJSwzTQIcA06KKA0mAnNTpGo2DUASzUzNPDOwSIAf+vzcHIwoxaKYyjiXDUAXRLhIQS3GgUjFbHow4YGolwtFk+CkYcAABQQRX5EgOhkQAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAIFJREFUeNrt2cENgCAQBVExVmMFFuTBkjxYkBXYDnZgJCgB8uYMCRP+sgSGAUDThLcD477E3xeznSF1ztj6DhCougZK5D63JkSIAAECBLKYSt9d7IAIfUC8jscrSpjXIEIECBAg0G8fSDnnRah2vEqIEAECBAj028hKNzVfTABQnBuEYxYRde+bnQAAAABJRU5ErkJggg=="
+    $b64 = "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"
     New-Item -ItemType Directory -Force -Path $Prefix | Out-Null
     [IO.File]::WriteAllBytes($ico, [Convert]::FromBase64String($b64))
     return $ico
@@ -309,6 +309,10 @@ if (`$userPath) {
     (Join-Path `$BinDir "galdr.exe.bak"),
     (Join-Path `$BinDir "galdr-sh.exe"),
     (Join-Path `$BinDir "galdr-sh.exe.bak"),
+    (Join-Path `$BinDir "galdr-plugin-host.exe"),
+    (Join-Path `$BinDir "galdr-plugin-host.exe.bak"),
+    (Join-Path `$BinDir "galdr-plugin.exe"),
+    (Join-Path `$BinDir "galdr-plugin.exe.bak"),
     (Join-Path `$Prefix "galdr.ico"),
     `$marker,
     (Join-Path `$Prefix "uninstall.ps1")
@@ -355,6 +359,8 @@ switch ($Kind) {
 
 $Dest = Join-Path $BinDir "galdr.exe"
 $ShDest = Join-Path $BinDir "galdr-sh.exe"
+$HostDest = Join-Path $BinDir "galdr-plugin-host.exe"
+$PluginDest = Join-Path $BinDir "galdr-plugin.exe"
 if ($Tag -eq "latest") {
     $Base = "https://github.com/$Repo/releases/latest/download"
 } else {
@@ -378,14 +384,26 @@ try {
     $DownloadedVersion = $null
     $Bin = $null
     $ShBin = $null
+    $HostBin = $null
+    $PluginBin = $null
     foreach ($c in $Candidates) {
         $Expect = Get-GaldrChecksum $SumLines $c
         if (-not $Expect) { continue }
         $candidateBin = Join-Path $Tmp $c
         $candidateShAsset = $c -replace '^galdr-','galdr-sh-'
+        $candidateHostAsset = $c -replace '^galdr-','galdr-plugin-host-'
+        $candidatePluginAsset = $c -replace '^galdr-','galdr-plugin-'
         $candidateShExpect = Get-GaldrChecksum $SumLines $candidateShAsset
+        $candidateHostExpect = Get-GaldrChecksum $SumLines $candidateHostAsset
+        $candidatePluginExpect = Get-GaldrChecksum $SumLines $candidatePluginAsset
         if (-not $candidateShExpect) {
             throw "SHA256SUMS has no entry for required Windows shell helper $candidateShAsset"
+        }
+        if (-not $candidateHostExpect) {
+            throw "SHA256SUMS has no entry for required plugin binary $candidateHostAsset"
+        }
+        if (-not $candidatePluginExpect) {
+            throw "SHA256SUMS has no entry for required plugin binary $candidatePluginAsset"
         }
         Write-Host "  checking $c"
         Get-GaldrRemoteFile "$Base/$c" $candidateBin
@@ -399,13 +417,32 @@ try {
         if ($candidateShGot -ne $candidateShExpect.ToLowerInvariant()) {
             throw "SHA256 mismatch for ${candidateShAsset}: got $candidateShGot expected $candidateShExpect"
         }
+        $candidateHostBin = Join-Path $Tmp $candidateHostAsset
+        Get-GaldrRemoteFile "$Base/$candidateHostAsset" $candidateHostBin
+        $candidateHostGot = (Get-FileHash -Algorithm SHA256 -Path $candidateHostBin).Hash.ToLowerInvariant()
+        if ($candidateHostGot -ne $candidateHostExpect.ToLowerInvariant()) {
+            throw "SHA256 mismatch for ${candidateHostAsset}: got $candidateHostGot expected $candidateHostExpect"
+        }
+        $candidatePluginBin = Join-Path $Tmp $candidatePluginAsset
+        Get-GaldrRemoteFile "$Base/$candidatePluginAsset" $candidatePluginBin
+        $candidatePluginGot = (Get-FileHash -Algorithm SHA256 -Path $candidatePluginBin).Hash.ToLowerInvariant()
+        if ($candidatePluginGot -ne $candidatePluginExpect.ToLowerInvariant()) {
+            throw "SHA256 mismatch for ${candidatePluginAsset}: got $candidatePluginGot expected $candidatePluginExpect"
+        }
         try { Unblock-File -LiteralPath $candidateBin -ErrorAction SilentlyContinue } catch { }
         try { Unblock-File -LiteralPath $candidateShBin -ErrorAction SilentlyContinue } catch { }
+        try { Unblock-File -LiteralPath $candidateHostBin -ErrorAction SilentlyContinue } catch { }
+        try { Unblock-File -LiteralPath $candidatePluginBin -ErrorAction SilentlyContinue } catch { }
         try {
             $candidateVersion = Get-GaldrBinaryVersion $candidateBin "galdr"
             $candidateShVersion = Get-GaldrBinaryVersion $candidateShBin "galdr-sh"
+            $candidateHostVersion = Get-GaldrBinaryVersion $candidateHostBin "galdr-plugin-host"
+            $candidatePluginVersion = Get-GaldrBinaryVersion $candidatePluginBin "galdr-plugin"
             if ($candidateShVersion -ne $candidateVersion) {
                 throw "$candidateShAsset version $candidateShVersion does not match $c version $candidateVersion"
+            }
+            if ($candidateHostVersion -ne $candidateVersion -or $candidatePluginVersion -ne $candidateVersion) {
+                throw "plugin binary versions do not match $c version $candidateVersion"
             }
         } catch {
             if ($Kind -eq "arm64" -and $c -eq $Arm64) {
@@ -418,6 +455,8 @@ try {
         $ShAsset = $candidateShAsset
         $Bin = $candidateBin
         $ShBin = $candidateShBin
+        $HostBin = $candidateHostBin
+        $PluginBin = $candidatePluginBin
         $Got = $candidateGot
         $DownloadedVersion = $candidateVersion
         break
@@ -441,11 +480,20 @@ try {
         }
     }
 
-    Install-GaldrBinary $Bin $Dest
+    $InstalledDests = @()
     try {
+        Install-GaldrBinary $Bin $Dest
+        $InstalledDests += $Dest
         Install-GaldrShellHelper $ShBin $BinDir
+        $InstalledDests += $ShDest
+        Install-GaldrBinary $HostBin $HostDest
+        $InstalledDests += $HostDest
+        Install-GaldrBinary $PluginBin $PluginDest
+        $InstalledDests += $PluginDest
     } catch {
-        Restore-GaldrBinary $Dest
+        for ($i = $InstalledDests.Count - 1; $i -ge 0; $i--) {
+            Restore-GaldrBinary $InstalledDests[$i]
+        }
         throw
     }
 } finally {
@@ -458,28 +506,40 @@ try {
     if ($helpResult.ExitCode -eq 0) { $Ran = $true }
 } catch { }
 if (-not $Ran) {
+    Restore-GaldrBinary $PluginDest
+    Restore-GaldrBinary $HostDest
     Restore-GaldrBinary $ShDest
     Restore-GaldrBinary $Dest
     throw "Downloaded binary did not run: $Dest --help"
 }
 $Ver = $null
 $ShVer = $null
+$HostVer = $null
+$PluginVer = $null
 try {
     $Ver = Get-GaldrBinaryVersion $Dest "galdr"
     $ShVer = Get-GaldrBinaryVersion $ShDest "galdr-sh"
+    $HostVer = Get-GaldrBinaryVersion $HostDest "galdr-plugin-host"
+    $PluginVer = Get-GaldrBinaryVersion $PluginDest "galdr-plugin"
 } catch {
+    Restore-GaldrBinary $PluginDest
+    Restore-GaldrBinary $HostDest
     Restore-GaldrBinary $ShDest
     Restore-GaldrBinary $Dest
     throw
 }
-if ($ShVer -ne $Ver) {
+if ($ShVer -ne $Ver -or $HostVer -ne $Ver -or $PluginVer -ne $Ver) {
+    Restore-GaldrBinary $PluginDest
+    Restore-GaldrBinary $HostDest
     Restore-GaldrBinary $ShDest
     Restore-GaldrBinary $Dest
-    throw "$ShDest version $ShVer does not match $Dest version $Ver"
+    throw "installed helper and plugin binary versions do not match $Dest version $Ver"
 }
 if ($Tag -ne "latest") {
     $ExpectedVersion = $Tag.TrimStart('v')
     if ($Ver -ne $ExpectedVersion) {
+        Restore-GaldrBinary $PluginDest
+        Restore-GaldrBinary $HostDest
         Restore-GaldrBinary $ShDest
         Restore-GaldrBinary $Dest
         throw "$Dest --version is '$Ver', expected $ExpectedVersion"
@@ -487,6 +547,8 @@ if ($Tag -ne "latest") {
 }
 Remove-Item -LiteralPath "$Dest.bak" -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath "$ShDest.bak" -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$HostDest.bak" -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath "$PluginDest.bak" -Force -ErrorAction SilentlyContinue
 
 $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
 if (-not $userPath) { $userPath = "" }
@@ -501,6 +563,8 @@ Write-Host "Installation complete."
 Write-Host "  version  $Ver"
 Write-Host "  binary   $Dest"
 Write-Host "  shell    $ShDest"
+Write-Host "  host     $HostDest"
+Write-Host "  plugins  $PluginDest"
 if ($Got) { Write-Host "  sha256   $Got" }
 Write-Host ""
 $Icon = $null

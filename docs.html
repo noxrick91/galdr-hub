@@ -6,29 +6,29 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <title data-i18n-title="docs">文档 — Galdr</title>
   <meta name="description" data-i18n-desc="docs" content="安装、galdrc、快捷键、配置、mux 与会话恢复。">
-  <meta name="theme-color" content="#121418">
+  <meta name="theme-color" content="#f1efe9">
   <link rel="canonical" href="https://term.noxcaw.com/docs.html">
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css?v=v0.1.16-1787517348">
-  <link rel="stylesheet" href="./assets/docs.css?v=v0.1.16-1787517348">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css?v=v0.2.0-1787589823">
+  <link rel="stylesheet" href="./assets/docs.css?v=v0.2.0-1787589823">
 </head>
 <body class="docs">
+  <a class="skip-link" href="#docs-main" data-i18n="a11y.skip">跳到正文</a>
   <header class="docs-top">
     <div class="docs-top-inner">
-      <a class="brand" href="./" data-keep-lang>
-        <img src="./assets/favicon.svg" alt="">
-        Galdr
-      </a>
+      <a class="brand" href="./" data-keep-lang aria-label="Galdr"><img src="./assets/logo.svg" alt="Galdr"></a>
       <nav class="nav" aria-label="主导航">
         <a href="./" data-keep-lang data-i18n="nav.home">首页</a>
+        <a href="./plugins.html" data-keep-lang data-i18n="nav.market">插件</a>
         <a href="./docs.html#/install" aria-current="page" data-keep-lang data-i18n="nav.docs">文档</a>
         <span class="lang" role="group" aria-label="语言">
-          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="zh">中</button>
           <button type="button" data-lang="en">EN</button>
         </span>
+        <a class="nav-cta" href="./#howto" data-keep-lang data-i18n="nav.get">获取 Galdr</a>
       </nav>
     </div>
   </header>
@@ -40,7 +40,7 @@
       <nav class="docs-nav" id="docs-nav" aria-label="docs"></nav>
     </aside>
 
-    <main class="docs-main">
+    <main class="docs-main" id="docs-main">
       <div class="docs-mobile-bar">
         <button class="docs-contents-btn" id="docs-contents-btn" type="button" aria-controls="docs-side" aria-expanded="false" data-i18n="docs.contents">目录</button>
         <button class="docs-search docs-search-compact" id="docs-search-btn-mobile" type="button" data-i18n="docs.search">搜索文档…</button>
@@ -72,7 +72,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
-  <script src="./assets/i18n.js?v=v0.1.16-1787517348"></script>
-  <script src="./assets/docs.js?v=v0.1.16-1787517348"></script>
+  <script src="./assets/i18n.js?v=v0.2.0-1787589823"></script>
+  <script src="./assets/docs.js?v=v0.2.0-1787589823"></script>
 </body>
 </html>

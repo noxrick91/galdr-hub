@@ -263,9 +263,9 @@ function installLabel(platform) {
 }
 
 const HOWTO = {
-  install: { unix: INSTALL_UNIX, win: INSTALL_WIN, hint: "installHint" },
-  update: { unix: UPDATE_CMD, win: UPDATE_WIN, hint: "updateHint" },
-  uninstall: { unix: UNINSTALL_UNIX, win: UNINSTALL_WIN, hint: "uninstallHint" },
+  install: { unix: INSTALL_UNIX, win: INSTALL_WIN, hint: "installHint", copy: "copyInstall" },
+  update: { unix: UPDATE_CMD, win: UPDATE_WIN, hint: "updateHint", copy: "copyUpdate" },
+  uninstall: { unix: UNINSTALL_UNIX, win: UNINSTALL_WIN, hint: "uninstallHint", copy: "copyUninstall" },
 };
 
 let howtoTab = "install";
@@ -281,7 +281,14 @@ function applyHowto(platform) {
     ? (how?.macUnavailable || "macOS prebuilt packages are temporarily unavailable")
     : (win ? spec.win : spec.unix);
   const copy = document.getElementById("copy-howto");
-  if (copy) copy.disabled = unavailable;
+  if (copy) {
+    const install = typeof dict === "function" ? dict().install : null;
+    const label = install?.[spec.copy] || install?.copy || "复制命令";
+    copy.disabled = unavailable;
+    copy.setAttribute("aria-label", label);
+    const text = copy.querySelector("span");
+    if (text) text.textContent = label;
+  }
   const hint = document.getElementById("howto-hint");
   if (hint) {
     const hintKey = unavailable ? "macHint" : spec.hint;
@@ -292,7 +299,7 @@ function applyHowto(platform) {
     btn.classList.toggle("on", active);
     btn.setAttribute("aria-selected", String(active));
     btn.tabIndex = active ? 0 : -1;
-    if (active && cmd) cmd.setAttribute("aria-labelledby", btn.id);
+    if (active) document.getElementById("howto-panel")?.setAttribute("aria-labelledby", btn.id);
   });
 }
 
@@ -316,20 +323,44 @@ howtoTabs.forEach((btn) => {
   });
 });
 
+async function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall through for browsers that expose Clipboard API without granting it.
+    }
+  }
+  const fallback = document.createElement("textarea");
+  fallback.value = text;
+  fallback.setAttribute("readonly", "");
+  fallback.style.position = "fixed";
+  fallback.style.opacity = "0";
+  document.body.appendChild(fallback);
+  let copied = false;
+  try {
+    fallback.select();
+    copied = document.execCommand("copy");
+  } finally {
+    fallback.remove();
+  }
+  if (!copied) throw new Error("clipboard unavailable");
+}
+
 document.getElementById("copy-howto")?.addEventListener("click", async () => {
   const text = document.getElementById("howto-cmd")?.textContent;
   if (!text) return;
   const d = typeof dict === "function" ? dict().install : null;
   const btn = document.getElementById("copy-howto");
+  const label = btn?.querySelector("span");
   try {
-    await navigator.clipboard.writeText(text);
-    btn.textContent = d?.copied || "已复制";
-    setTimeout(() => {
-      btn.textContent = d?.copy || "复制";
-    }, 1400);
+    await copyText(text);
+    if (label) label.textContent = d?.copied || "已复制";
   } catch {
-    /* ignore */
+    if (label) label.textContent = d?.copyFailed || "复制失败，请手动选择指令";
   }
+  setTimeout(() => applyHowto(detectedPlatform), 1600);
 });
 
 let detectedPlatform = "linux-x64";

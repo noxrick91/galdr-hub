@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 258 64" role="img" aria-labelledby="title">
+  <title id="title">Galdr</title>
+  <g>
+    <path d="M6 32h8l6-14v28l9-36v44l9-28v12l8-12v12h12" fill="none" stroke="#171816" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+    <rect x="49" y="28" width="10" height="10" fill="#e64024"/>
+  </g>
+  <text x="76" y="47" fill="#171816" font-family="Arial Narrow, Helvetica Neue, Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="4">GALDR</text>
+</svg>

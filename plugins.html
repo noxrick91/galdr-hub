@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Cache-Control" content="no-cache">
+  <title data-i18n-title="plugins">插件市场 — Galdr</title>
+  <meta name="description" data-i18n-desc="plugins" content="浏览 Galdr 官方插件，了解平台支持与所需权限。">
+  <meta name="theme-color" content="#f1efe9">
+  <link rel="canonical" href="https://term.noxcaw.com/plugins.html">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css?v=v0.2.0-1787589823">
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">跳到正文</a>
+  <header class="site-header">
+    <div class="wrap top">
+      <a class="brand" href="./" data-keep-lang aria-label="Galdr"><img src="./assets/logo.svg" alt="Galdr"></a>
+      <nav class="nav" aria-label="主导航">
+        <a href="./" data-keep-lang data-i18n="nav.home">首页</a>
+        <a href="./plugins.html" aria-current="page" data-keep-lang data-i18n="nav.market">插件</a>
+        <a href="./docs.html#/install" data-keep-lang data-i18n="nav.docs">文档</a>
+        <span class="lang" role="group" aria-label="语言">
+          <button type="button" data-lang="zh">中</button>
+          <button type="button" data-lang="en">EN</button>
+        </span>
+        <a class="nav-cta" href="./docs.html#/plugin-management" data-keep-lang data-i18n="market.manage">管理插件</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="market-main" id="main">
+    <section class="wrap market-hero">
+      <p class="eyebrow"><span class="rune" aria-hidden="true">ᚷ</span><span data-i18n="market.kicker">GALDR PLUGIN API · V1</span></p>
+      <h1 data-i18n-html="market.title">扩展命令，<br><em>不扩张信任。</em></h1>
+      <p class="lede" data-i18n="market.lede">插件可以贡献命令、Shell 集成、事件和声明式界面；版本、平台与权限在安装之前就清楚可见。</p>
+      <div class="market-actions">
+        <a class="btn" href="#catalog"><span data-i18n="market.explore">浏览插件</span><span aria-hidden="true">↘</span></a>
+        <a class="btn btn-ghost" href="./docs.html#/plugin-development" data-keep-lang><span data-i18n="market.build">开发插件</span><span aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <section class="wrap market-principles" aria-label="插件安全原则">
+      <article class="market-principle"><strong data-i18n="market.principleVerifyT">先校验，再安装</strong><span data-i18n="market.principleVerify">市场包必须提供 SHA-256，版本资产不可变。</span></article>
+      <article class="market-principle"><strong data-i18n="market.principleGrantT">权限由你授予</strong><span data-i18n="market.principleGrant">请求能力不会自动变成已授予能力。</span></article>
+      <article class="market-principle"><strong data-i18n="market.principleHostT">代码留在宿主之外</strong><span data-i18n="market.principleHost">进程与 Wasm 插件不会加载进终端进程。</span></article>
+    </section>
+
+    <section class="wrap market-browser" id="catalog" aria-labelledby="catalog-title">
+      <div class="market-browser-head">
+        <div>
+          <p class="eyebrow"><span data-i18n="market.catalogKicker">OFFICIAL CATALOG</span></p>
+          <h2 id="catalog-title" data-i18n="market.catalogTitle">官方插件目录</h2>
+        </div>
+        <label class="market-search">
+          <span class="sr-only" data-i18n="market.search">搜索插件</span>
+          <input id="plugin-search" type="search" autocomplete="off" data-i18n-placeholder="market.search" placeholder="搜索名称、ID 或描述">
+        </label>
+      </div>
+      <p class="meta market-status" id="plugin-status" aria-live="polite" data-i18n="market.loading">正在读取插件索引…</p>
+      <div class="market-grid" id="plugin-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-main">
+      <div class="footer-brand"><img src="./assets/logo.svg" alt="Galdr"><p data-i18n="footer.tagline">把 Shell、会话与扩展收进同一个工作现场。</p></div>
+      <div class="footer-links">
+        <a href="./docs.html#/plugin-overview" data-keep-lang data-i18n="footer.pluginDocs">插件文档</a>
+        <a href="./docs.html#/install" data-keep-lang data-i18n="footer.docs">安装文档</a>
+        <a href="./CHANGELOG.md" data-i18n="footer.changelog">更新记录</a>
+      </div>
+    </div>
+    <div class="wrap footer-base"><span>GALDR PLUGIN MARKETPLACE</span><span>VERIFIED · CAPABILITY-BASED · API V1</span></div>
+  </footer>
+  <script src="./assets/i18n.js?v=v0.2.0-1787589823"></script>
+  <script src="./assets/plugins.js?v=v0.2.0-1787589823"></script>
+</body>
+</html>

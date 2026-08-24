@@ -25,6 +25,16 @@
       ]
     },
     {
+      "title": { "zh": "插件", "en": "Plugins" },
+      "pages": [
+        { "key": "plugin-overview", "zh": "插件概览", "en": "Plugin overview" },
+        { "key": "plugin-management", "zh": "安装与管理插件", "en": "Install and manage plugins" },
+        { "key": "plugin-security", "zh": "权限与隔离", "en": "Permissions and isolation" },
+        { "key": "plugin-development", "zh": "插件开发", "en": "Build a plugin" },
+        { "key": "plugin-publishing", "zh": "插件发布", "en": "Publish plugins" }
+      ]
+    },
+    {
       "title": { "zh": "帮助", "en": "Help" },
       "pages": [
         { "key": "whats-new", "zh": "What's new", "en": "What's new" },
