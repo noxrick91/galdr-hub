@@ -7,6 +7,19 @@
       "description": "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
       "versions": [
         {
+          "version": "0.3.3",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.3/com.noxcaw.term.downloader-0.3.3-linux-x86_64.zip",
+              "sha256": "3ccb60acb04bbf8ce1df79cb32a28d736dc9ace05b75087de867a14cb43c8707"
+            }
+          ],
+          "galdr": ">=0.2.0"
+        },
+        {
           "version": "0.3.1",
           "api": "^1.0",
           "packages": [

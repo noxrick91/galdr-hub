@@ -5,7 +5,7 @@
       "id": "com.noxcaw.term.downloader",
       "name": "Galdr Downloader",
       "description": "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
-      "license": "MIT",
+      "license": "Proprietary",
       "capabilities": [
         "http",
         "p2p_network",
