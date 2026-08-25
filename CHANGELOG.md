@@ -2,6 +2,27 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.6] - 2026-08-26
+
+### Added
+
+- Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.
+- Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.
+- Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.
+
+### Changed
+
+- The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.
+- Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.
+- Enabled plugins use a green status dot without tinting the complete control.
+
+### Fixed
+
+- Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.
+- Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.
+- Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.
+- Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file.
+
 ## [0.2.5] - 2026-08-25
 
 ### Added

@@ -22,17 +22,18 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.5** — 2026-08-25
+**What's new in v0.2.6** — 2026-08-26
 
-- The plugin marketplace has a default Ctrl+Shift+M shortcut, startup update detection, update prompts, and restart-required notices for plugins that cannot reload live.
-- Settings → Shortcuts can capture, rebind, replace conflicting, and remove key bindings without editing `config.toml` manually.
-- The plugin marketplace now uses a responsive master-detail layout with compact twelve-item pages, keyboard navigation, enabled-status dots, an Official badge, bounded About text, and clearly separated management and permission sections.
-- Plugin panels preserve control focus across refreshes, support keyboard and context-menu input operations, expose styled badges/status buttons and determinate or indeterminate progress, and keep long or scrollable content readable.
-- Downloader 0.3.3 automatically analyzes pasted URLs, presents direct per-item download actions, separates active and completed tasks into scrollable tabs, and uses a proprietary plugin manifest.
-- Downloader URL input remains visible while discovery runs and accepts configured paste shortcuts, right-click paste, keyboard text, and IME text.
-- Extractor downloads discard impossible size estimates instead of showing a running task as 100% complete when downloaded bytes exceed the reported total.
-- Plugin install, update, enable, disable, permission, and removal operations stay hidden on Windows instead of flashing console windows; marketplace refreshes also preserve the active control.
-- The command palette closes when its backdrop is clicked, and live plugin commands such as Open download manager appear without restarting the shell.
+- Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.
+- Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.
+- Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.
+- The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.
+- Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.
+- Enabled plugins use a green status dot without tinting the complete control.
+- Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.
+- Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.
+- Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.
+- Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
