@@ -2,6 +2,12 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.4] - 2026-08-25
+
+### Fixed
+
+- Windows Explorer “Open Galdr here” launches no longer flash a PowerShell or host-console window before Galdr appears.
+
 ## [0.2.3] - 2026-08-25
 
 ### Changed

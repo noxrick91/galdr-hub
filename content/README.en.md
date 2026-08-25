@@ -22,11 +22,9 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.3** — 2026-08-25
+**What's new in v0.2.4** — 2026-08-25
 
-- The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.
-- DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.
-- Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases.
+- Windows Explorer “Open Galdr here” launches no longer flash a PowerShell or host-console window before Galdr appears.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

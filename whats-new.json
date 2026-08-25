@@ -1,13 +1,11 @@
 {
-  "tag": "v0.2.3",
-  "version": "0.2.3",
+  "tag": "v0.2.4",
+  "version": "0.2.4",
   "date": "2026-08-25",
-  "title": "What's new in v0.2.3",
+  "title": "What's new in v0.2.4",
   "notes": [
-    "The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.",
-    "DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.",
-    "Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases."
+    "Windows Explorer “Open Galdr here” launches no longer flash a PowerShell or host-console window before Galdr appears."
   ],
-  "body": "### Changed\n\n- The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.\n\n### Fixed\n\n- DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.\n- Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases.",
+  "body": "### Fixed\n\n- Windows Explorer “Open Galdr here” launches no longer flash a PowerShell or host-console window before Galdr appears.",
   "url": "./CHANGELOG.md"
 }
