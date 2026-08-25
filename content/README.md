@@ -22,9 +22,17 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.4** — 2026-08-25
+**What's new in v0.2.5** — 2026-08-25
 
-- Windows Explorer “Open Galdr here” launches no longer flash a PowerShell or host-console window before Galdr appears.
+- The plugin marketplace has a default Ctrl+Shift+M shortcut, startup update detection, update prompts, and restart-required notices for plugins that cannot reload live.
+- Settings → Shortcuts can capture, rebind, replace conflicting, and remove key bindings without editing `config.toml` manually.
+- The plugin marketplace now uses a responsive master-detail layout with compact twelve-item pages, keyboard navigation, enabled-status dots, an Official badge, bounded About text, and clearly separated management and permission sections.
+- Plugin panels preserve control focus across refreshes, support keyboard and context-menu input operations, expose styled badges/status buttons and determinate or indeterminate progress, and keep long or scrollable content readable.
+- Downloader 0.3.3 automatically analyzes pasted URLs, presents direct per-item download actions, separates active and completed tasks into scrollable tabs, and uses a proprietary plugin manifest.
+- Downloader URL input remains visible while discovery runs and accepts configured paste shortcuts, right-click paste, keyboard text, and IME text.
+- Extractor downloads discard impossible size estimates instead of showing a running task as 100% complete when downloaded bytes exceed the reported total.
+- Plugin install, update, enable, disable, permission, and removal operations stay hidden on Windows instead of flashing console windows; marketplace refreshes also preserve the active control.
+- The command palette closes when its backdrop is clicked, and live plugin commands such as Open download manager appear without restarting the shell.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
