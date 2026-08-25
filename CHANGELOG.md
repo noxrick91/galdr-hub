@@ -2,6 +2,16 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.2] - 2026-08-25
+
+### Changed
+
+- The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.
+
+### Fixed
+
+- DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.
+
 ## [0.2.1] - 2026-08-25
 
 ### Added

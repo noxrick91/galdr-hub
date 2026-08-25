@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 212 64" role="img" aria-labelledby="title">
   <title id="title">Galdr</title>
-  <rect x="4" y="4" width="56" height="56" rx="10" fill="#171816"/>
-  <path fill="#f1efe9" shape-rendering="crispEdges" d="M12 12h31v7H12zM12 20h7v7h-7zM12 28h7v7h-7zM28 28h23v7H28zM12 36h7v7h-7zM44 36h7v7h-7zM12 44h31v7H12z"/>
-  <rect x="44" y="44" width="7" height="7" fill="#e64024"/>
+  <rect width="64" height="64" rx="12" fill="#fff"/>
+  <path d="M6 32h8l6-14v28l9-36v44l9-28v12l8-12v12h12" fill="none" stroke="#171816" stroke-width="6" stroke-linecap="square" stroke-linejoin="miter"/>
+  <rect x="49" y="28" width="10" height="10" fill="#e64024"/>
   <path fill="#171816" shape-rendering="crispEdges" d="M72 14h6v6h-6zM79 14h6v6h-6zM86 14h6v6h-6zM72 21h6v6h-6zM72 28h6v6h-6zM86 28h6v6h-6zM72 35h6v6h-6zM86 35h6v6h-6zM72 42h6v6h-6zM79 42h6v6h-6zM86 42h6v6h-6zM107 14h6v6h-6zM100 21h6v6h-6zM114 21h6v6h-6zM100 28h6v6h-6zM107 28h6v6h-6zM114 28h6v6h-6zM100 35h6v6h-6zM114 35h6v6h-6zM100 42h6v6h-6zM114 42h6v6h-6zM128 14h6v6h-6zM128 21h6v6h-6zM128 28h6v6h-6zM128 35h6v6h-6zM128 42h6v6h-6zM135 42h6v6h-6zM142 42h6v6h-6zM156 14h6v6h-6zM163 14h6v6h-6zM156 21h6v6h-6zM170 21h6v6h-6zM156 28h6v6h-6zM170 28h6v6h-6zM156 35h6v6h-6zM170 35h6v6h-6zM156 42h6v6h-6zM163 42h6v6h-6zM184 14h6v6h-6zM191 14h6v6h-6zM184 21h6v6h-6zM198 21h6v6h-6zM184 28h6v6h-6zM191 28h6v6h-6zM184 35h6v6h-6zM198 35h6v6h-6zM184 42h6v6h-6zM198 42h6v6h-6z"/>
 </svg>
