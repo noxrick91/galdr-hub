@@ -1,12 +1,13 @@
 {
-  "tag": "v0.2.2",
-  "version": "0.2.2",
+  "tag": "v0.2.3",
+  "version": "0.2.3",
   "date": "2026-08-25",
-  "title": "What's new in v0.2.2",
+  "title": "What's new in v0.2.3",
   "notes": [
     "The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.",
-    "DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames."
+    "DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.",
+    "Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases."
   ],
-  "body": "### Changed\n\n- The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.\n\n### Fixed\n\n- DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.",
+  "body": "### Changed\n\n- The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.\n\n### Fixed\n\n- DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.\n- Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases.",
   "url": "./CHANGELOG.md"
 }

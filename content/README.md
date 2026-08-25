@@ -22,10 +22,11 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.2** — 2026-08-25
+**What's new in v0.2.3** — 2026-08-25
 
 - The website wordmark and favicon now use the application waveform icon alongside the pixel-style GALDR title.
 - DEC 2026 synchronized output is now honored end to end, so animated AI agent updates are presented atomically instead of moving the cursor or flashing intermediate frames.
+- Shell version fixtures now derive their expected value from the package version, preventing stale release-specific strings from blocking future releases.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
