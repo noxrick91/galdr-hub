@@ -22,10 +22,12 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.9** — 2026-08-26
+**What's new in v0.2.11** — 2026-08-26
 
-- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.
-- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.
+- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.
+- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.
+- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.
+- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -206,7 +208,7 @@ action = "none"
 
 拖标签可重排，拖分隔条可改分屏，见 [界面](#/ui)。
 
-Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空格不接受。打完或确认完整命令名后，菜单会列出参数 / 子命令；回车仍执行当前命令。补全使用 shell 的 `PATH`（`include bashrc` 之后加进来的工具也能对上），并跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。设置里的“自动建议弹窗”可以单独关闭；Tab 和幽灵提示不受影响。
+Tab 或 Enter 接受补全；**Esc**（或 Ctrl+G）关掉补全弹出框。空格不接受。打完或确认完整命令名后，菜单会列出参数 / 子命令；回车仍执行当前命令。补全使用 shell 的 `PATH`（`include bashrc` 之后加进来的工具也能对上），并跟别名、变量和 git 分支；子串 / 缩写也能对上（例如 `cko` → checkout）。Home / End 跳到菜单首尾。`complete -F fn` 会跑函数（`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`）；`complete -C cmd` 会跑外部补全器（`COMP_LINE` / `COMP_POINT`）。按键时不会每次都阻塞去跑它们。被动提示和粘贴只读取静态或缓存的命令帮助；只有明确按 Tab 请求补全时，才会探测外部 CLI 的最新帮助。关闭“自动建议弹窗”后使用经典 shell 补全：唯一候选按一次 Tab 完成；多候选先补到最长公共前缀，再按一次 Tab 会把所有候选打印在提示符下方并恢复当前输入行，不打开弹出框。
 
 交互里 Ctrl+Z 会停住前台作业并打印 `[n]+  Stopped  命令`，再用 `fg` / `bg` / `jobs` 管理。
 
@@ -251,7 +253,7 @@ kind = "galdr"            # galdr | system
 launcher = "auto"         # auto | helper | integrated
 
 [completion]
-auto_popup = true          # false 仍保留 Tab 和幽灵提示
+auto_popup = true          # false：先补公共前缀，双 Tab 在下方打印候选
 
 [mux]
 unix_socket = false
@@ -319,6 +321,8 @@ galdr --socket /tmp/galdr.sock --server
 ## 插件概览
 
 Galdr 插件是带版本的 `.zip` 包，通过 `galdr-plugin-host` 与终端通信。GUI 和 Shell 只收发有大小限制的协议消息，**不会把普通第三方插件直接加载进 Galdr 进程**。当前插件 API 主版本是 `1`。
+
+插件宿主由同时运行的 Galdr 进程共享。它会跟踪这些客户端的进程生命周期；最后一个客户端退出后，宿主经过短暂宽限期，会有序关闭插件运行时并自动退出。持久化的插件任务可在下次启动 Galdr 时恢复。
 
 插件可以贡献：
 

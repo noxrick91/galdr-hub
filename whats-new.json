@@ -1,12 +1,14 @@
 {
-  "tag": "v0.2.9",
-  "version": "0.2.9",
+  "tag": "v0.2.11",
+  "version": "0.2.11",
   "date": "2026-08-26",
-  "title": "What's new in v0.2.9",
+  "title": "What's new in v0.2.11",
   "notes": [
-    "Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.",
-    "The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references."
+    "Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.",
+    "The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.",
+    "Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.",
+    "Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes."
   ],
-  "body": "### Changed\n\n- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.\n- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.",
+  "body": "### Changed\n\n- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.\n- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.\n\n### Fixed\n\n- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.\n- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.",
   "url": "./CHANGELOG.md"
 }

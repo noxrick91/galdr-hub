@@ -22,10 +22,12 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.9** — 2026-08-26
+**What's new in v0.2.11** — 2026-08-26
 
-- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.
-- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.
+- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.
+- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.
+- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.
+- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -206,7 +208,7 @@ action = "none"
 
 Drag a tab to reorder it, or a split divider to resize; see [Interface](#/ui).
 
-Tab or Enter accepts a completion; **Esc** (or Ctrl+G) closes the popup. Space does not accept. After you type or accept a full command name, the menu lists arguments / subcommands; Enter still runs the current command. Completions use the shell `PATH` (tools added after `include bashrc` are included), plus aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke. The Automatic suggestion popup setting hides only the dialog; Tab and ghost hints remain active.
+Tab or Enter accepts a completion; **Esc** (or Ctrl+G) closes the popup. Space does not accept. After you type or accept a full command name, the menu lists arguments / subcommands; Enter still runs the current command. Completions use the shell `PATH` (tools added after `include bashrc` are included), plus aliases, variables, and git branches; substring and abbreviation matches work (`cko` → checkout). Home / End jump to the ends of the menu. `complete -F fn` runs a function (`COMP_WORDS` / `COMP_CWORD` / `COMPREPLY`); `complete -C cmd` runs an external completer (`COMP_LINE` / `COMP_POINT`). Those hooks are not invoked on every keystroke. Passive hints and paste only use static or cached command help; probing an external CLI for fresh help requires an explicit Tab completion request. When the Automatic suggestion popup is off, Tab uses classic shell completion: one Tab accepts a unique match or extends multiple matches to their longest common prefix; a second Tab prints all candidates below the prompt and restores the input line without opening a popup.
 
 Interactive Ctrl+Z stops the foreground job and prints `[n]+  Stopped  command`. Use `fg` / `bg` / `jobs` after that.
 
@@ -251,7 +253,7 @@ kind = "galdr"            # galdr | system
 launcher = "auto"         # auto | helper | integrated
 
 [completion]
-auto_popup = true          # false keeps Tab and ghost hints
+auto_popup = true          # false: common-prefix completion, then double Tab prints candidates
 
 [mux]
 unix_socket = false
@@ -319,6 +321,8 @@ With `[session] restore = true`, the next launch reopens the last window / tabs 
 ## Plugin overview
 
 A Galdr plugin is a versioned `.zip` package that communicates through `galdr-plugin-host`. The GUI and shell exchange size-limited protocol frames; they **do not load ordinary third-party plugins into the Galdr process**. The current plugin API major is `1`.
+
+The plugin host is shared by concurrent Galdr processes. It tracks their process lifetimes and, after the final client exits, waits for a short grace period, shuts plugin runtimes down, and exits automatically. Persisted plugin work can recover when Galdr starts again.
 
 Plugins can contribute:
 

@@ -2,6 +2,30 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.11] - 2026-08-26
+
+### Changed
+
+- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.
+- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.
+
+### Fixed
+
+- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.
+- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.
+
+## [0.2.10] - 2026-08-26
+
+### Changed
+
+- The downloader plugin release metadata now targets version 0.3.6.
+
+### Fixed
+
+- Linux updates now finish process cleanup successfully after all managed Galdr processes have stopped.
+- Windows Tab, completion-menu clicks, and ghost hints now use the shell's selected completion, preserving its exact replacement, quoting, path-separator, and spacing rules.
+- With the automatic suggestion popup disabled, Tab now completes the longest common prefix and a second Tab prints all candidates below the prompt instead of opening a popup.
+
 ## [0.2.9] - 2026-08-26
 
 ### Changed
