@@ -12,6 +12,7 @@ User-facing changes to Galdr. Versions match Git tags.
 ### Fixed
 
 - Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.
+- Empty-prefix completion now keeps a stable initial candidate, so moving down once and pressing Tab selects the next candidate instead of wrapping back to the first.
 - Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.
 
 ## [0.2.11] - 2026-08-26

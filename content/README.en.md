@@ -27,6 +27,7 @@ This page lists changes in the **current public release**.
 - First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.
 - Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.
 - Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.
+- Empty-prefix completion now keeps a stable initial candidate, so moving down once and pressing Tab selects the next candidate instead of wrapping back to the first.
 - Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
