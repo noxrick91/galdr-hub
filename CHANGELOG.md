@@ -2,6 +2,18 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.12] - 2026-08-26
+
+### Changed
+
+- First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.
+- Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.
+
+### Fixed
+
+- Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.
+- Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.
+
 ## [0.2.11] - 2026-08-26
 
 ### Changed

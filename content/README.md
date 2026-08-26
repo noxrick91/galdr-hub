@@ -22,12 +22,12 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.11** — 2026-08-26
+**What's new in v0.2.12** — 2026-08-26
 
-- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.
-- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.
-- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.
-- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.
+- First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.
+- Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.
+- Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.
+- Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

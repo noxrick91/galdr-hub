@@ -1,14 +1,14 @@
 {
-  "tag": "v0.2.11",
-  "version": "0.2.11",
+  "tag": "v0.2.12",
+  "version": "0.2.12",
   "date": "2026-08-26",
-  "title": "What's new in v0.2.11",
+  "title": "What's new in v0.2.12",
   "notes": [
-    "Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.",
-    "The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.",
-    "Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.",
-    "Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes."
+    "First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.",
+    "Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.",
+    "Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.",
+    "Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases."
   ],
-  "body": "### Changed\n\n- Passive hints and pasted text now use only static or cached completion data; external help probes, programmable completers, and plugin generators run only after an explicit Tab request.\n- The shared plugin host now tracks live Galdr clients and exits after the last client closes, following a short grace period and bounded plugin-runtime cleanup.\n\n### Fixed\n\n- Help discovery no longer opens external documentation while pasting command lines and only probes confirmed subcommand paths with terminal-local help.\n- Plugin runtime workers no longer leave `galdr-plugin-host` running indefinitely after Galdr closes.",
+  "body": "### Changed\n\n- First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.\n- Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.\n\n### Fixed\n\n- Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.\n- Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.",
   "url": "./CHANGELOG.md"
 }
