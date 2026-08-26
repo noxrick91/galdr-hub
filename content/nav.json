@@ -30,7 +30,11 @@
         { "key": "plugin-overview", "zh": "插件概览", "en": "Plugin overview" },
         { "key": "plugin-management", "zh": "安装与管理插件", "en": "Install and manage plugins" },
         { "key": "plugin-security", "zh": "权限与隔离", "en": "Permissions and isolation" },
+        { "key": "plugin-manifest", "zh": "插件包与 manifest", "en": "Package and manifest" },
+        { "key": "plugin-tools", "zh": "工具依赖", "en": "Managed tools" },
+        { "key": "plugin-ui", "zh": "声明式 UI", "en": "Declarative UI" },
         { "key": "plugin-development", "zh": "插件开发", "en": "Build a plugin" },
+        { "key": "plugin-troubleshooting", "zh": "插件排错", "en": "Plugin troubleshooting" },
         { "key": "plugin-publishing", "zh": "插件发布", "en": "Publish plugins" }
       ]
     },

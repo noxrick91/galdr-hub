@@ -1,20 +1,12 @@
 {
-  "tag": "v0.2.6",
-  "version": "0.2.6",
+  "tag": "v0.2.9",
+  "version": "0.2.9",
   "date": "2026-08-26",
-  "title": "What's new in v0.2.6",
+  "title": "What's new in v0.2.9",
   "notes": [
-    "Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.",
-    "Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.",
-    "Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.",
-    "The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.",
-    "Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.",
-    "Enabled plugins use a green status dot without tinting the complete control.",
-    "Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.",
-    "Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.",
-    "Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.",
-    "Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file."
+    "Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.",
+    "The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references."
   ],
-  "body": "### Added\n\n- Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.\n- Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.\n- Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.\n\n### Changed\n\n- The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.\n- Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.\n- Enabled plugins use a green status dot without tinting the complete control.\n\n### Fixed\n\n- Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.\n- Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.\n- Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.\n- Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file.",
+  "body": "### Changed\n\n- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.\n- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.",
   "url": "./CHANGELOG.md"
 }

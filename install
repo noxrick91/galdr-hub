@@ -729,6 +729,69 @@ elif [ "${platform}" = "windows" ]; then
   plugin_host_dest="${plugin_host_dest}.exe"
   plugin_cli_dest="${plugin_cli_dest}.exe"
 fi
+
+process_uses_managed_path() {
+  local pid="$1" proc="/proc/$1" target exe target_real
+  exe="$(readlink -f "${proc}/exe" 2>/dev/null || true)"
+  for target in "${dest}" "${shell_dest}" "${plugin_host_dest}" "${plugin_cli_dest}"; do
+    [ -n "${target}" ] || continue
+    target_real="$(readlink -f "${target}" 2>/dev/null || true)"
+    if [ -n "${exe}" ] && [ -n "${target_real}" ] && [ "${exe}" = "${target_real}" ]; then
+      return 0
+    fi
+    if [ -r "${proc}/cmdline" ] \
+      && tr '\0' '\n' <"${proc}/cmdline" | grep -Fqx -- "${target}"; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+galdr_process_is_running() {
+  local state
+  [ -r "/proc/$1/stat" ] || return 1
+  state="$(awk '{ print $3 }' "/proc/$1/stat" 2>/dev/null || true)"
+  [ -n "${state}" ] && [ "${state}" != "Z" ]
+}
+
+stop_galdr_install_processes() {
+  [ -d /proc ] || return 0
+  local proc pid remaining attempt
+  local -a pids=()
+  for proc in /proc/[0-9]*; do
+    [ -d "${proc}" ] || continue
+    pid="${proc##*/}"
+    [ "${pid}" != "$$" ] || continue
+    if process_uses_managed_path "${pid}"; then
+      pids+=("${pid}")
+    fi
+  done
+  [ "${#pids[@]}" -gt 0 ] || return 0
+
+  step "Stopping running Galdr processes"
+  kill -TERM "${pids[@]}" 2>/dev/null || true
+  for attempt in 1 2 3 4 5 6 7 8 9 10; do
+    remaining=0
+    for pid in "${pids[@]}"; do
+      if galdr_process_is_running "${pid}"; then
+        remaining=1
+        break
+      fi
+    done
+    [ "${remaining}" = "1" ] || break
+    sleep 0.2
+  done
+  for pid in "${pids[@]}"; do
+    if galdr_process_is_running "${pid}"; then
+      kill -KILL "${pid}" 2>/dev/null || true
+    fi
+  done
+  for pid in "${pids[@]}"; do
+    galdr_process_is_running "${pid}" \
+      && die "could not stop Galdr process ${pid}"
+  done
+}
+
 if [ "${TAG}" = "latest" ]; then
   base="https://github.com/${REPO}/releases/latest/download"
 else
@@ -885,15 +948,31 @@ ok "Checksums and executable verified"
 [ ! -d "${dest}" ] || die "install target is a directory: ${dest}"
 [ ! -d "${plugin_host_dest}" ] || die "install target is a directory: ${plugin_host_dest}"
 [ ! -d "${plugin_cli_dest}" ] || die "install target is a directory: ${plugin_cli_dest}"
+stop_galdr_install_processes
+previous_dir="${tmp}/previous"
+mkdir -p "${previous_dir}"
+for managed in \
+  "${BIN_DIR}/galdr" "${BIN_DIR}/galdr.exe" \
+  "${BIN_DIR}/galdr-sh" "${BIN_DIR}/galdr-sh.exe" \
+  "${BIN_DIR}/galdr-plugin-host" "${BIN_DIR}/galdr-plugin-host.exe" \
+  "${BIN_DIR}/galdr-plugin" "${BIN_DIR}/galdr-plugin.exe"
+do
+  rm -f "${managed}.bak"
+  case "${managed}" in
+    "${dest}" | "${shell_dest}" | "${plugin_host_dest}" | "${plugin_cli_dest}") ;;
+    *) rm -f "${managed}" ;;
+  esac
+done
+rm -rf "${PREFIX}/updates" "${PREFIX}/backup"
+
 had_dest=0
 if [ -e "${dest}" ] || [ -L "${dest}" ]; then
   had_dest=1
-  rm -f "${dest}.bak"
-  mv -f "${dest}" "${dest}.bak" || die "could not back up ${dest}"
+  mv -f "${dest}" "${previous_dir}/main" || die "could not stage ${dest} for replacement"
 fi
 if ! mv "${tmp}/${asset}" "${dest}"; then
-  if [ "${had_dest}" = "1" ] && { [ -e "${dest}.bak" ] || [ -L "${dest}.bak" ]; }; then
-    mv -f "${dest}.bak" "${dest}"
+  if [ "${had_dest}" = "1" ] && [ -e "${previous_dir}/main" ]; then
+    mv -f "${previous_dir}/main" "${dest}"
   fi
   die "could not install ${dest}"
 fi
@@ -903,15 +982,15 @@ had_shell_dest=0
 rollback_shell_wrapper() {
   [ -n "${shell_dest}" ] || return 0
   rm -f "${shell_dest}"
-  if [ "${had_shell_dest}" = "1" ] && { [ -e "${shell_dest}.bak" ] || [ -L "${shell_dest}.bak" ]; }; then
-    mv -f "${shell_dest}.bak" "${shell_dest}"
+  if [ "${had_shell_dest}" = "1" ] && [ -e "${previous_dir}/shell" ]; then
+    mv -f "${previous_dir}/shell" "${shell_dest}"
   fi
 }
 
 rollback_binary() {
   rm -f "${dest}"
-  if [ "${had_dest}" = "1" ] && { [ -e "${dest}.bak" ] || [ -L "${dest}.bak" ]; }; then
-    mv -f "${dest}.bak" "${dest}"
+  if [ "${had_dest}" = "1" ] && [ -e "${previous_dir}/main" ]; then
+    mv -f "${previous_dir}/main" "${dest}"
   fi
 }
 had_plugin_host_dest=0
@@ -919,15 +998,15 @@ had_plugin_cli_dest=0
 rollback_plugin_host() {
   rm -f "${plugin_host_dest}"
   if [ "${had_plugin_host_dest}" = "1" ] \
-    && { [ -e "${plugin_host_dest}.bak" ] || [ -L "${plugin_host_dest}.bak" ]; }; then
-    mv -f "${plugin_host_dest}.bak" "${plugin_host_dest}"
+    && [ -e "${previous_dir}/plugin-host" ]; then
+    mv -f "${previous_dir}/plugin-host" "${plugin_host_dest}"
   fi
 }
 rollback_plugin_cli() {
   rm -f "${plugin_cli_dest}"
   if [ "${had_plugin_cli_dest}" = "1" ] \
-    && { [ -e "${plugin_cli_dest}.bak" ] || [ -L "${plugin_cli_dest}.bak" ]; }; then
-    mv -f "${plugin_cli_dest}.bak" "${plugin_cli_dest}"
+    && [ -e "${previous_dir}/plugin-cli" ]; then
+    mv -f "${previous_dir}/plugin-cli" "${plugin_cli_dest}"
   fi
 }
 if ! "${dest}" --help >/dev/null 2>&1; then
@@ -965,10 +1044,9 @@ if [ -n "${shell_dest}" ]; then
     if [ -z "${old_shell_ver}" ] || [ "${old_shell_ver_num}" != "${installed_ver_num}" ]; then
       step "Replacing old ${old_shell_ver:-unversioned galdr-sh} at ${shell_dest}"
     fi
-    rm -f "${shell_dest}.bak"
-    if ! mv -f "${shell_dest}" "${shell_dest}.bak"; then
+    if ! mv -f "${shell_dest}" "${previous_dir}/shell"; then
       rollback_binary
-      die "could not back up ${shell_dest}"
+      die "could not stage ${shell_dest} for replacement"
     fi
   fi
   helper_source="${tmp}/${shell_asset}"
@@ -995,11 +1073,10 @@ fi
 
 if [ -e "${plugin_host_dest}" ] || [ -L "${plugin_host_dest}" ]; then
   had_plugin_host_dest=1
-  rm -f "${plugin_host_dest}.bak"
-  if ! mv -f "${plugin_host_dest}" "${plugin_host_dest}.bak"; then
+  if ! mv -f "${plugin_host_dest}" "${previous_dir}/plugin-host"; then
     rollback_shell_wrapper
     rollback_binary
-    die "could not back up ${plugin_host_dest}"
+    die "could not stage ${plugin_host_dest} for replacement"
   fi
 fi
 if ! mv "${tmp}/${plugin_host_asset}" "${plugin_host_dest}"; then
@@ -1011,12 +1088,11 @@ fi
 
 if [ -e "${plugin_cli_dest}" ] || [ -L "${plugin_cli_dest}" ]; then
   had_plugin_cli_dest=1
-  rm -f "${plugin_cli_dest}.bak"
-  if ! mv -f "${plugin_cli_dest}" "${plugin_cli_dest}.bak"; then
+  if ! mv -f "${plugin_cli_dest}" "${previous_dir}/plugin-cli"; then
     rollback_plugin_host
     rollback_shell_wrapper
     rollback_binary
-    die "could not back up ${plugin_cli_dest}"
+    die "could not stage ${plugin_cli_dest} for replacement"
   fi
 fi
 if ! mv "${tmp}/${plugin_cli_asset}" "${plugin_cli_dest}"; then

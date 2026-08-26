@@ -22,18 +22,10 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.6** — 2026-08-26
+**What's new in v0.2.9** — 2026-08-26
 
-- Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.
-- Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.
-- Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.
-- The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.
-- Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.
-- Enabled plugins use a green status dot without tinting the complete control.
-- Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.
-- Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.
-- Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.
-- Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file.
+- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.
+- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -47,12 +39,12 @@ Linux / Git Bash：
 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
-指定版本：
+指定版本（把 `vX.Y.Z` 替换为目标发布版本）：
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.1
+curl -fsS https://term.noxcaw.com/install | bash -s -- vX.Y.Z
 # 或
-GALDR_TAG=v0.2.1 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=vX.Y.Z curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell：
@@ -67,7 +59,7 @@ irm https://term.noxcaw.com/install.txt | iex
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，并在替换旧版本前实际运行版本检查，再装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 缺少 ARM64 资产或原生包因 VC++ 运行库不能启动时，会回退到 x64 系统模拟。macOS 预编译包暂不提供。再跑一次安装器会原子替换当前文件。
+脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，并在替换旧版本前实际运行版本检查，再装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 缺少 ARM64 资产或原生包因 VC++ 运行库不能启动时，会回退到 x64 系统模拟。macOS 预编译包暂不提供。再次运行安装器会先关闭该安装目录中的 Galdr 进程，清理旧核心二进制和发布暂存内容，再安装已校验的新版本；用户配置、插件数据和受管工具会保留。
 
 安装器**不会**改 `.bashrc` / `.zshrc`。它写入 `~/.galdr/env`。`curl | bash` 也改不了你当前已经打开的 shell，请：
 
@@ -340,7 +332,7 @@ Galdr 插件是带版本的 `.zip` 包，通过 `galdr-plugin-host` 与终端通
 
 | 运行时 | 适合 | 隔离边界 |
 | --- | --- | --- |
-| `process` | 常规插件、外部库与后台任务 | 独立进程；Linux 使用 Bubblewrap 严格沙箱 |
+| `process` | 常规插件、外部库与后台任务 | 独立进程；Linux 使用 Bubblewrap，Windows 使用 AppContainer |
 | `wasm` | 可移植、确定的逻辑 | Wasmtime component，64 MiB 内存上限与 epoch deadline |
 | `native` | 确实需要宿主内性能或系统集成 | 在插件宿主进程内运行；每次二进制变更都要显式信任 |
 
@@ -416,9 +408,142 @@ manifest 的 `capabilities` 是插件**请求**的能力，安装状态里的 gr
 
 Linux 上的 `process` 插件包只读挂载，私有数据目录单独可写，环境变量先清空再按能力恢复。`files_read` / `files_write` 只把下载目录挂到 `GALDR_PLUGIN_DOWNLOADS`；只有授予 `http` 或 `p2p_network` 才会共享网络并暴露 DNS 文件和标准代理变量。如果平台上没有严格沙箱，进程插件会被拒绝启动。
 
+Windows 上的 `process` 插件运行在按能力配置的 AppContainer 和随宿主关闭的 Job Object 中。宿主只授予包目录的读取 / 执行、私有数据目录的读写，以及用户明确批准的 Downloads 与网络访问；无法建立严格沙箱时同样拒绝启动。
+
 插件帧与 UI 树都有大小上限。崩溃或超时后宿主会重启插件；同一插件 60 秒内失败三次，会在本次会话中停用。插件包不接受绝对路径、父目录穿越；Linux 包也不接受符号链接。
 
 > `native` 插件不具备进程或 Wasm 的代码隔离。只对可信来源使用 `--trust-native`。
+
+---
+
+## 插件包与 manifest
+
+插件是根目录包含 `plugin.toml` 的 ZIP 包。包内路径必须是相对路径，不能包含 `..`、绝对路径；Linux 包不能包含符号链接。一个包含 Windows 与 Linux process 入口的包可以按下面组织：
+
+```text
+hello.zip
+├── plugin.toml
+└── bin/
+    ├── hello
+    └── hello.exe
+```
+
+manifest 使用 schema 1，未知字段会直接报错。ID 应使用反向域名并在发布后保持不变：
+
+```toml
+schema = 1
+id = "com.example.hello"
+name = "Hello"
+version = "0.1.0"
+api = "^1.0"
+galdr = ">=0.2.0"
+description = "A minimal example plugin"
+license = "MIT"
+requires_restart = false
+entrypoints = [
+  { os = "linux", arch = "x86_64", runtime = "process", path = "bin/hello" },
+  { os = "windows", arch = "x86_64", runtime = "process", path = "bin/hello.exe" },
+]
+capabilities = ["ui", "shell_state"]
+```
+
+| 字段 | 作用 |
+| --- | --- |
+| `schema` | manifest 格式版本，当前为 `1` |
+| `id` / `version` | 插件的稳定 ID 与语义化版本 |
+| `api` / `galdr` | 兼容的插件 API 与 Galdr 版本范围 |
+| `entrypoints` | 按 `os`、`arch` 选择的运行时和包内入口 |
+| `capabilities` | 插件请求、但尚未获得的能力 |
+| `tools` | 由宿主解析、校验并管理的外部工具 |
+| `contributions` | 命令、事件和 UI 入口 |
+| `requires_restart` | 只有无法热重载的插件才设为 `true` |
+
+命令的 `scope` 可以是 `gui`、`shell` 或 `both`。每个命令始终有稳定动作名 `plugin:<插件 ID>/<命令 ID>`，命令面板和代码应复用这个名字：
+
+```toml
+[[contributions.commands]]
+id = "hello"
+title = "Hello from plugin"
+scope = "both"
+shell_name = "galdr-hello"
+```
+
+快捷键属于用户配置，不属于插件 manifest。要绑定动作，在 `config.toml` 中写：
+
+```toml
+[[keys]]
+key = "h"
+mods = "ctrl|shift"
+action = "plugin:com.example.hello/hello"
+```
+
+---
+
+## 工具依赖
+
+插件依赖的可执行工具必须在 `plugin.toml` 中声明。宿主先查找允许的系统工具；找到后复制到插件专属目录。需要下载时，宿主只接受 HTTPS 和校验和，并把最终工具放在用户目录下：
+
+| 平台 | 管理目录 |
+| --- | --- |
+| Windows | `%USERPROFILE%\.galdr\tools\<插件 ID>\` |
+| Linux | `~/.galdr/tools/<插件 ID>/` |
+
+Windows 和 Linux 使用相同的目录模型，不从项目目录或任意系统位置直接执行。沙箱只读暴露当前插件自己的工具目录；插件不能看到其他插件的依赖。
+
+```toml
+[[tools]]
+id = "site-extractor"
+required = false
+
+[[tools.platforms]]
+os = "linux"
+arch = "x86_64"
+executable = "extractor"
+system_names = ["extractor"]
+source = "https://downloads.example.com/extractor"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+```
+
+- `required = true`：找不到或无法校验时，插件不会启动。
+- `required = false`：插件仍可启动，但应在对应功能旁显示明确的不可用原因。
+- `source` 必须使用 HTTPS，并提供固定 `sha256`；也可以使用 HTTPS `checksum_source` 配合 `checksum_name`。
+- 下载工具需要插件已经获得网络能力。宿主不会根据插件 ID、文件名或 PATH 猜测未声明的工具。
+- Rust process 插件用 `galdr_plugin_sdk::plugin_tool_path("工具 ID")` 获取解析后的路径。
+
+Galdr Downloader 会按同样方式管理站点解析器。FFmpeg、Deno、Node 等可选工具只有在 manifest 声明并成功解析后才会暴露给插件。
+
+---
+
+## 声明式 UI
+
+插件返回受大小和深度限制的 UI 树，Galdr 负责字体、焦点、输入法、键盘导航和窗口生命周期。插件不能注入任意窗口代码或直接访问 GPU。
+
+manifest 中先声明入口和位置：
+
+```toml
+[[contributions.ui]]
+id = "downloads"
+slot = "page"
+title = "Downloads"
+```
+
+常用 slot 包括完整内容页 `page`、弹出层 `modal_window` / `modal_pane`、左右面板、设置页、状态栏和终端 overlay。完整页面应以 `surface` 为根，并声明 `presentation = "page"`，这样宿主能统一处理页面标题、返回动作和关闭行为：
+
+```json
+{
+  "root": {
+    "type": "surface",
+    "id": "surface",
+    "title": "Downloads",
+    "presentation": "page",
+    "child": { "type": "text", "id": "body", "text": "Ready" }
+  }
+}
+```
+
+UI 节点可使用文本、图标、徽章、按钮、输入框、开关、选择框、图片、进度、列表和布局容器。控件 ID 在整棵树中必须唯一；宿主把激活、输入、切换和选择等操作作为带节点 ID 的 `UiEvent` 发回插件。只有真正的 modal 才应点击遮罩关闭；`page` 和普通面板由宿主导航，不应模拟弹窗生命周期。
+
+长任务应在插件自己的后台 worker 中运行。UI 请求只读取当前状态或提交短操作，再通过 `refresh_interval_ms` 或后续事件刷新，避免占用 supervisor 的请求期限。
 
 ---
 
@@ -450,7 +575,7 @@ slot = "modal_pane"
 title = "Hello"
 ```
 
-`scope` 可以是 `gui`、`shell` 或 `both`。命令始终可以写成 `plugin:com.example.hello/hello`；要绑快捷键：
+`scope` 可以是 `gui`、`shell` 或 `both`。命令始终可以写成 `plugin:com.example.hello/hello`；要绑快捷键，请在用户的 `config.toml` 中写：
 
 ```toml
 [[keys]]
@@ -471,6 +596,25 @@ galdr plugin install /tmp/galdr-hello.zip --grant ui --grant shell_state
 ```
 
 Shell 调用只有在成功、非超时且不是子 Shell 时才可能修改父 Shell；完整 patch 会先整体校验。长任务不要占住 supervisor 请求期限，应放到插件自己的后台 worker，并把进度通过后续请求或声明式 UI 返回。
+
+---
+
+## 插件排错
+
+先运行 `galdr plugin inspect ID`，确认平台入口、启用状态以及 requested / granted 能力，再按下面定位：
+
+| 现象 | 检查与处理 |
+| --- | --- |
+| 安装后找不到命令 | 确认插件已启用、当前平台有 entrypoint；重新打开命令面板或新开 Shell 会话 |
+| 提示缺少能力 | 对照 requested / granted，只用 `galdr plugin grant ID CAPABILITY` 授予当前功能所需的最小集合 |
+| Linux process 插件拒绝启动 | 确认 `bwrap` 可执行；Galdr 不会在严格沙箱缺失时降级裸跑 |
+| 工具不可用 | 检查 `tools` 是否声明当前 `os` / `arch`、是否有网络权限，以及下载源和校验和是否匹配 |
+| Downloader 无法解析视频网站 | 先确认 `site-extractor` 已解析；合并音视频还需要可用的 `media-converter`，再查看插件返回的具体错误 |
+| UI 可以打开但不刷新 | 不要让 invoke / UI 事件执行长下载；把任务放入后台 worker，并返回可轮询的状态 |
+| 连续崩溃后无响应 | 60 秒内三次失败会停用本次会话；检查插件日志、包版本和工具后重启 Galdr |
+| 更新后提示重启 | 只有 manifest 的 `requires_restart = true` 才需要重启；其他插件应通过宿主热重载生效 |
+
+卸载并重装会删除插件私有数据；需要保留任务或设置时，先使用 `galdr plugin uninstall ID --keep-data`。不要手工移动 `~/.galdr/tools` 或插件状态文件来修复安装，交给插件管理器重新解析和校验。
 
 ---
 

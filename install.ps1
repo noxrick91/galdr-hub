@@ -47,6 +47,106 @@ function Resolve-GaldrInstallPaths([string]$Prefix, [string]$BinDir) {
 $InstallPaths = Resolve-GaldrInstallPaths $Prefix $BinDir
 $Prefix = $InstallPaths[0]
 $BinDir = $InstallPaths[1]
+$script:PreviousBinDir = $null
+
+function Get-GaldrManagedBinaryPaths([string]$BinDir) {
+    $names = @(
+        "galdr.exe",
+        "galdr-sh.exe",
+        "galdr-plugin-host.exe",
+        "galdr-plugin.exe",
+        "galdr",
+        "galdr-sh",
+        "galdr-plugin-host",
+        "galdr-plugin"
+    )
+    return @($names | ForEach-Object { Join-Path $BinDir $_ })
+}
+
+function Stop-GaldrInstallProcesses([string]$BinDir) {
+    $targets = Get-GaldrManagedBinaryPaths $BinDir
+    $matches = @{}
+    foreach ($name in @("galdr", "galdr-sh", "galdr-plugin-host", "galdr-plugin")) {
+        foreach ($process in @(Get-Process -Name $name -ErrorAction SilentlyContinue)) {
+            $path = $null
+            try { $path = $process.Path } catch { }
+            if (-not $path) { continue }
+            $fullPath = [IO.Path]::GetFullPath($path)
+            if ($targets | Where-Object {
+                [string]::Equals(
+                    [IO.Path]::GetFullPath($_),
+                    $fullPath,
+                    [StringComparison]::OrdinalIgnoreCase
+                )
+            }) {
+                $matches[$process.Id] = $process
+            }
+        }
+    }
+    if ($matches.Count -eq 0) { return }
+
+    Write-Host "Stopping running Galdr processes"
+    foreach ($process in $matches.Values) {
+        try {
+            if ($process.ProcessName -eq "galdr" -and $process.MainWindowHandle -ne 0) {
+                [void]$process.CloseMainWindow()
+            }
+        } catch { }
+    }
+    Start-Sleep -Milliseconds 750
+    foreach ($id in @($matches.Keys)) {
+        if (Get-Process -Id $id -ErrorAction SilentlyContinue) {
+            Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
+        }
+    }
+    Wait-Process -Id @($matches.Keys) -Timeout 10 -ErrorAction SilentlyContinue
+    $alive = @($matches.Keys | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
+    if ($alive.Count -gt 0) {
+        throw "Could not stop Galdr processes: $($alive -join ', ')"
+    }
+}
+
+function Clear-GaldrPreviousInstall([string]$Prefix, [string]$BinDir, [string]$PreviousBinDir) {
+    New-Item -ItemType Directory -Force -Path $PreviousBinDir | Out-Null
+    $currentNames = @("galdr.exe", "galdr-sh.exe", "galdr-plugin-host.exe", "galdr-plugin.exe")
+    try {
+        foreach ($name in $currentNames) {
+            $path = Join-Path $BinDir $name
+            if (Test-Path -LiteralPath $path -PathType Container) {
+                throw "Install target is a directory: $path"
+            }
+            if (Test-Path -LiteralPath $path) {
+                Move-Item -LiteralPath $path -Destination (Join-Path $PreviousBinDir $name) -Force
+            }
+        }
+
+        foreach ($path in Get-GaldrManagedBinaryPaths $BinDir) {
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+            Remove-Item -LiteralPath "$path.bak" -Force -ErrorAction SilentlyContinue
+        }
+
+        $prefixWithSeparator = $Prefix.TrimEnd([char[]]@('\', '/')) + [IO.Path]::DirectorySeparatorChar
+        foreach ($name in @("updates", "backup")) {
+            $path = [IO.Path]::GetFullPath((Join-Path $Prefix $name))
+            if (-not $path.StartsWith($prefixWithSeparator, [StringComparison]::OrdinalIgnoreCase)) {
+                throw "Refusing to clean path outside PREFIX: $path"
+            }
+            if (Test-Path -LiteralPath $path) {
+                Remove-Item -LiteralPath $path -Recurse -Force
+            }
+        }
+    } catch {
+        foreach ($name in $currentNames) {
+            $previous = Join-Path $PreviousBinDir $name
+            if (Test-Path -LiteralPath $previous) {
+                $destination = Join-Path $BinDir $name
+                Remove-Item -LiteralPath $destination -Force -ErrorAction SilentlyContinue
+                Move-Item -LiteralPath $previous -Destination $destination -Force
+            }
+        }
+        throw
+    }
+}
 
 function Get-GaldrWindowsKind {
     $names = @()
@@ -139,6 +239,13 @@ function Restore-GaldrBinary([string]$Dest) {
     Remove-Item -LiteralPath $Dest -Force -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $bak) {
         Move-Item -LiteralPath $bak -Destination $Dest -Force
+        return
+    }
+    if ($script:PreviousBinDir) {
+        $previous = Join-Path $script:PreviousBinDir (Split-Path -Leaf $Dest)
+        if (Test-Path -LiteralPath $previous) {
+            Move-Item -LiteralPath $previous -Destination $Dest -Force
+        }
     }
 }
 
@@ -471,35 +578,21 @@ try {
     if ($Tag -ne "latest" -and $DownloadedVersion -ne $Tag.TrimStart('v')) {
         throw "$Asset version $DownloadedVersion does not match requested $Tag"
     }
-    if (Test-Path -LiteralPath $ShDest) {
-        $OldShVersion = $null
-        try { $OldShVersion = Get-GaldrBinaryVersion $ShDest "galdr-sh" } catch { }
-        if (-not $OldShVersion -or $OldShVersion -ne $DownloadedVersion) {
-            $shown = if ($OldShVersion) { $OldShVersion } else { "unknown" }
-            Write-Host "Replacing old galdr-sh $shown at $ShDest"
-        }
-    }
+    Stop-GaldrInstallProcesses $BinDir
+    $script:PreviousBinDir = Join-Path $Tmp "previous"
+    Clear-GaldrPreviousInstall $Prefix $BinDir $script:PreviousBinDir
 
-    $InstalledDests = @()
     try {
         Install-GaldrBinary $Bin $Dest
-        $InstalledDests += $Dest
         Install-GaldrShellHelper $ShBin $BinDir
-        $InstalledDests += $ShDest
         Install-GaldrBinary $HostBin $HostDest
-        $InstalledDests += $HostDest
         Install-GaldrBinary $PluginBin $PluginDest
-        $InstalledDests += $PluginDest
     } catch {
-        for ($i = $InstalledDests.Count - 1; $i -ge 0; $i--) {
-            Restore-GaldrBinary $InstalledDests[$i]
+        foreach ($installed in @($PluginDest, $HostDest, $ShDest, $Dest)) {
+            Restore-GaldrBinary $installed
         }
         throw
     }
-} finally {
-    Remove-Item $Tmp -Recurse -Force -ErrorAction SilentlyContinue
-}
-
 $Ran = $false
 try {
     $helpResult = Invoke-GaldrBinary $Dest "--help"
@@ -590,3 +683,6 @@ if (-not $env:GALDR_NO_START_MENU) { Write-Host "  Start menu: Galdr" }
 if (-not $env:GALDR_NO_CONTEXT_MENU) { Write-Host "  Right-click a folder: Open Galdr here" }
 Write-Host "  uninstall $Prefix\uninstall.ps1"
 Write-Host ""
+} finally {
+    Remove-Item $Tmp -Recurse -Force -ErrorAction SilentlyContinue
+}

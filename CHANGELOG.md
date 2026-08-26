@@ -2,6 +2,26 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.9] - 2026-08-26
+
+### Changed
+
+- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.
+- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.
+
+## [0.2.8] - 2026-08-26
+
+### Fixed
+
+- Linux and macOS builds no longer reference the Windows-only native clipboard command, and the Rust 1.98 CI lint remains warning-free.
+
+## [0.2.7] - 2026-08-26
+
+### Fixed
+
+- Clipboard text is sent to terminal applications as text instead of being reinterpreted as a `Ctrl+V` shortcut, preventing text pastes from triggering image-paste actions.
+- Plugin marketplace and other page-style plugin interfaces close with one `Esc` even while an input is active, and their footer now describes that behavior accurately.
+
 ## [0.2.6] - 2026-08-26
 
 ### Added

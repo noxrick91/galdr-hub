@@ -22,18 +22,10 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.6** — 2026-08-26
+**What's new in v0.2.9** — 2026-08-26
 
-- Plugin manifests can declare platform-specific tools that Galdr resolves, verifies, and stores under the current user's `~/.galdr/tools` directory on Windows and Linux.
-- Page-style plugin interfaces support fixed-width columns and a native header back action without taking ownership of the application window controls.
-- Downloader 0.3.5 provides richer quality, codec, container, frame-rate, and audio information, plus one-click clearing of completed tasks.
-- The plugin marketplace now separates the plugin list and detail views. Management and permissions use a compact left column, while identity and About content adapt to the remaining width.
-- Downloader uses a cleaner two-column workspace with deliberate spacing, concise media rows, and no repeated output-file description.
-- Enabled plugins use a green status dot without tinting the complete control.
-- Plugin and Downloader inputs accept keyboard input immediately after focus, support Unicode-aware cursor movement and editing, and position the IME candidate window at the visible caret.
-- Opening a page-style plugin interface no longer prevents resizing, minimizing, or closing the Galdr window; page titles and blank areas no longer dismiss the interface, while modal backdrops retain their expected behavior.
-- Managed `yt-dlp`, FFmpeg, and JavaScript runtimes work inside the Windows plugin sandbox, restoring discovery and download for YouTube and similar extractor-supported sites.
-- Extractor downloads preserve useful failure diagnostics, and direct downloads recover when a server advertises byte ranges but later responds with a complete file.
+- Reinstalling or updating now stops processes from the managed Galdr installation, removes old core binaries and release staging, then installs the verified release while preserving configuration, plugin data, and managed tools.
+- The website improves homepage typography and responsive readability, removes stale preview versions, and expands the bilingual plugin documentation with manifest, managed-tool, declarative-UI, sandbox, and troubleshooting references.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -47,12 +39,12 @@ Linux / Git Bash:
 curl -fsS https://term.noxcaw.com/install | bash
 ```
 
-Pin a version:
+Pin a version (replace `vX.Y.Z` with the target release):
 
 ```bash
-curl -fsS https://term.noxcaw.com/install | bash -s -- v0.2.1
+curl -fsS https://term.noxcaw.com/install | bash -s -- vX.Y.Z
 # or
-GALDR_TAG=v0.2.1 curl -fsS https://term.noxcaw.com/install | bash
+GALDR_TAG=vX.Y.Z curl -fsS https://term.noxcaw.com/install | bash
 ```
 
 Windows PowerShell:
@@ -67,7 +59,7 @@ Do not use `irm …/install.ps1`: the site serves `.ps1` as `application/octet-s
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and runs its version check before replacing the old copy in `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation when an older Release lacks ARM64 assets or its native package cannot start without a VC++ runtime. macOS prebuilt packages are temporarily unavailable. Running the installer again atomically replaces the current files.
+The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and runs its version check before replacing the old copy in `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation when an older Release lacks ARM64 assets or its native package cannot start without a VC++ runtime. macOS prebuilt packages are temporarily unavailable. Running the installer again stops Galdr processes from that installation, removes old core binaries and release staging, and then installs the verified release. Configuration, plugin data, and managed tools are preserved.
 
 The installer **does not** edit `.bashrc` / `.zshrc`. It writes `~/.galdr/env`. `curl | bash` cannot update the shell you already have open:
 
@@ -340,7 +332,7 @@ Choose a runtime for the work and trust boundary:
 
 | Runtime | Best for | Isolation boundary |
 | --- | --- | --- |
-| `process` | Typical plugins, external libraries, background workers | Separate process; strict Bubblewrap sandbox on Linux |
+| `process` | Typical plugins, external libraries, background workers | Separate process; Bubblewrap on Linux and AppContainer on Windows |
 | `wasm` | Portable, deterministic logic | Wasmtime component with a 64 MiB memory ceiling and epoch deadline |
 | `native` | Host-level performance or system integration that is truly required | Runs inside the plugin host; each binary change requires explicit trust |
 
@@ -416,9 +408,142 @@ The manifest's `capabilities` are what a plugin **requests**. Grants in local in
 
 On Linux, a `process` package is mounted read-only, its private data directory is separately writable, and the environment is cleared before approved values are restored. `files_read` / `files_write` expose only Downloads at `GALDR_PLUGIN_DOWNLOADS`. Network sharing, DNS files, and standard proxy variables appear only when `http` or `p2p_network` is granted. A process plugin is refused when a strict platform sandbox is unavailable.
 
+On Windows, a `process` plugin runs in a capability-scoped AppContainer and a kill-on-close Job Object. The host grants only read / execute access to the package, read / write access to private data, and the explicitly approved Downloads and network access. It is likewise refused when the strict sandbox cannot be created.
+
 Frames and UI trees have size limits. The host restarts a plugin after a crash or timeout; three failures in 60 seconds disable it for the current session. Packages cannot use absolute paths or parent traversal, and Linux packages cannot contain symlinks.
 
 > A `native` plugin does not have process or Wasm code isolation. Use `--trust-native` only for a source you trust.
+
+---
+
+## Package and manifest
+
+A plugin is a ZIP package with `plugin.toml` at its root. Package paths must be relative and cannot contain `..` or absolute paths; Linux packages cannot contain symlinks. A package with Windows and Linux process entrypoints can use this layout:
+
+```text
+hello.zip
+├── plugin.toml
+└── bin/
+    ├── hello
+    └── hello.exe
+```
+
+The manifest uses schema 1 and rejects unknown fields. Use a reverse-domain ID and keep it stable after publishing:
+
+```toml
+schema = 1
+id = "com.example.hello"
+name = "Hello"
+version = "0.1.0"
+api = "^1.0"
+galdr = ">=0.2.0"
+description = "A minimal example plugin"
+license = "MIT"
+requires_restart = false
+entrypoints = [
+  { os = "linux", arch = "x86_64", runtime = "process", path = "bin/hello" },
+  { os = "windows", arch = "x86_64", runtime = "process", path = "bin/hello.exe" },
+]
+capabilities = ["ui", "shell_state"]
+```
+
+| Field | Purpose |
+| --- | --- |
+| `schema` | Manifest format version; currently `1` |
+| `id` / `version` | Stable plugin ID and semantic version |
+| `api` / `galdr` | Compatible plugin API and Galdr version ranges |
+| `entrypoints` | Runtime and package path selected by `os` and `arch` |
+| `capabilities` | Access the plugin requests but has not yet been granted |
+| `tools` | External tools resolved, verified, and managed by the host |
+| `contributions` | Commands, events, and UI entrypoints |
+| `requires_restart` | Set to `true` only when normal live reload cannot activate the plugin |
+
+A command's `scope` is `gui`, `shell`, or `both`. Every command has a stable `plugin:<plugin-id>/<command-id>` action name; palettes and code should reuse it:
+
+```toml
+[[contributions.commands]]
+id = "hello"
+title = "Hello from plugin"
+scope = "both"
+shell_name = "galdr-hello"
+```
+
+Key bindings are user configuration, not plugin manifest fields. Bind the action in `config.toml`:
+
+```toml
+[[keys]]
+key = "h"
+mods = "ctrl|shift"
+action = "plugin:com.example.hello/hello"
+```
+
+---
+
+## Managed tools
+
+Every executable tool a plugin uses must be declared in `plugin.toml`. The host first looks for an allowed system tool and copies a resolved dependency into the plugin-specific directory. When it must download a tool, the host accepts only HTTPS plus a checksum. The final location is always under the user's home directory:
+
+| Platform | Managed directory |
+| --- | --- |
+| Windows | `%USERPROFILE%\.galdr\tools\<plugin-id>\` |
+| Linux | `~/.galdr/tools/<plugin-id>/` |
+
+Windows and Linux use the same layout model. Tools are not executed from the project or an arbitrary system location. The sandbox exposes only the current plugin's tool directory as read-only, so a plugin cannot see another plugin's dependencies.
+
+```toml
+[[tools]]
+id = "site-extractor"
+required = false
+
+[[tools.platforms]]
+os = "linux"
+arch = "x86_64"
+executable = "extractor"
+system_names = ["extractor"]
+source = "https://downloads.example.com/extractor"
+sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+```
+
+- With `required = true`, the plugin does not start when the tool cannot be found or verified.
+- With `required = false`, the plugin may start but should show a clear unavailable reason beside the affected feature.
+- `source` must use HTTPS and have a fixed `sha256`, or an HTTPS `checksum_source` with an optional `checksum_name`.
+- Tool downloads require a granted network capability. The host never guesses undeclared tools from a plugin ID, filename, or PATH.
+- Rust process plugins obtain the resolved path with `galdr_plugin_sdk::plugin_tool_path("tool-id")`.
+
+Galdr Downloader manages its site extractor through the same mechanism. Optional tools such as FFmpeg, Deno, and Node are exposed only after their manifest declarations resolve successfully.
+
+---
+
+## Declarative UI
+
+A plugin returns a size- and depth-limited UI tree. Galdr owns typography, focus, IME, keyboard navigation, and window lifecycle. Plugins cannot inject arbitrary window code or access the GPU directly.
+
+Declare the entry and placement in the manifest first:
+
+```toml
+[[contributions.ui]]
+id = "downloads"
+slot = "page"
+title = "Downloads"
+```
+
+Common slots include the full-content `page`, `modal_window` / `modal_pane`, side panels, settings, status, and terminal overlays. A full page should use a `surface` root with `presentation = "page"`, allowing the host to own its title, back action, and close behavior:
+
+```json
+{
+  "root": {
+    "type": "surface",
+    "id": "surface",
+    "title": "Downloads",
+    "presentation": "page",
+    "child": { "type": "text", "id": "body", "text": "Ready" }
+  }
+}
+```
+
+UI nodes include text, icons, badges, buttons, inputs, toggles, selects, images, progress, lists, and layout containers. Node IDs must be unique across the tree. The host returns activate, input, toggle, and select operations as typed `UiEvent` values carrying the node ID. Only a real modal should close when its backdrop is clicked; pages and ordinary panels use host navigation rather than simulated modal lifecycle.
+
+Long-running work belongs on plugin-owned background workers. UI requests should read current state or submit a short operation, then refresh with `refresh_interval_ms` or later events instead of occupying the supervisor deadline.
 
 ---
 
@@ -450,7 +575,7 @@ slot = "modal_pane"
 title = "Hello"
 ```
 
-`scope` is `gui`, `shell`, or `both`. A command is always addressable as `plugin:com.example.hello/hello`; bind that same action to a key:
+`scope` is `gui`, `shell`, or `both`. A command is always addressable as `plugin:com.example.hello/hello`; bind that same action in the user's `config.toml`:
 
 ```toml
 [[keys]]
@@ -471,6 +596,25 @@ galdr plugin install /tmp/galdr-hello.zip --grant ui --grant shell_state
 ```
 
 A shell invocation can change the parent shell only after a successful, non-timeout, non-subshell result; Galdr validates the complete patch first. Put long work on plugin-owned background workers instead of occupying the supervisor request deadline, and report progress through later requests or declarative UI.
+
+---
+
+## Plugin troubleshooting
+
+Start with `galdr plugin inspect ID`. Confirm the platform entrypoint, enabled state, and requested / granted capabilities, then narrow the failure down with this table:
+
+| Symptom | Check and fix |
+| --- | --- |
+| Command missing after install | Confirm the plugin is enabled and has an entrypoint for this platform; reopen the palette or start a new shell session |
+| Missing-capability error | Compare requested and granted access, then grant only the minimum needed with `galdr plugin grant ID CAPABILITY` |
+| Linux process plugin is refused | Verify that `bwrap` is executable; Galdr does not fall back to running a process plugin without its strict sandbox |
+| Tool unavailable | Check that `tools` declares the current `os` / `arch`, network access is granted, and the source checksum matches |
+| Downloader cannot parse a media site | Confirm that `site-extractor` resolved; merging separate audio and video also needs `media-converter`, then use the plugin's specific error message |
+| UI opens but does not refresh | Do not perform a long download inside invoke / UI-event handling; move it to a worker and return pollable state |
+| Plugin stops after repeated crashes | Three failures in 60 seconds disable it for the session; inspect its logs, package version, and tools, then restart Galdr |
+| Update asks for restart | Only manifests with `requires_restart = true` should need one; other plugins activate through host live reload |
+
+Uninstalling and reinstalling removes private plugin data. Use `galdr plugin uninstall ID --keep-data` first when tasks or settings must survive. Do not repair an installation by manually moving `~/.galdr/tools` or plugin state files; let the manager resolve and verify them again.
 
 ---
 
