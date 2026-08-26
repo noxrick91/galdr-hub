@@ -22,13 +22,13 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.12** — 2026-08-26
+**What's new in v0.2.13** — 2026-08-27
 
-- First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.
-- Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.
-- Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.
-- Empty-prefix completion now keeps a stable initial candidate, so moving down once and pressing Tab selects the next candidate instead of wrapping back to the first.
-- Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.
+- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.
+- Downloader 0.3.8 shows completed downloads as compact filename-only rows.
+- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.
+- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.
+- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

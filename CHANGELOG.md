@@ -2,6 +2,19 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.13] - 2026-08-27
+
+### Changed
+
+- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.
+- Downloader 0.3.8 shows completed downloads as compact filename-only rows.
+- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.
+
+### Fixed
+
+- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.
+- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.
+
 ## [0.2.12] - 2026-08-26
 
 ### Changed

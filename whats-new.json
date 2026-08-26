@@ -1,15 +1,15 @@
 {
-  "tag": "v0.2.12",
-  "version": "0.2.12",
-  "date": "2026-08-26",
-  "title": "What's new in v0.2.12",
+  "tag": "v0.2.13",
+  "version": "0.2.13",
+  "date": "2026-08-27",
+  "title": "What's new in v0.2.13",
   "notes": [
-    "First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.",
-    "Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.",
-    "Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.",
-    "Empty-prefix completion now keeps a stable initial candidate, so moving down once and pressing Tab selects the next candidate instead of wrapping back to the first.",
-    "Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases."
+    "Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.",
+    "Downloader 0.3.8 shows completed downloads as compact filename-only rows.",
+    "Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.",
+    "Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.",
+    "ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind."
   ],
-  "body": "### Changed\n\n- First-party plugin publishing now covers every public Galdr target and rejects incomplete platform matrices before packaging.\n- Downloader 0.3.7 adds native Linux and Windows ARM64 packages, including the matching managed `yt-dlp` executable.\n\n### Fixed\n\n- Enter after accepting a programmable completion now executes the completed command instead of inserting the first candidate for the next argument.\n- Empty-prefix completion now keeps a stable initial candidate, so moving down once and pressing Tab selects the next candidate instead of wrapping back to the first.\n- Plugin releases now use the same verified Windows ARM64 cross-compiler setup as Galdr releases.",
+  "body": "### Changed\n\n- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.\n- Downloader 0.3.8 shows completed downloads as compact filename-only rows.\n- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.\n\n### Fixed\n\n- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.\n- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.",
   "url": "./CHANGELOG.md"
 }
