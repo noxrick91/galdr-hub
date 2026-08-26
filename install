@@ -787,9 +787,11 @@ stop_galdr_install_processes() {
     fi
   done
   for pid in "${pids[@]}"; do
-    galdr_process_is_running "${pid}" \
-      && die "could not stop Galdr process ${pid}"
+    if galdr_process_is_running "${pid}"; then
+      die "could not stop Galdr process ${pid}"
+    fi
   done
+  return 0
 }
 
 if [ "${TAG}" = "latest" ]; then
