@@ -2,6 +2,18 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.14] - 2026-08-27
+
+### Changed
+
+- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.
+
+### Fixed
+
+- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.
+- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.
+- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.
+
 ## [0.2.13] - 2026-08-27
 
 ### Changed

@@ -1,15 +1,14 @@
 {
-  "tag": "v0.2.13",
-  "version": "0.2.13",
+  "tag": "v0.2.14",
+  "version": "0.2.14",
   "date": "2026-08-27",
-  "title": "What's new in v0.2.13",
+  "title": "What's new in v0.2.14",
   "notes": [
-    "Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.",
-    "Downloader 0.3.8 shows completed downloads as compact filename-only rows.",
-    "Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.",
-    "Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.",
-    "ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind."
+    "Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.",
+    "Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.",
+    "Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.",
+    "Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task."
   ],
-  "body": "### Changed\n\n- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.\n- Downloader 0.3.8 shows completed downloads as compact filename-only rows.\n- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.\n\n### Fixed\n\n- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.\n- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.",
+  "body": "### Changed\n\n- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.\n\n### Fixed\n\n- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.\n- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.\n- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.",
   "url": "./CHANGELOG.md"
 }

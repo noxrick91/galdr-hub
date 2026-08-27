@@ -22,13 +22,12 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.13** — 2026-08-27
+**What's new in v0.2.14** — 2026-08-27
 
-- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.
-- Downloader 0.3.8 shows completed downloads as compact filename-only rows.
-- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.
-- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.
-- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.
+- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.
+- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.
+- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.
+- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -62,7 +61,7 @@ Do not use `irm …/install.ps1`: the site serves `.ps1` as `application/octet-s
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and runs its version check before replacing the old copy in `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation when an older Release lacks ARM64 assets or its native package cannot start without a VC++ runtime. macOS prebuilt packages are temporarily unavailable. Running the installer again stops Galdr processes from that installation, removes old core binaries and release staging, and then installs the verified release. Configuration, plugin data, and managed tools are preserved.
+The script picks the asset for your OS/ARCH (Linux x64/arm64 or Windows x64/ARM64), checks `SHA256SUMS` from the same Release, and runs its version check before replacing the old copy in `~/.galdr/bin`. Windows ARM64 prefers the native build and falls back to x64 emulation when an older Release lacks ARM64 assets or its native package cannot start without a VC++ runtime. macOS prebuilt packages are temporarily unavailable. Running the installer again stages and verifies the complete runtime, then performs rollback-safe file replacement without terminating the Galdr session that launched it; open windows and shells keep running the old image until restarted. Configuration, plugin data, and managed tools are preserved.
 
 The installer **does not** edit `.bashrc` / `.zshrc`. It writes `~/.galdr/env`. `curl | bash` cannot update the shell you already have open:
 
@@ -617,7 +616,7 @@ Start with `galdr plugin inspect ID`. Confirm the platform entrypoint, enabled s
 | Downloader cannot parse a media site | Confirm that `site-extractor` resolved; merging separate audio and video also needs `media-converter`, then use the plugin's specific error message |
 | UI opens but does not refresh | Do not perform a long download inside invoke / UI-event handling; move it to a worker and return pollable state |
 | Plugin stops after repeated crashes | Three failures in 60 seconds disable it for the session; inspect its logs, package version, and tools, then restart Galdr |
-| Update asks for restart | Only manifests with `requires_restart = true` should need one; other plugins activate through host live reload |
+| A plugin update asks for restart | Restart when `requires_restart = true`, the host does not match the new core, or the loaded versions cannot be verified after live reload; afterwards the marketplace Installed version should match the latest compatible version |
 
 Uninstalling and reinstalling removes private plugin data. Use `galdr plugin uninstall ID --keep-data` first when tasks or settings must survive. Do not repair an installation by manually moving `~/.galdr/tools` or plugin state files; let the manager resolve and verify them again.
 
@@ -645,7 +644,7 @@ A package cannot be replaced under the same version. Bump both `plugin.toml` and
 | Linux black window / instant exit | Check Vulkan drivers; wgpu needs a working GPU backend |
 | Missing glyphs / tofu | Install DejaVu Sans Mono, Noto Sans CJK SC, Noto Color Emoji, or change `[font]` |
 | Windows `irm …/install.ps1` does nothing | Use `irm …/install.txt \| iex` |
-| Windows still shows an old version | Close every Galdr window and install again; `Get-Command galdr` to confirm PATH |
+| The UI still shows the old version after an update | Restart open Galdr windows and shells; use `command -v galdr` on Linux or `Get-Command galdr` on Windows to rule out another installation on PATH |
 | Galdr missing from the Linux app menu | Re-run the installer or log out; check `~/.local/share/applications/galdr.desktop` |
 | No “Open Galdr here” on folders | GNOME: `sudo apt install python3-nautilus && nautilus -q` (without bindings it only appears under Scripts). Windows 11: look under **Show more options** |
 | Want system bash | `[shell] kind = "system"` — the default will not read `.bashrc` |

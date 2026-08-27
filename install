@@ -729,6 +729,7 @@ elif [ "${platform}" = "windows" ]; then
   plugin_host_dest="${plugin_host_dest}.exe"
   plugin_cli_dest="${plugin_cli_dest}.exe"
 fi
+galdr_path_before_install="$(command -v galdr 2>/dev/null || true)"
 
 process_uses_managed_path() {
   local pid="$1" proc="/proc/$1" target exe target_real
@@ -747,51 +748,43 @@ process_uses_managed_path() {
   return 1
 }
 
-galdr_process_is_running() {
-  local state
-  [ -r "/proc/$1/stat" ] || return 1
-  state="$(awk '{ print $3 }' "/proc/$1/stat" 2>/dev/null || true)"
-  [ -n "${state}" ] && [ "${state}" != "Z" ]
-}
-
-stop_galdr_install_processes() {
-  [ -d /proc ] || return 0
-  local proc pid remaining attempt
-  local -a pids=()
+managed_install_is_running() {
+  [ -d /proc ] || return 1
+  local proc pid
   for proc in /proc/[0-9]*; do
     [ -d "${proc}" ] || continue
     pid="${proc##*/}"
     [ "${pid}" != "$$" ] || continue
     if process_uses_managed_path "${pid}"; then
-      pids+=("${pid}")
+      return 0
     fi
   done
-  [ "${#pids[@]}" -gt 0 ] || return 0
+  return 1
+}
 
-  step "Stopping running Galdr processes"
-  kill -TERM "${pids[@]}" 2>/dev/null || true
-  for attempt in 1 2 3 4 5 6 7 8 9 10; do
-    remaining=0
-    for pid in "${pids[@]}"; do
-      if galdr_process_is_running "${pid}"; then
-        remaining=1
-        break
-      fi
-    done
-    [ "${remaining}" = "1" ] || break
-    sleep 0.2
-  done
-  for pid in "${pids[@]}"; do
-    if galdr_process_is_running "${pid}"; then
-      kill -KILL "${pid}" 2>/dev/null || true
-    fi
-  done
-  for pid in "${pids[@]}"; do
-    if galdr_process_is_running "${pid}"; then
-      die "could not stop Galdr process ${pid}"
-    fi
-  done
-  return 0
+canonical_existing_path() {
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$1" 2>/dev/null && return
+  fi
+  readlink -f "$1" 2>/dev/null && return
+  local directory base
+  directory="$(CDPATH= cd -P "$(dirname "$1")" && pwd)" || return 1
+  base="$(basename "$1")"
+  printf '%s/%s\n' "${directory}" "${base}"
+}
+
+show_galdr_path_conflict() {
+  local resolved resolved_real dest_real
+  resolved="${galdr_path_before_install:-}"
+  [ -n "${resolved}" ] && [ -e "${resolved}" ] || return 0
+  resolved_real="$(canonical_existing_path "${resolved}" || true)"
+  dest_real="$(canonical_existing_path "${dest}" || true)"
+  if [ -n "${resolved_real}" ] && [ -n "${dest_real}" ] \
+    && [ "${resolved_real}" != "${dest_real}" ]; then
+    printf '  warning: PATH resolves galdr to %s\n' "${resolved}"
+    printf '           installer wrote %s\n' "${dest}"
+    printf '           source %s/env or remove the older PATH entry.\n' "${PREFIX}"
+  fi
 }
 
 if [ "${TAG}" = "latest" ]; then
@@ -924,6 +917,7 @@ if ! candidate_error="$("${tmp}/${asset}" --help 2>&1)"; then
   fi
 fi
 candidate_ver="$("${tmp}/${asset}" --version 2>/dev/null || true)"
+candidate_shell_ver="$("${tmp}/${shell_asset}" --version 2>/dev/null || true)"
 candidate_host_ver="$("${tmp}/${plugin_host_asset}" --version 2>/dev/null || true)"
 candidate_plugin_ver="$("${tmp}/${plugin_cli_asset}" --version 2>/dev/null || true)"
 case "${candidate_ver}" in
@@ -931,6 +925,10 @@ case "${candidate_ver}" in
   *) die "${asset} returned an invalid version: ${candidate_ver:-unavailable}" ;;
 esac
 candidate_ver_num="${candidate_ver_num#v}"
+case "${candidate_shell_ver}" in
+  "galdr-sh "*) candidate_shell_ver_num="${candidate_shell_ver##* }" ;;
+  *) die "${shell_asset} returned an invalid version: ${candidate_shell_ver:-unavailable}" ;;
+esac
 case "${candidate_host_ver}" in
   "galdr-plugin-host "*) candidate_host_ver_num="${candidate_host_ver##* }" ;;
   *) die "${plugin_host_asset} returned an invalid version: ${candidate_host_ver:-unavailable}" ;;
@@ -939,18 +937,24 @@ case "${candidate_plugin_ver}" in
   "galdr-plugin "*) candidate_plugin_ver_num="${candidate_plugin_ver##* }" ;;
   *) die "${plugin_cli_asset} returned an invalid version: ${candidate_plugin_ver:-unavailable}" ;;
 esac
+candidate_shell_ver_num="${candidate_shell_ver_num#v}"
 candidate_host_ver_num="${candidate_host_ver_num#v}"
 candidate_plugin_ver_num="${candidate_plugin_ver_num#v}"
-if [ "${candidate_host_ver_num}" != "${candidate_ver_num}" ] \
+if [ "${candidate_shell_ver_num}" != "${candidate_ver_num}" ] \
+  || [ "${candidate_host_ver_num}" != "${candidate_ver_num}" ] \
   || [ "${candidate_plugin_ver_num}" != "${candidate_ver_num}" ]; then
-  die "plugin binary versions do not match ${asset} ${candidate_ver_num}"
+  die "runtime binary versions do not match ${asset} ${candidate_ver_num}"
 fi
 ok "Checksums and executable verified"
 
 [ ! -d "${dest}" ] || die "install target is a directory: ${dest}"
 [ ! -d "${plugin_host_dest}" ] || die "install target is a directory: ${plugin_host_dest}"
 [ ! -d "${plugin_cli_dest}" ] || die "install target is a directory: ${plugin_cli_dest}"
-stop_galdr_install_processes
+running_install=0
+if managed_install_is_running; then
+  running_install=1
+  step "Updating the installed files without stopping the current Galdr session"
+fi
 previous_dir="${tmp}/previous"
 mkdir -p "${previous_dir}"
 for managed in \
@@ -1169,10 +1173,14 @@ printf '  host     %s\n' "${plugin_host_dest}"
 printf '  plugins  %s\n' "${plugin_cli_dest}"
 printf '  sha256   %s\n' "${got}"
 printf '  PATH     %s\n' "${BIN_DIR}"
+show_galdr_path_conflict
 printf '\n  The installer does not edit .bashrc or .zshrc.\n'
 printf '  source %s/env\n' "${PREFIX}"
 printf '  or add %s to PATH, then open Galdr:\n' "${BIN_DIR}"
 printf '\n  galdr\n  galdr --version\n'
+if [ "${running_install}" = "1" ]; then
+  printf '  Restart open Galdr windows and shells to use %s.\n' "${ver}"
+fi
 if [ "${os}" = "linux" ]; then
   if [ "${desktop_integration:-0}" = "1" ]; then
     printf '  App menu: Galdr\n'

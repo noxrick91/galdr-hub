@@ -22,13 +22,12 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.13** — 2026-08-27
+**What's new in v0.2.14** — 2026-08-27
 
-- Dragging a session tab now opens a dashed insertion slot between neighboring tabs, including a reliable target before the first tab, without rendering a duplicate of the dragged tab.
-- Downloader 0.3.8 shows completed downloads as compact filename-only rows.
-- Release publication is now resumable and keeps immutable tags and assets consistent when a workflow is retried.
-- Terminal contents now reflow losslessly when a window is narrowed and widened again, preserving column gaps, CJK text, background fills, scrollback extent, and the bottom viewport position.
-- ConPTY cursor positioning now stays aligned with Galdr's recovered rows after reflow, preventing completion popups and subsequent input from jumping upward or leaving stale text behind.
+- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.
+- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.
+- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.
+- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -62,7 +61,7 @@ irm https://term.noxcaw.com/install.txt | iex
 iex ((New-Object Net.WebClient).DownloadString('https://term.noxcaw.com/install.ps1'))
 ```
 
-脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，并在替换旧版本前实际运行版本检查，再装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 缺少 ARM64 资产或原生包因 VC++ 运行库不能启动时，会回退到 x64 系统模拟。macOS 预编译包暂不提供。再次运行安装器会先关闭该安装目录中的 Galdr 进程，清理旧核心二进制和发布暂存内容，再安装已校验的新版本；用户配置、插件数据和受管工具会保留。
+脚本按本机 OS/ARCH 选择资产（Linux x64/arm64、Windows x64/ARM64），下载后核对同 Release 的 `SHA256SUMS`，并在替换旧版本前实际运行版本检查，再装到 `~/.galdr/bin`。Windows ARM64 优先安装原生版本；旧版 Release 缺少 ARM64 资产或原生包因 VC++ 运行库不能启动时，会回退到 x64 系统模拟。macOS 预编译包暂不提供。再次运行安装器会先暂存并校验整套运行时，再以可回滚的文件替换完成升级，不会中途终止发起升级的 Galdr 会话；已打开的窗口和 shell 在重启前继续运行旧映像。用户配置、插件数据和受管工具会保留。
 
 安装器**不会**改 `.bashrc` / `.zshrc`。它写入 `~/.galdr/env`。`curl | bash` 也改不了你当前已经打开的 shell，请：
 
@@ -617,7 +616,7 @@ Shell 调用只有在成功、非超时且不是子 Shell 时才可能修改父 
 | Downloader 无法解析视频网站 | 先确认 `site-extractor` 已解析；合并音视频还需要可用的 `media-converter`，再查看插件返回的具体错误 |
 | UI 可以打开但不刷新 | 不要让 invoke / UI 事件执行长下载；把任务放入后台 worker，并返回可轮询的状态 |
 | 连续崩溃后无响应 | 60 秒内三次失败会停用本次会话；检查插件日志、包版本和工具后重启 Galdr |
-| 更新后提示重启 | 只有 manifest 的 `requires_restart = true` 才需要重启；其他插件应通过宿主热重载生效 |
+| 插件更新后提示重启 | `requires_restart = true`、插件宿主与新核心版本不一致，或热重载后无法确认实际运行版本时需要重启；重启后市场页的 Installed 版本应与最新兼容版本一致 |
 
 卸载并重装会删除插件私有数据；需要保留任务或设置时，先使用 `galdr plugin uninstall ID --keep-data`。不要手工移动 `~/.galdr/tools` 或插件状态文件来修复安装，交给插件管理器重新解析和校验。
 
@@ -645,7 +644,7 @@ Shell 调用只有在成功、非超时且不是子 Shell 时才可能修改父 
 | Linux 黑屏 / 立刻退出 | 检查 Vulkan 驱动；`wgpu` 需要可用的 GPU 后端 |
 | 缺字 / 方框 | 安装 DejaVu Sans Mono、Noto Sans CJK SC、Noto Color Emoji，或改 `[font]` |
 | Windows `irm …/install.ps1` 无效 | 改用 `irm …/install.txt \| iex` |
-| Windows 仍是旧版本 | 关掉所有 Galdr 窗口再装一次；`Get-Command galdr` 确认 PATH 不是另一份 exe |
+| 更新后界面仍显示旧版本 | 重启已打开的 Galdr 窗口和 shell；Linux 用 `command -v galdr`、Windows 用 `Get-Command galdr` 确认 PATH 不是另一份安装 |
 | Linux 应用菜单没有 Galdr | 再跑一次安装器，或注销后重开；确认 `~/.local/share/applications/galdr.desktop` 存在 |
 | 文件夹右键没有「打开 Galdr」 | GNOME：`sudo apt install python3-nautilus && nautilus -q`（没装绑定只有「脚本」子菜单）。Windows 11：在「显示更多选项」里 |
 | 想用系统 bash | `[shell] kind = "system"`，不要指望默认会读 `.bashrc` |

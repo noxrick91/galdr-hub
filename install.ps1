@@ -63,7 +63,7 @@ function Get-GaldrManagedBinaryPaths([string]$BinDir) {
     return @($names | ForEach-Object { Join-Path $BinDir $_ })
 }
 
-function Stop-GaldrInstallProcesses([string]$BinDir) {
+function Get-GaldrInstallProcesses([string]$BinDir) {
     $targets = Get-GaldrManagedBinaryPaths $BinDir
     $matches = @{}
     foreach ($name in @("galdr", "galdr-sh", "galdr-plugin-host", "galdr-plugin")) {
@@ -83,27 +83,7 @@ function Stop-GaldrInstallProcesses([string]$BinDir) {
             }
         }
     }
-    if ($matches.Count -eq 0) { return }
-
-    Write-Host "Stopping running Galdr processes"
-    foreach ($process in $matches.Values) {
-        try {
-            if ($process.ProcessName -eq "galdr" -and $process.MainWindowHandle -ne 0) {
-                [void]$process.CloseMainWindow()
-            }
-        } catch { }
-    }
-    Start-Sleep -Milliseconds 750
-    foreach ($id in @($matches.Keys)) {
-        if (Get-Process -Id $id -ErrorAction SilentlyContinue) {
-            Stop-Process -Id $id -Force -ErrorAction SilentlyContinue
-        }
-    }
-    Wait-Process -Id @($matches.Keys) -Timeout 10 -ErrorAction SilentlyContinue
-    $alive = @($matches.Keys | Where-Object { Get-Process -Id $_ -ErrorAction SilentlyContinue })
-    if ($alive.Count -gt 0) {
-        throw "Could not stop Galdr processes: $($alive -join ', ')"
-    }
+    return @($matches.Values)
 }
 
 function Clear-GaldrPreviousInstall([string]$Prefix, [string]$BinDir, [string]$PreviousBinDir) {
@@ -441,12 +421,10 @@ Write-Host "Config in ~/.config/galdr/ was left in place."
     Set-Content -LiteralPath $path -Value $script -Encoding UTF8
 }
 
-function Show-GaldrPathConflict([string]$Dest) {
-    $cmd = Get-Command galdr -ErrorAction SilentlyContinue
-    if (-not $cmd) { $cmd = Get-Command galdr.exe -ErrorAction SilentlyContinue }
-    if (-not $cmd -or -not $cmd.Source) { return }
-    if ([string]::Equals($cmd.Source, $Dest, [StringComparison]::OrdinalIgnoreCase)) { return }
-    Write-Host "Warning: PATH 'galdr' is $($cmd.Source)"
+function Show-GaldrPathConflict([string]$Dest, [string]$Resolved) {
+    if (-not $Resolved) { return }
+    if ([string]::Equals($Resolved, $Dest, [StringComparison]::OrdinalIgnoreCase)) { return }
+    Write-Host "Warning: PATH 'galdr' was $Resolved before installation"
     Write-Host "         installer wrote $Dest"
     Write-Host "         Open a new terminal, or run: & '$Dest' --version"
 }
@@ -468,6 +446,15 @@ $Dest = Join-Path $BinDir "galdr.exe"
 $ShDest = Join-Path $BinDir "galdr-sh.exe"
 $HostDest = Join-Path $BinDir "galdr-plugin-host.exe"
 $PluginDest = Join-Path $BinDir "galdr-plugin.exe"
+$ExistingGaldrCommand = Get-Command galdr -ErrorAction SilentlyContinue
+if (-not $ExistingGaldrCommand) {
+    $ExistingGaldrCommand = Get-Command galdr.exe -ErrorAction SilentlyContinue
+}
+$GaldrPathBeforeInstall = if ($ExistingGaldrCommand) {
+    $ExistingGaldrCommand.Source
+} else {
+    $null
+}
 if ($Tag -eq "latest") {
     $Base = "https://github.com/$Repo/releases/latest/download"
 } else {
@@ -578,7 +565,10 @@ try {
     if ($Tag -ne "latest" -and $DownloadedVersion -ne $Tag.TrimStart('v')) {
         throw "$Asset version $DownloadedVersion does not match requested $Tag"
     }
-    Stop-GaldrInstallProcesses $BinDir
+    $RunningGaldr = @(Get-GaldrInstallProcesses $BinDir)
+    if ($RunningGaldr.Count -gt 0) {
+        Write-Host "Updating the installed files without stopping the current Galdr session"
+    }
     $script:PreviousBinDir = Join-Path $Tmp "previous"
     Clear-GaldrPreviousInstall $Prefix $BinDir $script:PreviousBinDir
 
@@ -676,9 +666,12 @@ Set-Content -LiteralPath (Join-Path $Prefix ".galdr-install-root") -Value "galdr
 try { Install-GaldrUninstallScript $Prefix $BinDir } catch {
     Write-Host "Warning: could not write uninstall helper: $($_.Exception.Message)"
 }
-Show-GaldrPathConflict $Dest
+Show-GaldrPathConflict $Dest $GaldrPathBeforeInstall
 Write-Host "  galdr"
 Write-Host "  galdr --version"
+if ($RunningGaldr.Count -gt 0) {
+    Write-Host "  Restart open Galdr windows and shells to use $Ver."
+}
 if (-not $env:GALDR_NO_START_MENU) { Write-Host "  Start menu: Galdr" }
 if (-not $env:GALDR_NO_CONTEXT_MENU) { Write-Host "  Right-click a folder: Open Galdr here" }
 Write-Host "  uninstall $Prefix\uninstall.ps1"
