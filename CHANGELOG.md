@@ -16,7 +16,7 @@ User-facing changes to Galdr. Versions match Git tags.
 ### Changed
 
 - The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
-- The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
+- The official website presents plugins in compact responsive cards with a clear install action and a lightweight permission disclosure, so larger catalogs remain easy to scan.
 - Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
 - Galdr Downloader 0.3.10 adopts the extended declarative UI event and input schema used by Galdr 0.2.18.
 
@@ -27,6 +27,7 @@ User-facing changes to Galdr. Versions match Git tags.
 - Password and key credential edits now report save failures or success, and saved passwords can be reused by SSH and SFTP without appearing in process arguments or plugin documents.
 - Closing a window while a plugin page or child dialog is open no longer leaves the confirmation UI layered into the page.
 - Holding Delete no longer repeats through both stages of remote-file deletion confirmation.
+- Plugin publication reconciles current manifests with the public marketplace index, so a later run automatically resumes plugin versions omitted by an earlier partial failure.
 
 ## [0.2.14] - 2026-08-27
 
