@@ -12,6 +12,47 @@
         "files_write",
         "ui"
       ]
+    },
+    {
+      "id": "com.noxcaw.term.git",
+      "name": "Galdr Git",
+      "description": "Visual Git history, changes, branches, commits, and remote operations",
+      "license": "Proprietary",
+      "capabilities": [
+        "context_read",
+        "workspace_write",
+        "http",
+        "ui",
+        "credentials_use",
+        "ssh_agent_use"
+      ]
+    },
+    {
+      "id": "com.noxcaw.term.password-manager",
+      "name": "Galdr Password Manager",
+      "description": "Encrypted credentials, scoped plugin authorization, and security controls",
+      "license": "Proprietary",
+      "capabilities": [
+        "ui",
+        "credentials_manage"
+      ]
+    },
+    {
+      "id": "com.noxcaw.term.ssh",
+      "name": "Galdr SSH",
+      "description": "Managed SSH connections with explicit password or key login and secure SFTP browsing",
+      "license": "Proprietary",
+      "capabilities": [
+        "context_read",
+        "terminal_write",
+        "tabs_manage",
+        "network",
+        "files_read",
+        "files_write",
+        "user_files_read",
+        "ui",
+        "ssh_agent_use"
+      ]
     }
   ]
 }
