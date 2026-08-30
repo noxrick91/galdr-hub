@@ -22,12 +22,22 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.14** — 2026-08-27
+**What's new in v0.2.18** — 2026-08-30
 
-- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.
-- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.
-- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.
-- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.
+- Galdr Password Manager provides an encrypted local credential vault with scoped session or persistent grants, automatic locking, master-password rotation, and short-lived secret clipboard writes.
+- Galdr Git provides a full-page repository workspace with commit history and graph context, working-tree and index changes, staging, commits, branch management, diff inspection, and remote synchronization.
+- Galdr SSH manages reusable profiles with explicit password or key authentication. SSH terminals and SFTP browsing connect independently through private AskPass channels, and the SFTP browser supports direct paths plus file and directory transfers.
+- Declarative plugin UI now supports panels, tabs, selectable weighted tables, diff-aware code blocks, dividers, spacers, multiline text editors, keyboard-native file-table actions, and nested page dialogs.
+- Process plugins can request scoped credential use, SSH-agent access, direct networking, repository access, or explicit read-only access to the user's home directory. The host validates each capability and re-sandboxes plugins when their active repository changes.
+- Managed Linux and Windows installations can apply available Galdr updates directly from the update prompt.
+- The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
+- The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
+- Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
+- SSH and SFTP terminal tabs start with a stable connection title, so clients that do not emit a terminal title no longer remain in the loading state.
+- Galdr SSH reliably switches in both directions between its Remote files and Local files panels.
+- Password and key credential edits now report save failures or success, and saved passwords can be reused by SSH and SFTP without appearing in process arguments or plugin documents.
+- Closing a window while a plugin page or child dialog is open no longer leaves the confirmation UI layered into the page.
+- Holding Delete no longer repeats through both stages of remote-file deletion confirmation.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -407,12 +417,17 @@ The manifest's `capabilities` are what a plugin **requests**. Grants in local in
 | `events` | Subscribe to declared terminal events |
 | `ui` | Provide declarative UI and receive typed UI events |
 | `files_read` / `files_write` | Read / read-write access to the user's Downloads directory |
+| `user_files_read` | Read-only access to files in the user's home directory |
+| `workspace_read` / `workspace_write` | Read / read-write access to the repository containing the active directory |
+| `network` | Direct remote network connections and DNS |
 | `http` | HTTP(S), DNS, and configured proxies |
 | `p2p_network` | Peer-to-peer network connections |
+| `credentials_use` / `credentials_manage` | Use / manage credentials through the host broker |
+| `ssh_agent_use` | Connect to the user's SSH agent without reading private key files |
 
-On Linux, a `process` package is mounted read-only, its private data directory is separately writable, and the environment is cleared before approved values are restored. `files_read` / `files_write` expose only Downloads at `GALDR_PLUGIN_DOWNLOADS`. Network sharing, DNS files, and standard proxy variables appear only when `http` or `p2p_network` is granted. A process plugin is refused when a strict platform sandbox is unavailable.
+On Linux, a `process` package is mounted read-only, its private data directory is separately writable, and the environment is cleared before approved values are restored. `files_read` / `files_write` expose only Downloads at `GALDR_PLUGIN_DOWNLOADS`; `user_files_read` exposes the user's home directory read-only at `GALDR_PLUGIN_USER_FILES`; `workspace_read` / `workspace_write` expose only the active repository at `GALDR_PLUGIN_WORKSPACE`. Network sharing and DNS files appear only when `network`, `http`, or `p2p_network` is granted. A process plugin is refused when a strict platform sandbox is unavailable.
 
-On Windows, a `process` plugin runs in a capability-scoped AppContainer and a kill-on-close Job Object. The host grants only read / execute access to the package, read / write access to private data, and the explicitly approved Downloads and network access. It is likewise refused when the strict sandbox cannot be created.
+On Windows, a `process` plugin runs in a capability-scoped AppContainer and a kill-on-close Job Object. The host grants only read / execute access to the package, read / write access to private data, and the explicitly approved Downloads, current workspace, and network access. It is likewise refused when the strict sandbox cannot be created.
 
 Frames and UI trees have size limits. The host restarts a plugin after a crash or timeout; three failures in 60 seconds disable it for the current session. Packages cannot use absolute paths or parent traversal, and Linux packages cannot contain symlinks.
 

@@ -2,6 +2,31 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.18] - 2026-08-30
+
+### Added
+
+- Galdr Password Manager provides an encrypted local credential vault with scoped session or persistent grants, automatic locking, master-password rotation, and short-lived secret clipboard writes.
+- Galdr Git provides a full-page repository workspace with commit history and graph context, working-tree and index changes, staging, commits, branch management, diff inspection, and remote synchronization.
+- Galdr SSH manages reusable profiles with explicit password or key authentication. SSH terminals and SFTP browsing connect independently through private AskPass channels, and the SFTP browser supports direct paths plus file and directory transfers.
+- Declarative plugin UI now supports panels, tabs, selectable weighted tables, diff-aware code blocks, dividers, spacers, multiline text editors, keyboard-native file-table actions, and nested page dialogs.
+- Process plugins can request scoped credential use, SSH-agent access, direct networking, repository access, or explicit read-only access to the user's home directory. The host validates each capability and re-sandboxes plugins when their active repository changes.
+- Managed Linux and Windows installations can apply available Galdr updates directly from the update prompt.
+
+### Changed
+
+- The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
+- The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
+- Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
+
+### Fixed
+
+- SSH and SFTP terminal tabs start with a stable connection title, so clients that do not emit a terminal title no longer remain in the loading state.
+- Galdr SSH reliably switches in both directions between its Remote files and Local files panels.
+- Password and key credential edits now report save failures or success, and saved passwords can be reused by SSH and SFTP without appearing in process arguments or plugin documents.
+- Closing a window while a plugin page or child dialog is open no longer leaves the confirmation UI layered into the page.
+- Holding Delete no longer repeats through both stages of remote-file deletion confirmation.
+
 ## [0.2.14] - 2026-08-27
 
 ### Changed

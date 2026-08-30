@@ -22,12 +22,22 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.14** — 2026-08-27
+**What's new in v0.2.18** — 2026-08-30
 
-- Installers now stage and verify the complete Galdr runtime before replacing files in place, without terminating the Galdr session that launched the update; open windows and shells continue on the old image until restarted.
-- Linux and Windows upgrades now verify matching `galdr`, `galdr-sh`, `galdr-plugin-host`, and `galdr-plugin` versions on disk and warn when `PATH` resolves a different installation.
-- Plugin marketplace installs now require package identity and version to match the selected index entry, verify the versions loaded by the running host, and request a restart when activation cannot be confirmed.
-- Downloader 0.3.9 preserves freshly discovered media when the URL input commits an unchanged value, so the first Download click queues the selected item; asynchronous network failures now show their error on the task.
+- Galdr Password Manager provides an encrypted local credential vault with scoped session or persistent grants, automatic locking, master-password rotation, and short-lived secret clipboard writes.
+- Galdr Git provides a full-page repository workspace with commit history and graph context, working-tree and index changes, staging, commits, branch management, diff inspection, and remote synchronization.
+- Galdr SSH manages reusable profiles with explicit password or key authentication. SSH terminals and SFTP browsing connect independently through private AskPass channels, and the SFTP browser supports direct paths plus file and directory transfers.
+- Declarative plugin UI now supports panels, tabs, selectable weighted tables, diff-aware code blocks, dividers, spacers, multiline text editors, keyboard-native file-table actions, and nested page dialogs.
+- Process plugins can request scoped credential use, SSH-agent access, direct networking, repository access, or explicit read-only access to the user's home directory. The host validates each capability and re-sandboxes plugins when their active repository changes.
+- Managed Linux and Windows installations can apply available Galdr updates directly from the update prompt.
+- The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
+- The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
+- Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
+- SSH and SFTP terminal tabs start with a stable connection title, so clients that do not emit a terminal title no longer remain in the loading state.
+- Galdr SSH reliably switches in both directions between its Remote files and Local files panels.
+- Password and key credential edits now report save failures or success, and saved passwords can be reused by SSH and SFTP without appearing in process arguments or plugin documents.
+- Closing a window while a plugin page or child dialog is open no longer leaves the confirmation UI layered into the page.
+- Holding Delete no longer repeats through both stages of remote-file deletion confirmation.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -407,12 +417,17 @@ manifest 的 `capabilities` 是插件**请求**的能力，安装状态里的 gr
 | `events` | 订阅声明的终端事件 |
 | `ui` | 提供声明式界面与 UI 事件 |
 | `files_read` / `files_write` | 只读 / 读写用户下载目录 |
+| `user_files_read` | 只读访问用户主目录中的文件 |
+| `workspace_read` / `workspace_write` | 只读 / 读写当前终端所在仓库 |
+| `network` | 建立普通远程网络连接并使用 DNS |
 | `http` | 使用 HTTP(S)、DNS 和已配置的代理 |
 | `p2p_network` | 建立 P2P 网络连接 |
+| `credentials_use` / `credentials_manage` | 通过宿主凭证代理使用 / 管理凭证 |
+| `ssh_agent_use` | 连接用户的 SSH agent，不读取私钥文件 |
 
-Linux 上的 `process` 插件包只读挂载，私有数据目录单独可写，环境变量先清空再按能力恢复。`files_read` / `files_write` 只把下载目录挂到 `GALDR_PLUGIN_DOWNLOADS`；只有授予 `http` 或 `p2p_network` 才会共享网络并暴露 DNS 文件和标准代理变量。如果平台上没有严格沙箱，进程插件会被拒绝启动。
+Linux 上的 `process` 插件包只读挂载，私有数据目录单独可写，环境变量先清空再按能力恢复。`files_read` / `files_write` 只把下载目录挂到 `GALDR_PLUGIN_DOWNLOADS`；`user_files_read` 把用户主目录只读挂到 `GALDR_PLUGIN_USER_FILES`；`workspace_read` / `workspace_write` 只把当前终端所在仓库挂到 `GALDR_PLUGIN_WORKSPACE`。只有授予 `network`、`http` 或 `p2p_network` 才会共享网络并暴露 DNS 文件。如果平台上没有严格沙箱，进程插件会被拒绝启动。
 
-Windows 上的 `process` 插件运行在按能力配置的 AppContainer 和随宿主关闭的 Job Object 中。宿主只授予包目录的读取 / 执行、私有数据目录的读写，以及用户明确批准的 Downloads 与网络访问；无法建立严格沙箱时同样拒绝启动。
+Windows 上的 `process` 插件运行在按能力配置的 AppContainer 和随宿主关闭的 Job Object 中。宿主只授予包目录的读取 / 执行、私有数据目录的读写，以及用户明确批准的 Downloads、当前工作区与网络访问；无法建立严格沙箱时同样拒绝启动。
 
 插件帧与 UI 树都有大小上限。崩溃或超时后宿主会重启插件；同一插件 60 秒内失败三次，会在本次会话中停用。插件包不接受绝对路径、父目录穿越；Linux 包也不接受符号链接。
 

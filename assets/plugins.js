@@ -23,6 +23,7 @@ function latestStable(versions) {
 function capabilityLabel(value) {
   const labels = {
     http: "HTTP",
+    network: marketText("market.capNetwork", "Remote network"),
     p2p_network: marketText("market.capP2p", "P2P network"),
     context_read: marketText("market.capContextRead", "Read context"),
     terminal_read: marketText("market.capTerminalRead", "Read terminal"),
@@ -35,6 +36,12 @@ function capabilityLabel(value) {
     events: marketText("market.capEvents", "Events"),
     files_read: marketText("market.capFilesRead", "Read downloads"),
     files_write: marketText("market.capFilesWrite", "Write downloads"),
+    user_files_read: marketText("market.capUserFilesRead", "Read user files"),
+    workspace_read: marketText("market.capWorkspaceRead", "Read current workspace"),
+    workspace_write: marketText("market.capWorkspaceWrite", "Write current workspace"),
+    credentials_use: marketText("market.capCredentialsUse", "Use credentials"),
+    credentials_manage: marketText("market.capCredentialsManage", "Manage credentials"),
+    ssh_agent_use: marketText("market.capSshAgent", "Use SSH agent"),
     ui: marketText("market.capUi", "UI"),
     shell_state: marketText("market.capShell", "Shell state"),
   };
@@ -77,12 +84,16 @@ function renderMarketplace() {
     const card = element("article", "market-card");
     const heading = element("div", "market-card-head");
     const names = element("div");
-    names.append(element("h2", null, plugin.name));
-    names.append(element("p", "market-id", plugin.id));
+    names.append(element("h3", null, plugin.name));
+    const pluginId = element("p", "market-id", plugin.id);
+    pluginId.title = plugin.id;
+    names.append(pluginId);
     heading.append(names);
     heading.append(element("span", "market-version", version?.version || "—"));
     card.append(heading);
-    card.append(element("p", "market-description", plugin.description));
+    const description = element("p", "market-description", plugin.description);
+    description.title = plugin.description;
+    card.append(description);
 
     const facts = element("dl", "market-facts");
     const addFact = (label, value) => {
@@ -93,19 +104,34 @@ function renderMarketplace() {
       .map((item) => `${item.os} ${item.arch}`)
       .join(", ");
     addFact(marketText("market.platforms", "Platforms"), platforms || "—");
-    addFact(
-      marketText("market.permissions", "Permissions"),
-      (plugin.capabilities || []).map(capabilityLabel).join(", ") || marketText("market.none", "None")
-    );
     if (plugin.license) addFact(marketText("market.license", "License"), plugin.license);
     card.append(facts);
 
-    if ((plugin.capabilities || []).length) {
+    const permissions = plugin.capabilities || [];
+    if (permissions.length) {
+      const permissionDetails = element("details", "market-permissions");
+      const permissionSummary = element("summary");
+      permissionSummary.append(
+        element("span", null, marketText("market.permissions", "Permissions")),
+        element("span", "market-permission-count", String(permissions.length))
+      );
+      permissionDetails.append(permissionSummary);
       const capabilities = element("div", "market-capabilities");
-      for (const capability of plugin.capabilities) {
-        capabilities.append(element("span", "market-capability", capabilityLabel(capability)));
+      capabilities.setAttribute("role", "list");
+      for (const capability of permissions) {
+        const item = element("span", "market-capability", capabilityLabel(capability));
+        item.setAttribute("role", "listitem");
+        capabilities.append(item);
       }
-      card.append(capabilities);
+      permissionDetails.append(capabilities);
+      card.append(permissionDetails);
+    } else {
+      const noPermissions = element("p", "market-no-permissions");
+      noPermissions.append(
+        element("span", null, marketText("market.permissions", "Permissions")),
+        element("span", null, marketText("market.none", "None"))
+      );
+      card.append(noPermissions);
     }
 
     const command = installCommand(plugin);
