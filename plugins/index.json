@@ -7,6 +7,37 @@
       "description": "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
       "versions": [
         {
+          "version": "0.3.10",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.10/com.noxcaw.term.downloader-0.3.10-linux-aarch64.zip",
+              "sha256": "a24718f522fb5f13f8d94d66ba1ad9bc713c042eddfaf8ef8c363bfd4fa257b6"
+            },
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.10/com.noxcaw.term.downloader-0.3.10-linux-x86_64.zip",
+              "sha256": "0dea3897fc2ee2e0e51ce432aecac432649538839f24fa994160a516d27a84ac"
+            },
+            {
+              "os": "windows",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.10/com.noxcaw.term.downloader-0.3.10-windows-aarch64.zip",
+              "sha256": "b5933126b73b6ca2ce86f793454d54ee727fb5eadf624b03ca91721b86a00ee6"
+            },
+            {
+              "os": "windows",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.10/com.noxcaw.term.downloader-0.3.10-windows-x86_64.zip",
+              "sha256": "2d22ba6214960b4907153a5fb2a5f3d3ea56ccad718f2f2215ab6013ebc3ea9d"
+            }
+          ],
+          "galdr": ">=0.2.6"
+        },
+        {
           "version": "0.3.9",
           "api": "^1.0",
           "packages": [
