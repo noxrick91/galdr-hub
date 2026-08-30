@@ -18,6 +18,7 @@ User-facing changes to Galdr. Versions match Git tags.
 - The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
 - The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
 - Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
+- Galdr Downloader 0.3.10 adopts the extended declarative UI event and input schema used by Galdr 0.2.18.
 
 ### Fixed
 

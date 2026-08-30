@@ -33,6 +33,7 @@ This page lists changes in the **current public release**.
 - The plugin manager uses each installed plugin manifest's display name, including for local plugins that are absent from the current marketplace catalog.
 - The official website presents plugins in compact responsive cards so larger catalogs remain easy to scan.
 - Galdr SSH 0.1.7 uses compact switchable Remote files and Local files views. It reuses the selected connection credential without rendering the password, supports arbitrary local paths under the granted home directory, and exposes keyboard shortcuts for navigation and transfers.
+- Galdr Downloader 0.3.10 adopts the extended declarative UI event and input schema used by Galdr 0.2.18.
 - SSH and SFTP terminal tabs start with a stable connection title, so clients that do not emit a terminal title no longer remain in the loading state.
 - Galdr SSH reliably switches in both directions between its Remote files and Local files panels.
 - Password and key credential edits now report save failures or success, and saved passwords can be reused by SSH and SFTP without appearing in process arguments or plugin documents.
