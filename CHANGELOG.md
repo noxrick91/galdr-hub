@@ -2,6 +2,60 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
+## [0.2.19] - 2026-09-04
+
+### Added
+
+- An `[update]` configuration section with `check` and `auto_install`, also honouring `GALDR_NO_UPDATE_CHECK`, so air-gapped and centrally managed installations can turn off the startup release check.
+- The built-in `cat` accepts `-n -b -s -E -T -v -e -t -A` and streams its input, so piping a large file no longer reads it into memory and `tail -f | cat` forwards lines as they arrive.
+
+### Changed
+
+- The alternate screen no longer accumulates host scrollback. A full-screen application keeps the wheel it asked for and no longer has a second scrollbar drawn beside its own; inline transcripts on the primary screen are unaffected.
+- Precision touchpads scroll by the distance moved instead of a fixed three notches per event, and Page Up/Down move one window height instead of a fixed 20 lines.
+- HTTPS on Linux and Windows x86_64 verifies against the operating system trust store, so a certificate an administrator installed — an inspecting proxy, for instance — now works for the marketplace, tool downloads, and updates.
+- Automatic updates require the release index to publish a checksum for the install script and refuse to run a script that does not match it.
+- Resizing a window across columns reflows about twice as fast, so dragging a window edge with a large scrollback stays smooth.
+- Command completion falls back to native specifications and recent command-specific history when a plugin is unavailable, and PATH discovery no longer holds shared cache locks while scanning.
+- Galdr Git 0.1.6 reads remote details in one Git invocation, and Galdr SSH 0.1.8 uses private local named pipes for Windows SFTP password prompts.
+- Plugin manager network operations now have bounded DNS, connection, response, body, and overall timeouts.
+- The rest of a previous command line is suggested where nothing can be completed word by word: typing `cargo build --rel` shows the rest of the last matching line, and Right accepts it whole. Word-by-word completion still wins wherever it has candidates.
+- Command and path suggestions put what you actually use first. Ranking compares usage in doubling bands before name length, so a command run every day outranks a shorter one never used, while similarly-used candidates keep the shorter name first.
+
+### Fixed
+
+- A plugin that misses a completion deadline no longer loses its pages and commands too. Completion is asked for on a keystroke and given 300 ms; missing that now backs off only further completions, while three hard failures still stop everything for the minute they were counted in.
+- Extracted plugin files are never left writable by other accounts, whatever mode the package declares.
+- Updating all plugins no longer stops at the first failure. A plugin the Hub cannot serve, or whose package fails verification, is reported by name and the rest still update.
+- Superseded plugin packages are pruned by any plugin-manager command that changes state, instead of only after an update whose host reload succeeded. Installs that accumulated old versions release that disk space at the next enable, install, or update.
+- Shell history is written as each command is entered instead of only when the shell exits cleanly. Closing a window kills the shell outright, so until now a whole session's history — and on a long-running window every command ever typed — was lost, and the last command before any exit was missing.
+- A highlight is dropped once the text under it is replaced. Copying re-reads the grid at the moment the copy happens, so a highlight left over a full-screen application that had since redrawn those rows quietly put different text on the clipboard. Redrawing the same characters, which most applications do constantly, leaves the selection alone.
+- A highlight left over a full-screen application can be dismissed again. Clicking in a pane whose application asked for the mouse never reached the host's selection handling, so a selection made there stayed on screen with no gesture that would clear it; the click now clears it and still reaches the application.
+- Copying a selection no longer carries the blank padding a drag sweeps past the end of each line. Lines that were wrapped keep their full width, and interior spacing is untouched.
+- Scrolling back no longer drifts: new output keeps the viewport on the text being read instead of sliding it forward, and dragging the scrollbar stays accurate while output arrives.
+- Array and positional-parameter slices such as `${a[@]:1}` and `${@:2}` select elements instead of silently expanding to nothing, and `${s:0:-1}` and `${s: -99}` now match bash.
+- Arithmetic supports `**`, the ternary operator, and hexadecimal, octal and `base#digits` literals, and `&&`, `||` and `?:` no longer apply assignments from the branch they skipped.
+- `echo` honours `-e` and `-E` with the full escape set, and `printf` accepts `0x`, octal and `'c` numeric operands.
+- The multiplexer socket is created private to the user and refuses connections from other accounts, which previously could start processes in the running session.
+- A plugin whose identifier is made only of dots is rejected instead of installing outside the plugin directory.
+- Plugin packages are downloaded into a private directory and verified and extracted through one file handle, and extraction stops on the bytes actually written rather than on the sizes the archive declares.
+- Process plugins run under address space, process count, file descriptor and core dump limits.
+- Ctrl+click asks for confirmation before handing a local path or `file://` link to the desktop opener.
+- Tab completion no longer runs executables discovered in world-writable `PATH` directories.
+- Galdr Downloader no longer builds against a withdrawn release of its stream cipher dependency.
+- Git, SSH, and other plugins that preserve tools from Windows or Program Files can open their command-palette pages without attempting an unauthorized ACL rewrite of system-managed directories.
+- Windows plugin-host and AskPass named pipes reserve their first instance, reject remote clients, and use bounded connection and I/O waits so startup races or stalled peers cannot freeze the UI.
+- Plugin-host shutdown, reload, update, and removal now stop active process runtimes before replacing files, avoiding executable locks on Windows and restoring installed state when a live host cannot unload a plugin.
+- Galdr Password Manager 0.1.1 no longer emits invalid table selections after filtering entries or when pending authorization data becomes stale.
+- Galdr Downloader 0.3.11 saves task state through crash-safe atomic replacement on Windows and Unix.
+- Galdr SSH 0.1.9 keeps one SSH connection open across SFTP operations for a minute, so browsing, uploading and deleting no longer pay a fresh handshake and password prompt each time; checks host keys against the user's own `known_hosts` as well as its private one instead of trusting a first connection blindly; shows a transfer's percentage, rate and estimate while it runs; and can cancel an operation instead of waiting for it.
+- Galdr Downloader 0.3.12 verifies HTTPS against the operating system trust store and honours a SOCKS proxy, matching the rest of Galdr; finishes a single-connection download by moving the file into place instead of copying it, which no longer needs room for two copies of the download at the moment it completes; no longer saves a file under a name Windows opens as a device; only resumes a partial download when a validator or the file length confirms the remote file is the one the parts came from; and dials BitTorrent through a `socks5h://` proxy setting instead of ignoring it.
+- Plugin state, command caches, session restore data, completion frequencies, and downloader tasks are replaced atomically on Windows as well as Unix.
+- Concurrent plugin installs and other state-changing manager commands are serialized, so each command reloads and preserves changes committed by earlier processes.
+- Plugin-host startup participates in the state lock until its IPC endpoint is ready, no-op manager commands no longer restart runtimes, and reload shutdown is broadcast before a shared deadline without creating duplicate workers after a timeout.
+- Plugin updates discard grants no longer requested by the new manifest, reject mutable contents for an existing version, roll back uncommitted packages, remove obsolete versions after a verified reload, and retry pending Windows directory cleanup.
+- External help discovery drains large output concurrently and remains bounded when child processes inherit its output stream.
+
 ## [0.2.18] - 2026-08-30
 
 ### Added

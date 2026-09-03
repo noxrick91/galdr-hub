@@ -70,5 +70,9 @@
       "name": "SHA256SUMS",
       "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.18/SHA256SUMS"
     }
-  ]
+  ],
+  "installers": {
+    "install": "1d0eb09d705883f45a6d03b7d93ae206e0d3e983345c6b64e58cd91138187f61",
+    "install.ps1": "171a06a91a1e0a00efd1e8e5c8d70a0ed6bcf929d7db474d884420c836f0731b"
+  }
 }
