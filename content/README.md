@@ -22,11 +22,14 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.21** — 2026-09-04
+**What's new in v0.2.22** — 2026-09-05
 
-- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. The question is drawn over the bottom of the window; Enter pastes, Escape drops it, and simply carrying on typing drops it too, so input is never held by a question. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
-- Everything Galdr says is on the screen again. Messages were written to a status strip that is no longer laid out, so the search query and match count, copy mode, quick select, settings feedback, plugin errors, and the confirmations that wait on Enter or Escape were all written to nowhere — a question could hold the keyboard while showing nothing at all. They are drawn in a bar over the bottom of the window now: a message reporting something that happened fades after a few seconds, a line describing a mode leaves when the mode does, and a question stands until it is answered.
-- A question can be answered by carrying on. Enter accepts and Escape refuses, and any other key refuses it and still reaches the terminal, so a confirmation is never the reason a keystroke disappears; a modifier held on the way to a shortcut answers nothing.
+- A cross-platform `cargo xtask release` workflow prepares versions, changelog sections, bundled plugin versions, lockfiles, and native verification from one command, then validates and atomically pushes an annotated release tag from a separate confirmed command.
+- Process plugins receive structured availability and failure reasons for every declared external tool. Feature-level dependencies can now keep a plugin's diagnostics and settings UI running while disabling only actions that need the missing executable; the SDK falls back cleanly on older hosts.
+- Galdr Git and Galdr SSH open their manager pages even when Git or the OpenSSH client is not installed, explain how to recover, and leave connection profiles and other non-tool state usable.
+- The update card now reserves space for its close button, grows for the active font, and wraps its copy at narrow window sizes instead of clipping the title or instructions.
+- Routine plugin UI opens, acknowledgements, and automatic refreshes no longer cover the footer with internal-ID status notices; explicit plugin notifications and failures remain visible.
+- Windows process plugins no longer reapply an identical inheritable AppContainer ACL on every start, which previously walked an entire repository or user profile and made Git and SSH manager pages stall or time out. User-file access on Windows is now confined to the Downloads exchange boundary instead of rewriting permissions across the whole profile.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -512,11 +515,13 @@ source = "https://downloads.example.com/extractor"
 sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 ```
 
-- `required = true`：找不到或无法校验时，插件不会启动。
-- `required = false`：插件仍可启动，但应在对应功能旁显示明确的不可用原因。
+- `required = true`：找不到或无法校验时，插件不会启动。仅当工具缺失后连诊断或设置界面都没有意义时才使用它。
+- `required = false`：插件以降级模式启动，只禁用受影响的功能。`galdr_plugin_sdk::plugin_tool_status("工具 ID")` 可取得宿主给出的不可用原因，`plugin_tool_statuses()` 可取得全部声明工具的状态。
 - `source` 必须使用 HTTPS，并提供固定 `sha256`；也可以使用 HTTPS `checksum_source` 配合 `checksum_name`。
 - 下载工具需要插件已经获得网络能力。宿主不会根据插件 ID、文件名或 PATH 猜测未声明的工具。
 - Rust process 插件用 `galdr_plugin_sdk::plugin_tool_path("工具 ID")` 获取解析后的路径。
+
+状态 API 是向后兼容的增量能力：旧插件继续使用原有路径映射；新插件运行在旧宿主上时，已解析路径仍会报告为可用。旧宿主无法提供缺失原因时，插件应显示通用安装说明，并提示用户安装后重启 Galdr。
 
 Galdr Downloader 会按同样方式管理站点解析器。FFmpeg、Deno、Node 等可选工具只有在 manifest 声明并成功解析后才会暴露给插件。
 

@@ -22,11 +22,14 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.21** — 2026-09-04
+**What's new in v0.2.22** — 2026-09-05
 
-- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. The question is drawn over the bottom of the window; Enter pastes, Escape drops it, and simply carrying on typing drops it too, so input is never held by a question. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
-- Everything Galdr says is on the screen again. Messages were written to a status strip that is no longer laid out, so the search query and match count, copy mode, quick select, settings feedback, plugin errors, and the confirmations that wait on Enter or Escape were all written to nowhere — a question could hold the keyboard while showing nothing at all. They are drawn in a bar over the bottom of the window now: a message reporting something that happened fades after a few seconds, a line describing a mode leaves when the mode does, and a question stands until it is answered.
-- A question can be answered by carrying on. Enter accepts and Escape refuses, and any other key refuses it and still reaches the terminal, so a confirmation is never the reason a keystroke disappears; a modifier held on the way to a shortcut answers nothing.
+- A cross-platform `cargo xtask release` workflow prepares versions, changelog sections, bundled plugin versions, lockfiles, and native verification from one command, then validates and atomically pushes an annotated release tag from a separate confirmed command.
+- Process plugins receive structured availability and failure reasons for every declared external tool. Feature-level dependencies can now keep a plugin's diagnostics and settings UI running while disabling only actions that need the missing executable; the SDK falls back cleanly on older hosts.
+- Galdr Git and Galdr SSH open their manager pages even when Git or the OpenSSH client is not installed, explain how to recover, and leave connection profiles and other non-tool state usable.
+- The update card now reserves space for its close button, grows for the active font, and wraps its copy at narrow window sizes instead of clipping the title or instructions.
+- Routine plugin UI opens, acknowledgements, and automatic refreshes no longer cover the footer with internal-ID status notices; explicit plugin notifications and failures remain visible.
+- Windows process plugins no longer reapply an identical inheritable AppContainer ACL on every start, which previously walked an entire repository or user profile and made Git and SSH manager pages stall or time out. User-file access on Windows is now confined to the Downloads exchange boundary instead of rewriting permissions across the whole profile.
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -512,11 +515,13 @@ source = "https://downloads.example.com/extractor"
 sha256 = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 ```
 
-- With `required = true`, the plugin does not start when the tool cannot be found or verified.
-- With `required = false`, the plugin may start but should show a clear unavailable reason beside the affected feature.
+- With `required = true`, the plugin does not start when the tool cannot be found or verified. Use this only when no plugin request, including diagnostics or settings UI, is useful without the tool.
+- With `required = false`, the plugin starts in degraded mode and should disable only the affected feature. `galdr_plugin_sdk::plugin_tool_status("tool-id")` provides the host's unavailable reason; `plugin_tool_statuses()` returns every declared result.
 - `source` must use HTTPS and have a fixed `sha256`, or an HTTPS `checksum_source` with an optional `checksum_name`.
 - Tool downloads require a granted network capability. The host never guesses undeclared tools from a plugin ID, filename, or PATH.
 - Rust process plugins obtain the resolved path with `galdr_plugin_sdk::plugin_tool_path("tool-id")`.
+
+The status API is additive: old plugins continue to use the path map unchanged, and a new plugin running on an older host still sees resolved paths as available. If the host has no detailed status for a missing tool, show a generic installation instruction and ask the user to restart Galdr after installing it.
 
 Galdr Downloader manages its site extractor through the same mechanism. Optional tools such as FFmpeg, Deno, and Node are exposed only after their manifest declarations resolve successfully.
 
