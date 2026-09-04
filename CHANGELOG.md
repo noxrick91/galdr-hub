@@ -2,7 +2,7 @@
 
 User-facing changes to Galdr. Versions match Git tags.
 
-## [0.2.19] - 2026-09-04
+## [0.2.20] - 2026-09-04
 
 ### Added
 
