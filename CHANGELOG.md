@@ -6,7 +6,7 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ### Added
 
-- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
+- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. The question is drawn over the bottom of the window; Enter pastes, Escape drops it, and simply carrying on typing drops it too, so input is never held by a question. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
 - An `[update]` configuration section with `check` and `auto_install`, also honouring `GALDR_NO_UPDATE_CHECK`, so air-gapped and centrally managed installations can turn off the startup release check.
 - The built-in `cat` accepts `-n -b -s -E -T -v -e -t -A` and streams its input, so piping a large file no longer reads it into memory and `tail -f | cat` forwards lines as they arrive.
 
@@ -43,6 +43,8 @@ User-facing changes to Galdr. Versions match Git tags.
 - Plugin packages are downloaded into a private directory and verified and extracted through one file handle, and extraction stops on the bytes actually written rather than on the sizes the archive declares.
 - Process plugins run under address space, process count, file descriptor and core dump limits.
 - Ctrl+click asks for confirmation before handing a local path or `file://` link to the desktop opener.
+- Everything Galdr says is on the screen again. Messages were written to a status strip that is no longer laid out, so the search query and match count, copy mode, quick select, settings feedback, plugin errors, and the confirmations that wait on Enter or Escape were all written to nowhere — a question could hold the keyboard while showing nothing at all. They are drawn in a bar over the bottom of the window now: a message reporting something that happened fades after a few seconds, a line describing a mode leaves when the mode does, and a question stands until it is answered.
+- A question can be answered by carrying on. Enter accepts and Escape refuses, and any other key refuses it and still reaches the terminal, so a confirmation is never the reason a keystroke disappears; a modifier held on the way to a shortcut answers nothing.
 - Tab completion no longer runs executables discovered in world-writable `PATH` directories.
 - Galdr Downloader no longer builds against a withdrawn release of its stream cipher dependency.
 - Git, SSH, and other plugins that preserve tools from Windows or Program Files can open their command-palette pages without attempting an unauthorized ACL rewrite of system-managed directories.
