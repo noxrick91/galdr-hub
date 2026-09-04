@@ -24,6 +24,7 @@ This page lists changes in the **current public release**.
 
 **What's new in v0.2.20** — 2026-09-04
 
+- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
 - An `[update]` configuration section with `check` and `auto_install`, also honouring `GALDR_NO_UPDATE_CHECK`, so air-gapped and centrally managed installations can turn off the startup release check.
 - The built-in `cat` accepts `-n -b -s -E -T -v -e -t -A` and streams its input, so piping a large file no longer reads it into memory and `tail -f | cat` forwards lines as they arrive.
 - The alternate screen no longer accumulates host scrollback. A full-screen application keeps the wheel it asked for and no longer has a second scrollbar drawn beside its own; inline transcripts on the primary screen are unaffected.

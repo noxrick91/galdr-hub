@@ -6,6 +6,7 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ### Added
 
+- Pasting more than one line asks first, because more than one line runs more than one command and what the clipboard holds is not always what the screen it came from appeared to say. `[term] confirm_multiline_paste = false` turns it off; a single command, with or without the newline that submits it, is never held back.
 - An `[update]` configuration section with `check` and `auto_install`, also honouring `GALDR_NO_UPDATE_CHECK`, so air-gapped and centrally managed installations can turn off the startup release check.
 - The built-in `cat` accepts `-n -b -s -E -T -v -e -t -A` and streams its input, so piping a large file no longer reads it into memory and `tail -f | cat` forwards lines as they arrive.
 
