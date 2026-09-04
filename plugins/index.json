@@ -7,6 +7,37 @@
       "description": "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
       "versions": [
         {
+          "version": "0.3.13",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.13/com.noxcaw.term.downloader-0.3.13-linux-aarch64.zip",
+              "sha256": "b8619bc2873dbddd332ebbff75185b204bc00ed653331bba48ec5678b92a4cb4"
+            },
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.13/com.noxcaw.term.downloader-0.3.13-linux-x86_64.zip",
+              "sha256": "59a89fa48ac97d836ce221b7eed068bc8926956f2c5f1590cac492f4875f8834"
+            },
+            {
+              "os": "windows",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.13/com.noxcaw.term.downloader-0.3.13-windows-aarch64.zip",
+              "sha256": "823896e282bc5e5cae03a3842264f78052d5e758382aa73208bf684c1e6ae54c"
+            },
+            {
+              "os": "windows",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.downloader-v0.3.13/com.noxcaw.term.downloader-0.3.13-windows-x86_64.zip",
+              "sha256": "d6147fb3f39a6f09a075f1eb7e9a9315b32bd457642fe5fbf3237b2e274f7bca"
+            }
+          ],
+          "galdr": ">=0.2.6"
+        },
+        {
           "version": "0.3.12",
           "api": "^1.0",
           "packages": [
@@ -246,6 +277,37 @@
       "description": "Visual Git history, changes, branches, commits, and remote operations",
       "versions": [
         {
+          "version": "0.1.7",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.git-v0.1.7/com.noxcaw.term.git-0.1.7-linux-aarch64.zip",
+              "sha256": "388edda7722c00135f2667404166b108b3f02442f5b8c72303071c5565167cdf"
+            },
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.git-v0.1.7/com.noxcaw.term.git-0.1.7-linux-x86_64.zip",
+              "sha256": "70cb37fed3006aea6e0ad5ecd4eed459521f7ea804ad18f70e1b954e820ba90e"
+            },
+            {
+              "os": "windows",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.git-v0.1.7/com.noxcaw.term.git-0.1.7-windows-aarch64.zip",
+              "sha256": "dc4b2601843648d33c6a1845125e9cc1fa0a0596b1989d7b98f9e56eead9dd69"
+            },
+            {
+              "os": "windows",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.git-v0.1.7/com.noxcaw.term.git-0.1.7-windows-x86_64.zip",
+              "sha256": "e42edb5a1157e2bb9c32262cec71bf99367e959ebc2f077fab873aa990e261c0"
+            }
+          ],
+          "galdr": ">=0.2.19"
+        },
+        {
           "version": "0.1.6",
           "api": "^1.0",
           "packages": [
@@ -315,6 +377,37 @@
       "description": "Encrypted credentials, scoped plugin authorization, and security controls",
       "versions": [
         {
+          "version": "0.1.2",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.password-manager-v0.1.2/com.noxcaw.term.password-manager-0.1.2-linux-aarch64.zip",
+              "sha256": "520ffa2cb23c63ef241a393d6b8e9b387f3526fd8a4a33fb6a2a03b039277a1e"
+            },
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.password-manager-v0.1.2/com.noxcaw.term.password-manager-0.1.2-linux-x86_64.zip",
+              "sha256": "f7bd48be1dc9723783e593532af80f721c8361c89bdfef411e64558b9198ac54"
+            },
+            {
+              "os": "windows",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.password-manager-v0.1.2/com.noxcaw.term.password-manager-0.1.2-windows-aarch64.zip",
+              "sha256": "883d1923d2197e20a782d32d1ac68a8705094cb5650e202b4b72901030c31501"
+            },
+            {
+              "os": "windows",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.password-manager-v0.1.2/com.noxcaw.term.password-manager-0.1.2-windows-x86_64.zip",
+              "sha256": "38a7c7ed29c3a462300257aba6000056d8c16d56aa15be2faf4ab6356fcad4b9"
+            }
+          ],
+          "galdr": ">=0.2.19"
+        },
+        {
           "version": "0.1.1",
           "api": "^1.0",
           "packages": [
@@ -383,6 +476,37 @@
       "name": "Galdr SSH",
       "description": "Managed SSH connections with explicit password or key login and secure SFTP browsing",
       "versions": [
+        {
+          "version": "0.1.10",
+          "api": "^1.0",
+          "packages": [
+            {
+              "os": "linux",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.ssh-v0.1.10/com.noxcaw.term.ssh-0.1.10-linux-aarch64.zip",
+              "sha256": "c1970d3193f9e2fff0c1d11fbf01df83f9e375931f469292089ce983f0f4dc38"
+            },
+            {
+              "os": "linux",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.ssh-v0.1.10/com.noxcaw.term.ssh-0.1.10-linux-x86_64.zip",
+              "sha256": "98f85fab7b4b970e433526861781c3d1bfcaa5666e750667aaf7e0f04a73f067"
+            },
+            {
+              "os": "windows",
+              "arch": "aarch64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.ssh-v0.1.10/com.noxcaw.term.ssh-0.1.10-windows-aarch64.zip",
+              "sha256": "e1433bfaa8f1c9d68fc17630b773c5c30a4dcdc458f68e202c8f81ee92cf6f65"
+            },
+            {
+              "os": "windows",
+              "arch": "x86_64",
+              "url": "https://github.com/noxrick91/galdr-hub/releases/download/plugin-com.noxcaw.term.ssh-v0.1.10/com.noxcaw.term.ssh-0.1.10-windows-x86_64.zip",
+              "sha256": "1175a038bb59df71163b12f2a7fed429ebb742ce4ea9504bf01919c6efb40b21"
+            }
+          ],
+          "galdr": ">=0.2.19"
+        },
         {
           "version": "0.1.9",
           "api": "^1.0",
