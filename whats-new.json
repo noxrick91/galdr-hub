@@ -1,16 +1,23 @@
 {
-  "tag": "v0.2.22",
-  "version": "0.2.22",
-  "date": "2026-09-05",
-  "title": "What's new in v0.2.22",
+  "tag": "v0.2.23",
+  "version": "0.2.23",
+  "date": "2026-09-09",
+  "title": "What's new in v0.2.23",
   "notes": [
-    "A cross-platform `cargo xtask release` workflow prepares versions, changelog sections, bundled plugin versions, lockfiles, and native verification from one command, then validates and atomically pushes an annotated release tag from a separate confirmed command.",
-    "Process plugins receive structured availability and failure reasons for every declared external tool. Feature-level dependencies can now keep a plugin's diagnostics and settings UI running while disabling only actions that need the missing executable; the SDK falls back cleanly on older hosts.",
-    "Galdr Git and Galdr SSH open their manager pages even when Git or the OpenSSH client is not installed, explain how to recover, and leave connection profiles and other non-tool state usable.",
-    "The update card now reserves space for its close button, grows for the active font, and wraps its copy at narrow window sizes instead of clipping the title or instructions.",
-    "Routine plugin UI opens, acknowledgements, and automatic refreshes no longer cover the footer with internal-ID status notices; explicit plugin notifications and failures remain visible.",
-    "Windows process plugins no longer reapply an identical inheritable AppContainer ACL on every start, which previously walked an entire repository or user profile and made Git and SSH manager pages stall or time out. User-file access on Windows is now confined to the Downloads exchange boundary instead of rewriting permissions across the whole profile."
+    "Windows SSH AskPass now uses a private, owner-and-system ACL named pipe with",
+    "Windows SSH AskPass keeps serving after a client disconnects before the pipe",
+    "Live window resizing now throttles intermediate terminal reflows to about",
+    "Common two-number ANSI color sequences now use a direct parser fast path,",
+    "Completion usage learning now persists command names only and filters legacy",
+    "History-derived argument candidates are now deduplicated before type inference,",
+    "Programmable completion cache entries now include the active PATH and working",
+    "Catalog completion now follows nested Git `remote` and `stash` commands and",
+    "Common path-valued options now enter file or directory completion directly,",
+    "SSH jump-host options now use host candidates, and `git clone --branch` uses",
+    "Completion now uses command-aware schemas for Git, Cargo, SSH/SCP, cURL,",
+    "Plugin completion requests run off the editor thread with bounded caching,",
+    "Completion settings now support learning sensitivity, history scope,"
   ],
-  "body": "### Added\n\n- A cross-platform `cargo xtask release` workflow prepares versions, changelog sections, bundled plugin versions, lockfiles, and native verification from one command, then validates and atomically pushes an annotated release tag from a separate confirmed command.\n\n### Changed\n\n- Process plugins receive structured availability and failure reasons for every declared external tool. Feature-level dependencies can now keep a plugin's diagnostics and settings UI running while disabling only actions that need the missing executable; the SDK falls back cleanly on older hosts.\n- Galdr Git and Galdr SSH open their manager pages even when Git or the OpenSSH client is not installed, explain how to recover, and leave connection profiles and other non-tool state usable.\n\n### Fixed\n\n- The update card now reserves space for its close button, grows for the active font, and wraps its copy at narrow window sizes instead of clipping the title or instructions.\n- Routine plugin UI opens, acknowledgements, and automatic refreshes no longer cover the footer with internal-ID status notices; explicit plugin notifications and failures remain visible.\n- Windows process plugins no longer reapply an identical inheritable AppContainer ACL on every start, which previously walked an entire repository or user profile and made Git and SSH manager pages stall or time out. User-file access on Windows is now confined to the Downloads exchange boundary instead of rewriting permissions across the whole profile.",
+  "body": "### Fixed\n\n- Windows SSH AskPass now uses a private, owner-and-system ACL named pipe with\n  remote clients rejected, instead of a loopback TCP listener for password\n  delivery.\n- Windows SSH AskPass keeps serving after a client disconnects before the pipe\n  handshake completes; the SSH plugin test also now checks the platform's\n  actual OpenSSH wording.\n- Live window resizing now throttles intermediate terminal reflows to about\n  30 Hz and still applies the final size after the drag settles.\n- Common two-number ANSI color sequences now use a direct parser fast path,\n  reducing SGR parsing overhead without changing general escape handling.\n- Completion usage learning now persists command names only and filters legacy\n  frequency entries that contain paths, URLs, assignments, or other raw values.\n- History-derived argument candidates are now deduplicated before type inference,\n  so repeated values cannot skew host, file, or generic-value detection.\n- Programmable completion cache entries now include the active PATH and working\n  directory, preventing stale results after a shell context change.\n- Catalog completion now follows nested Git `remote` and `stash` commands and\n  ignores values belonging to global options such as `git -C <dir>` when\n  locating the active subcommand.\n- Common path-valued options now enter file or directory completion directly,\n  including `git -C`, `ssh -i`, `scp -i`, `curl -o`, and Cargo path options.\n- SSH jump-host options now use host candidates, and `git clone --branch` uses\n  repository references when they are available.\n- Completion now uses command-aware schemas for Git, Cargo, SSH/SCP, cURL,\n  Docker, and ping, including attached `-iidentity` and `--output=file`\n  values, enum options, Git refs, and `--` end-of-options handling.\n- Plugin completion requests run off the editor thread with bounded caching,\n  configurable timeouts, and generation checks that discard results from a\n  replaced plugin set. Candidate protocol items and host menus now carry\n  optional source, kind, replacement, score, and request metadata.\n- Completion settings now support learning sensitivity, history scope,\n  dynamic-provider timeout, and source visibility. Deep help cache keys retain\n  confirmed nested subcommands, while host and Git-ref discovery use bounded\n  caches with finer-grained file timestamps.",
   "url": "./CHANGELOG.md"
 }

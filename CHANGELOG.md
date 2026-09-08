@@ -4,6 +4,45 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.23] - 2026-09-09
+
+### Fixed
+
+- Windows SSH AskPass now uses a private, owner-and-system ACL named pipe with
+  remote clients rejected, instead of a loopback TCP listener for password
+  delivery.
+- Windows SSH AskPass keeps serving after a client disconnects before the pipe
+  handshake completes; the SSH plugin test also now checks the platform's
+  actual OpenSSH wording.
+- Live window resizing now throttles intermediate terminal reflows to about
+  30 Hz and still applies the final size after the drag settles.
+- Common two-number ANSI color sequences now use a direct parser fast path,
+  reducing SGR parsing overhead without changing general escape handling.
+- Completion usage learning now persists command names only and filters legacy
+  frequency entries that contain paths, URLs, assignments, or other raw values.
+- History-derived argument candidates are now deduplicated before type inference,
+  so repeated values cannot skew host, file, or generic-value detection.
+- Programmable completion cache entries now include the active PATH and working
+  directory, preventing stale results after a shell context change.
+- Catalog completion now follows nested Git `remote` and `stash` commands and
+  ignores values belonging to global options such as `git -C <dir>` when
+  locating the active subcommand.
+- Common path-valued options now enter file or directory completion directly,
+  including `git -C`, `ssh -i`, `scp -i`, `curl -o`, and Cargo path options.
+- SSH jump-host options now use host candidates, and `git clone --branch` uses
+  repository references when they are available.
+- Completion now uses command-aware schemas for Git, Cargo, SSH/SCP, cURL,
+  Docker, and ping, including attached `-iidentity` and `--output=file`
+  values, enum options, Git refs, and `--` end-of-options handling.
+- Plugin completion requests run off the editor thread with bounded caching,
+  configurable timeouts, and generation checks that discard results from a
+  replaced plugin set. Candidate protocol items and host menus now carry
+  optional source, kind, replacement, score, and request metadata.
+- Completion settings now support learning sensitivity, history scope,
+  dynamic-provider timeout, and source visibility. Deep help cache keys retain
+  confirmed nested subcommands, while host and Git-ref discovery use bounded
+  caches with finer-grained file timestamps.
+
 ## [0.2.22] - 2026-09-05
 
 ### Added
@@ -535,3 +574,10 @@ User-facing changes to Galdr. Versions match Git tags.
 
 - Default font size is 15pt with line height 1 and tab-line height 1.5.
 - Tab or Enter accepts a completion; Space does not.
+- Completion now treats plugin generators as asynchronous: the editor never
+  waits on plugin IPC, and a completed request is cached for the next Tab with
+  a bounded key cache. Completion protocol items carry optional kind, source,
+  score, replacement, and request metadata, and host menus can show plugin
+  source metadata through the compatible OSC 777 `show2` form.
+- `GALDR_COMPLETE_HISTORY_SCOPE=none` disables history-derived candidates and
+  whole-line history hints for privacy-sensitive sessions.

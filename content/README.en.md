@@ -22,14 +22,21 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.22** — 2026-09-05
+**What's new in v0.2.23** — 2026-09-09
 
-- A cross-platform `cargo xtask release` workflow prepares versions, changelog sections, bundled plugin versions, lockfiles, and native verification from one command, then validates and atomically pushes an annotated release tag from a separate confirmed command.
-- Process plugins receive structured availability and failure reasons for every declared external tool. Feature-level dependencies can now keep a plugin's diagnostics and settings UI running while disabling only actions that need the missing executable; the SDK falls back cleanly on older hosts.
-- Galdr Git and Galdr SSH open their manager pages even when Git or the OpenSSH client is not installed, explain how to recover, and leave connection profiles and other non-tool state usable.
-- The update card now reserves space for its close button, grows for the active font, and wraps its copy at narrow window sizes instead of clipping the title or instructions.
-- Routine plugin UI opens, acknowledgements, and automatic refreshes no longer cover the footer with internal-ID status notices; explicit plugin notifications and failures remain visible.
-- Windows process plugins no longer reapply an identical inheritable AppContainer ACL on every start, which previously walked an entire repository or user profile and made Git and SSH manager pages stall or time out. User-file access on Windows is now confined to the Downloads exchange boundary instead of rewriting permissions across the whole profile.
+- Windows SSH AskPass now uses a private, owner-and-system ACL named pipe with
+- Windows SSH AskPass keeps serving after a client disconnects before the pipe
+- Live window resizing now throttles intermediate terminal reflows to about
+- Common two-number ANSI color sequences now use a direct parser fast path,
+- Completion usage learning now persists command names only and filters legacy
+- History-derived argument candidates are now deduplicated before type inference,
+- Programmable completion cache entries now include the active PATH and working
+- Catalog completion now follows nested Git `remote` and `stash` commands and
+- Common path-valued options now enter file or directory completion directly,
+- SSH jump-host options now use host candidates, and `git clone --branch` uses
+- Completion now uses command-aware schemas for Git, Cargo, SSH/SCP, cURL,
+- Plugin completion requests run off the editor thread with bounded caching,
+- Completion settings now support learning sensitivity, history scope,
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

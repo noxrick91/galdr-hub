@@ -1,6 +1,49 @@
 const MARKET_INDEX = "./plugins/index.json";
 const MARKET_METADATA = "./plugins/metadata.json";
 
+// The protected publishing workflow replaces this snapshot with the signed
+// marketplace indexes. Keeping a small snapshot here makes the catalog useful
+// when previewing the hub directly from this repository (before a first
+// publication has created plugins/index.json and metadata.json).
+const EMBEDDED_MARKETPLACE = [
+  {
+    id: "com.noxcaw.term.downloader",
+    name: "Galdr Downloader",
+    version: "0.3.15",
+    description: "Concurrent and resumable file, media, HLS, magnet, and BitTorrent downloader",
+    license: "Proprietary",
+    capabilities: ["http", "p2p_network", "files_write", "ui"],
+    packages: ["linux x86_64", "linux aarch64", "windows x86_64", "windows aarch64"],
+  },
+  {
+    id: "com.noxcaw.term.git",
+    name: "Galdr Git",
+    version: "0.1.9",
+    description: "Visual Git history, changes, branches, commits, and remote operations",
+    license: "Proprietary",
+    capabilities: ["context_read", "workspace_write", "http", "ui", "credentials_use", "ssh_agent_use"],
+    packages: ["linux x86_64", "linux aarch64", "windows x86_64", "windows aarch64"],
+  },
+  {
+    id: "com.noxcaw.term.password-manager",
+    name: "Galdr Password Manager",
+    version: "0.1.4",
+    description: "Encrypted credentials, scoped plugin authorization, and security controls",
+    license: "Proprietary",
+    capabilities: ["ui", "credentials_manage"],
+    packages: ["linux x86_64", "linux aarch64", "windows x86_64", "windows aarch64"],
+  },
+  {
+    id: "com.noxcaw.term.ssh",
+    name: "Galdr SSH",
+    version: "0.1.12",
+    description: "Managed SSH connections with explicit password or key login and secure SFTP browsing",
+    license: "Proprietary",
+    capabilities: ["context_read", "terminal_write", "tabs_manage", "network", "files_read", "files_write", "user_files_read", "ui", "ssh_agent_use"],
+    packages: ["linux x86_64", "linux aarch64", "windows x86_64", "windows aarch64"],
+  },
+];
+
 let marketplacePlugins = [];
 let marketplaceError = false;
 
@@ -100,9 +143,11 @@ function renderMarketplace() {
       facts.append(element("dt", null, label));
       facts.append(element("dd", null, value));
     };
-    const platforms = (version?.packages || [])
-      .map((item) => `${item.os} ${item.arch}`)
-      .join(", ");
+    const platforms = version?.packages?.length
+      ? version.packages
+          .map((item) => typeof item === "string" ? item : `${item.os} ${item.arch}`)
+          .join(", ")
+      : "—";
     addFact(marketText("market.platforms", "Platforms"), platforms || "—");
     if (plugin.license) addFact(marketText("market.license", "License"), plugin.license);
     card.append(facts);
@@ -154,18 +199,25 @@ function renderMarketplace() {
 }
 
 async function loadMarketplace() {
-  const [indexResponse, metadataResponse] = await Promise.all([
-    fetch(MARKET_INDEX, { cache: "no-cache" }),
-    fetch(MARKET_METADATA, { cache: "no-cache" }),
-  ]);
-  if (!indexResponse.ok || !metadataResponse.ok) throw new Error("marketplace unavailable");
-  const [index, metadata] = await Promise.all([indexResponse.json(), metadataResponse.json()]);
-  const details = new Map((metadata.plugins || []).map((plugin) => [plugin.id, plugin]));
-  marketplacePlugins = (index.plugins || []).map((plugin) => ({
-    ...plugin,
-    ...(details.get(plugin.id) || {}),
-    versions: plugin.versions || [],
-  }));
+  try {
+    const [indexResponse, metadataResponse] = await Promise.all([
+      fetch(MARKET_INDEX, { cache: "no-cache" }),
+      fetch(MARKET_METADATA, { cache: "no-cache" }),
+    ]);
+    if (!indexResponse.ok || !metadataResponse.ok) throw new Error("marketplace unavailable");
+    const [index, metadata] = await Promise.all([indexResponse.json(), metadataResponse.json()]);
+    const details = new Map((metadata.plugins || []).map((plugin) => [plugin.id, plugin]));
+    marketplacePlugins = (index.plugins || []).map((plugin) => ({
+      ...plugin,
+      ...(details.get(plugin.id) || {}),
+      versions: plugin.versions || [],
+    }));
+  } catch {
+    marketplacePlugins = EMBEDDED_MARKETPLACE.map((plugin) => ({
+      ...plugin,
+      versions: [{ version: plugin.version, packages: plugin.packages }],
+    }));
+  }
   marketplaceError = false;
   renderMarketplace();
 }
