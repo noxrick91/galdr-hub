@@ -6,19 +6,20 @@
   <meta http-equiv="Cache-Control" content="no-cache">
   <title data-i18n-title="plugins">插件市场 — Galdr</title>
   <meta name="description" data-i18n-desc="plugins" content="浏览 Galdr 官方插件，了解平台支持与所需权限。">
-  <meta name="theme-color" content="#f1efe9">
+  <meta name="theme-color" content="#f7f7f2">
   <link rel="canonical" href="https://term.noxcaw.com/plugins.html">
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="icon" href="./assets/favicon.svg?v=v0.2.24-1790085055" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css?v=v0.2.23-1788890560">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css?v=v0.2.24-1790085055">
+  <link rel="stylesheet" href="./assets/market.css?v=v0.2.24-1790085055">
 </head>
 <body>
   <a class="skip-link" href="#main" data-i18n="a11y.skip">跳到正文</a>
   <header class="site-header">
     <div class="wrap top">
-      <a class="brand" href="./" data-keep-lang aria-label="Galdr"><img src="./assets/logo.svg" alt="Galdr"></a>
+      <a class="brand" href="./" data-keep-lang aria-label="Galdr"><img src="./assets/logo.svg?v=v0.2.24-1790085055" alt="Galdr"></a>
       <nav class="nav" aria-label="主导航">
         <a href="./" data-keep-lang data-i18n="nav.home">首页</a>
         <a href="./plugins.html" aria-current="page" data-keep-lang data-i18n="nav.market">插件</a>
@@ -27,56 +28,81 @@
           <button type="button" data-lang="zh">中</button>
           <button type="button" data-lang="en">EN</button>
         </span>
-        <a class="nav-cta" href="./docs.html#/plugin-management" data-keep-lang data-i18n="market.manage">管理插件</a>
+        <a class="nav-cta" href="./#howto" data-keep-lang data-i18n="nav.get">获取 Galdr</a>
       </nav>
     </div>
   </header>
 
   <main class="market-main" id="main">
     <section class="wrap market-hero">
-      <p class="eyebrow"><span class="rune" aria-hidden="true">ᚷ</span><span data-i18n="market.kicker">GALDR PLUGIN API · V1</span></p>
-      <h1 data-i18n-html="market.title">扩展命令，<br><em>不扩张信任。</em></h1>
-      <p class="lede" data-i18n="market.lede">插件可以贡献命令、Shell 集成、事件和声明式界面；版本、平台与权限在安装之前就清楚可见。</p>
-      <div class="market-actions">
-        <a class="btn" href="#catalog"><span data-i18n="market.explore">浏览插件</span><span aria-hidden="true">↘</span></a>
-        <a class="btn btn-ghost" href="./docs.html#/plugin-development" data-keep-lang><span data-i18n="market.build">开发插件</span><span aria-hidden="true">→</span></a>
+      <div class="market-hero-copy">
+        <p class="eyebrow"><span class="market-live-dot" aria-hidden="true"></span><span data-i18n="market.kicker">GALDR PLUGIN API · V1</span></p>
+        <h1 data-i18n-html="market.title">让终端，<br><em>多一种可能。</em></h1>
+        <p class="market-lede" data-i18n="market.lede">连接远程主机、管理代码与凭证、处理下载。把需要的工具带进终端，每项权限都由你决定。</p>
+        <div class="market-actions">
+          <a class="btn" href="#catalog"><span data-i18n="market.explore">浏览插件</span><span aria-hidden="true">↘</span></a>
+          <a class="market-text-link" href="./docs.html#/plugin-development" data-keep-lang><span data-i18n="market.build">开发插件</span><span aria-hidden="true">↗</span></a>
+        </div>
       </div>
-    </section>
-
-    <section class="wrap market-principles" aria-label="插件安全原则">
-      <article class="market-principle"><strong data-i18n="market.principleVerifyT">先校验，再安装</strong><span data-i18n="market.principleVerify">市场包必须提供 SHA-256，版本资产不可变。</span></article>
-      <article class="market-principle"><strong data-i18n="market.principleGrantT">权限由你授予</strong><span data-i18n="market.principleGrant">请求能力不会自动变成已授予能力。</span></article>
-      <article class="market-principle"><strong data-i18n="market.principleHostT">代码留在宿主之外</strong><span data-i18n="market.principleHost">进程与 Wasm 插件不会加载进终端进程。</span></article>
+      <div class="market-constellation" aria-hidden="true">
+        <div class="market-art-label"><span>YOUR WORKFLOW, EXTENDED</span><span>↗</span></div>
+        <div class="market-art-grid">
+          <div class="market-art-tile market-art-git"><svg viewBox="0 0 48 48"><circle cx="14" cy="10" r="4"/><circle cx="34" cy="14" r="4"/><circle cx="14" cy="38" r="4"/><path d="M14 14v20m20-16v4c0 7-20 3-20 12"/></svg><span>GIT</span></div>
+          <div class="market-art-tile market-art-download"><svg viewBox="0 0 48 48"><path d="M24 7v25M14 23l10 10 10-10M9 34v7h30v-7"/></svg><span>DOWNLOADS</span></div>
+          <div class="market-art-tile market-art-ssh"><svg viewBox="0 0 48 48"><rect x="6" y="8" width="36" height="32" rx="5"/><path d="m14 18 7 6-7 6m12 0h8"/></svg><span>SSH</span></div>
+          <div class="market-art-tile market-art-vault"><svg viewBox="0 0 48 48"><rect x="10" y="21" width="28" height="21" rx="4"/><path d="M16 21v-7a8 8 0 0 1 16 0v7m-8 9v4"/></svg><span>VAULT</span></div>
+        </div>
+        <div class="market-art-caption"><span class="market-live-dot"></span><code>galdr plugin install-from …</code></div>
+      </div>
     </section>
 
     <section class="wrap market-browser" id="catalog" aria-labelledby="catalog-title">
       <div class="market-browser-head">
-        <div>
-          <p class="eyebrow"><span data-i18n="market.catalogKicker">OFFICIAL CATALOG</span></p>
-          <h2 id="catalog-title" data-i18n="market.catalogTitle">官方插件目录</h2>
-        </div>
+        <div><p class="eyebrow" data-i18n="market.catalogKicker">OFFICIAL CATALOG</p><h2 id="catalog-title" data-i18n="market.catalogTitle">官方插件目录</h2></div>
         <label class="market-search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>
           <span class="sr-only" data-i18n="market.search">搜索插件</span>
           <input id="plugin-search" type="search" autocomplete="off" data-i18n-placeholder="market.search" placeholder="搜索名称、ID 或描述">
         </label>
       </div>
-      <p class="meta market-status" id="plugin-status" aria-live="polite" data-i18n="market.loading">正在读取插件索引…</p>
-      <div class="market-grid" id="plugin-list" aria-live="polite"></div>
+      <div class="market-toolbar">
+        <div class="market-filters" role="group" data-market-label="filterLabel" aria-label="插件分类">
+          <button type="button" data-category="all" aria-pressed="true" data-market-text="all">全部插件</button>
+          <button type="button" data-category="development" aria-pressed="false" data-market-text="development">开发工具</button>
+          <button type="button" data-category="remote" aria-pressed="false" data-market-text="remote">远程连接</button>
+          <button type="button" data-category="downloads" aria-pressed="false" data-market-text="downloads">下载</button>
+          <button type="button" data-category="security" aria-pressed="false" data-market-text="security">安全</button>
+        </div>
+        <p class="market-status" id="plugin-status" aria-live="polite" data-i18n="market.loading">正在读取插件索引…</p>
+      </div>
+      <p class="market-source" id="plugin-source" hidden></p>
+      <div class="market-grid" id="plugin-list"></div>
+      <div class="market-catalog-help"><a class="market-text-link" href="./docs.html#/plugin-management" data-keep-lang><span data-i18n="market.manage">管理插件</span><span aria-hidden="true">↗</span></a></div>
+      <noscript><p>请启用 JavaScript 以浏览插件目录。Enable JavaScript to browse the plugin catalog.</p></noscript>
+    </section>
+
+    <section class="wrap market-principles" aria-labelledby="market-trust-title">
+      <div class="market-principles-heading"><p class="eyebrow" data-market-text="trustKicker">YOUR TERMINAL. YOUR RULES.</p><h2 id="market-trust-title" data-market-text="trustTitle">能力透明，边界清晰。</h2><a class="market-text-link" href="./docs.html#/plugin-security" data-keep-lang><span data-market-text="securityDocs">了解权限与隔离</span><span aria-hidden="true">↗</span></a></div>
+      <div class="market-principles-list">
+        <article class="market-principle"><span class="market-principle-number">01</span><div><h3 data-i18n="market.principleVerifyT">先校验，再安装</h3><p data-i18n="market.principleVerify">市场包必须提供 SHA-256，版本资产不可变。</p></div></article>
+        <article class="market-principle"><span class="market-principle-number">02</span><div><h3 data-i18n="market.principleGrantT">权限由你授予</h3><p data-i18n="market.principleGrant">请求能力不会自动变成已授予能力。</p></div></article>
+        <article class="market-principle"><span class="market-principle-number">03</span><div><h3 data-i18n="market.principleHostT">代码留在宿主之外</h3><p data-i18n="market.principleHost">进程与 Wasm 插件不会加载进终端进程。</p></div></article>
+      </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="wrap footer-main">
-      <div class="footer-brand"><img src="./assets/logo.svg" alt="Galdr"><p data-i18n="footer.tagline">把 Shell、会话与扩展收进同一个工作现场。</p></div>
+      <div class="footer-brand"><img src="./assets/logo.svg?v=v0.2.24-1790085055" alt="Galdr"><p data-i18n="footer.tagline">把 Shell、会话与扩展收进同一个工作现场。</p></div>
       <div class="footer-links">
         <a href="./docs.html#/plugin-overview" data-keep-lang data-i18n="footer.pluginDocs">插件文档</a>
         <a href="./docs.html#/install" data-keep-lang data-i18n="footer.docs">安装文档</a>
         <a href="./CHANGELOG.md" data-i18n="footer.changelog">更新记录</a>
       </div>
     </div>
-    <div class="wrap footer-base"><span>GALDR PLUGIN MARKETPLACE</span><span>VERIFIED · CAPABILITY-BASED · API V1</span></div>
+    <div class="wrap footer-base"><span>GALDR PLUGIN MARKETPLACE</span><span>MAKE ROOM FOR YOUR WORK.</span></div>
   </footer>
-  <script src="./assets/i18n.js?v=v0.2.23-1788890560"></script>
-  <script src="./assets/plugins.js?v=v0.2.23-1788890560"></script>
+  <script src="./assets/i18n.js?v=v0.2.24-1790085055"></script>
+  <script src="./assets/plugins.js?v=v0.2.24-1790085055"></script>
 </body>
 </html>

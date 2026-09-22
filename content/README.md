@@ -22,21 +22,24 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.23** — 2026-09-09
+**What's new in v0.2.24** — 2026-09-22
 
-- Windows SSH AskPass now uses a private, owner-and-system ACL named pipe with
-- Windows SSH AskPass keeps serving after a client disconnects before the pipe
-- Live window resizing now throttles intermediate terminal reflows to about
-- Common two-number ANSI color sequences now use a direct parser fast path,
-- Completion usage learning now persists command names only and filters legacy
-- History-derived argument candidates are now deduplicated before type inference,
-- Programmable completion cache entries now include the active PATH and working
-- Catalog completion now follows nested Git `remote` and `stash` commands and
-- Common path-valued options now enter file or directory completion directly,
-- SSH jump-host options now use host candidates, and `git clone --branch` uses
-- Completion now uses command-aware schemas for Git, Cargo, SSH/SCP, cURL,
-- Plugin completion requests run off the editor thread with bounded caching,
-- Completion settings now support learning sensitivity, history scope,
+- Command blocks retain command text, working directory, exit status, duration
+- Saved workspace layouts, a docked plugin sidebar and a unified task center
+- The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named
+- Workbench supports configurable OpenAI-compatible providers and credential-broker
+- Git, SSH, downloader and password-manager workflows integrate with the updated
+- Plugins support verified publisher signatures, diagnostics and rollback;
+- Cancellable cross-pane/project search, local mux reconnection, file:line
+- The official website uses a warm white, graphite and cobalt visual design
+- Updated Rustls to 0.23.45 in the application and downloader plugin to reject
+- Delayed IME fallback characters retain their order across fast typing, spaces,
+- Idle or malformed Unix mux clients release their connections and subscribers.
+- Preserved development tools no longer expose a user's home or credential
+- Shell command lifecycle records preserve failure, interruption and multiline
+- Completion history now applies session, project, global and disabled scopes.
+- Task plugins retain their runtime while work is active during a workspace
+- Updated plugins require Galdr 0.2.24 so older hosts do not load contributions
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

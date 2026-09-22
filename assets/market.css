@@ -1,0 +1,106 @@
+/* The plugin directory shares the site's navigation and typography. */
+.market-main { padding-bottom: 112px; }
+.market-hero { display: grid; grid-template-columns: 1.25fr 1fr; gap: 80px; align-items: center; padding-top: 95px; padding-bottom: 100px; }
+.market-hero h1 { font-size: clamp(44px, 5vw, 72px); line-height: 1.14; letter-spacing: -.055em; margin: 23px 0 25px; }
+.market-hero h1 em { color: var(--accent); font-style: normal; }
+.market-lede { max-width: 490px; color: var(--muted); font-size: 16px; line-height: 1.85; }
+.market-actions { display: flex; align-items: center; gap: 28px; margin-top: 30px; }
+.market-text-link { display: inline-flex; gap: 20px; align-items: center; color: var(--fg); font-size: 13px; font-weight: 500; text-decoration: none; }
+.market-text-link:hover { color: var(--accent); }
+.market-live-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: 0 0 auto; }
+.market-hero .eyebrow { display: flex; gap: 10px; align-items: center; }
+.market-constellation { border: 1px solid var(--line); border-radius: 18px; padding: 23px; background: var(--surface); box-shadow: 0 18px 48px rgba(32, 35, 31, .06); }
+.market-art-label { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font: 10px/1.4 "IBM Plex Mono", monospace; letter-spacing: .12em; }
+.market-art-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin: 21px 0; }
+.market-art-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 19px; min-height: 139px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--accent); }
+.market-art-tile svg { width: 40px; height: 40px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.market-art-tile span { font: 10px/1.3 "IBM Plex Mono", monospace; letter-spacing: .1em; }
+.market-art-download { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.market-art-ssh { background: var(--bg); color: var(--accent); }
+.market-art-vault { background: var(--bg); color: var(--accent); }
+.market-art-caption { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 11px; }
+.market-art-caption code { font-family: "IBM Plex Mono", monospace; }
+.market-browser { scroll-margin-top: 100px; }
+.market-browser-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; margin-bottom: 30px; }
+.market-browser-head h2 { font-size: 34px; letter-spacing: -.04em; margin: 10px 0 0; }
+.market-search { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 15px; width: 340px; min-width: 0; }
+.market-search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.market-search svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.market-search input { width: 100%; min-width: 0; height: 46px; border: 0; outline: 0; background: transparent; color: var(--fg); font: inherit; font-size: 12px; }
+.market-search input::placeholder { color: var(--muted); }
+.market-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-bottom: 22px; }
+.market-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+.market-filters button { border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--muted); padding: 8px 13px; cursor: pointer; font: inherit; font-size: 12px; }
+.market-filters button:hover { color: var(--fg); background: var(--surface-raised); }
+.market-filters button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent); }
+.market-status { color: var(--muted); font: 11px/1.5 "IBM Plex Mono", monospace; white-space: nowrap; margin: 0; }
+.market-source { color: var(--muted); font-size: 11px; line-height: 1.6; margin: -5px 0 19px; }
+.market-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.market-card { min-width: 0; border: 1px solid var(--line); border-radius: 12px; padding: 26px; background: var(--surface); box-shadow: 0 3px 12px rgba(32, 35, 31, .02); transition: border-color .18s, box-shadow .18s; }
+.market-card:hover { border-color: var(--accent); box-shadow: 0 8px 24px rgba(32, 35, 31, .05); }
+.market-card-head { display: flex; align-items: center; gap: 14px; }
+.market-plugin-icon { display: grid; place-items: center; flex: 0 0 47px; width: 47px; height: 47px; border: 1px solid var(--line); border-radius: 11px; background: var(--accent-soft); color: var(--accent); }
+.market-plugin-icon svg { width: 25px; height: 25px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.market-card-names { min-width: 0; flex: 1; }
+.market-card h3 { margin: 0; font-size: 18px; line-height: 1.4; letter-spacing: -.025em; }
+.market-category { display: block; color: var(--muted); font-size: 11px; margin-top: 4px; }
+.market-version { align-self: flex-start; border: 1px solid var(--line); border-radius: 5px; padding: 4px 7px; color: var(--muted); white-space: nowrap; font: 10px/1.4 "IBM Plex Mono", monospace; }
+.market-description { color: var(--muted); font-size: 13px; line-height: 1.8; min-height: 47px; margin: 22px 0 17px; }
+.market-id { color: var(--muted); font: 10px/1.5 "IBM Plex Mono", monospace; overflow-wrap: anywhere; margin: 0 0 18px; }
+.market-facts { display: grid; grid-template-columns: auto 1fr; column-gap: 20px; row-gap: 8px; margin: 0; padding: 17px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.7; }
+.market-facts dt { color: var(--muted); }
+.market-facts dd { margin: 0; text-align: right; }
+.market-permissions { border-top: 1px solid var(--line); color: var(--fg); font-size: 12px; }
+.market-permissions summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 9px; padding: 15px 0; }
+.market-permissions summary::-webkit-details-marker { display: none; }
+.market-permissions summary::after { content: ""; margin-left: auto; width: 6px; height: 6px; border-right: 1px solid var(--muted); border-bottom: 1px solid var(--muted); transform: rotate(45deg); transition: transform .15s; }
+.market-permissions[open] summary::after { transform: rotate(225deg); }
+.market-permission-count { color: var(--muted); font: 10px/1.5 "IBM Plex Mono", monospace; background: var(--surface-raised); padding: 1px 6px; border-radius: 4px; }
+.market-capabilities { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 0 17px; }
+.market-capability { border: 1px solid var(--line); padding: 4px 7px; border-radius: 4px; color: var(--muted); font-size: 10px; }
+.market-no-permissions { display: flex; justify-content: space-between; margin: 0; padding: 15px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.market-command { display: flex; align-items: center; justify-content: space-between; gap: 15px; background: var(--bg); border: 1px solid var(--line); border-radius: 7px; padding: 12px; }
+.market-command code { color: var(--fg); font: 10px/1.7 "IBM Plex Mono", monospace; overflow-wrap: anywhere; min-width: 0; }
+.market-copy { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 6px; border: 0; background: transparent; color: var(--accent); cursor: pointer; font: inherit; font-size: 11px; padding: 5px; }
+.market-copy:hover { color: var(--accent-hover); }
+.market-copy svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.market-catalog-help { display: flex; justify-content: flex-end; margin-top: 23px; }
+.market-empty { grid-column: 1 / -1; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); padding: 60px 20px; border-radius: 12px; }
+.market-principles { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; border-top: 1px solid var(--line); margin-top: 95px; padding-top: 65px; }
+.market-principles-heading h2 { max-width: 420px; font-size: 38px; line-height: 1.3; letter-spacing: -.045em; margin: 20px 0 26px; }
+.market-principle { display: flex; gap: 24px; padding: 23px 0; border-bottom: 1px solid var(--line); }
+.market-principle:first-child { padding-top: 0; }
+.market-principle-number { color: var(--accent); font: 11px/1.9 "IBM Plex Mono", monospace; }
+.market-principle h3 { font-size: 15px; line-height: 1.5; margin: 0 0 8px; }
+.market-principle p { color: var(--muted); font-size: 13px; line-height: 1.8; margin: 0; }
+@media (max-width: 1000px) {
+  .market-hero { gap: 38px; padding-top: 65px; padding-bottom: 75px; }
+  .market-hero h1 { font-size: 50px; }
+  .market-card { padding: 20px; }
+  .market-card h3 { font-size: 16px; }
+  .market-principles { gap: 45px; }
+}
+@media (max-width: 720px) {
+  .market-main { padding-bottom: 65px; }
+  .market-hero { grid-template-columns: 1fr; gap: 45px; padding-top: 55px; padding-bottom: 65px; }
+  .market-hero h1 { font-size: clamp(40px, 9vw, 60px); }
+  .market-lede { font-size: 14px; }
+  .market-constellation { max-width: 440px; width: 100%; justify-self: center; }
+  .market-art-grid { gap: 9px; margin: 18px 0; }
+  .market-art-tile { min-height: 113px; gap: 12px; }
+  .market-browser-head { flex-direction: column; align-items: stretch; gap: 23px; }
+  .market-browser-head h2 { font-size: 29px; }
+  .market-search { width: 100%; }
+  .market-toolbar { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .market-filters { gap: 3px; }
+  .market-filters button { font-size: 11px; padding: 8px 10px; }
+  .market-grid { grid-template-columns: 1fr; }
+  .market-card { padding: 22px; }
+  .market-description { min-height: 0; }
+  .market-principles { grid-template-columns: 1fr; gap: 38px; margin-top: 65px; padding-top: 42px; }
+  .market-principles-heading h2 { font-size: 31px; }
+  .market-principle { gap: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .market-card, .market-permissions summary::after { transition: none; }
+}

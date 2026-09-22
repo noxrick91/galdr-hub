@@ -184,11 +184,9 @@ async function renderHome(releases) {
   claimDynamic(recMeta);
   const latestBin = binaryTotal([release]);
   const allBin = binaryTotal(releases);
-  recMeta.textContent = !rec
-    ? (d?.dl?.unsupported || "当前仅发布 Linux 和 Windows 版本")
-    : d?.table?.meta
-    ? d.table.meta(tag, rec.file, date, fmtCount(latestBin), fmtCount(allBin))
-    : `${tag} · ${rec.file}${date ? ` · ${date}` : ""} · ${fmtCount(latestBin)} · ${fmtCount(allBin)}`;
+  recMeta.textContent = d?.table?.meta
+    ? d.table.meta(tag, rec?.file, date, fmtCount(latestBin), fmtCount(allBin))
+    : `${tag}${date ? ` · ${date}` : ""}`;
   const stageVersion = document.getElementById("stage-version");
   if (stageVersion) stageVersion.textContent = tag;
   const stats = document.getElementById("dl-stats");
@@ -269,8 +267,12 @@ const HOWTO = {
 };
 
 let howtoTab = "install";
+let selectedPlatform = null;
 
 function applyHowto(platform) {
+  platform = selectedPlatform || platform;
+  const picker = document.getElementById("install-platform");
+  if (picker) picker.value = platform.startsWith("win-") ? "win-x64" : platform === "unsupported" ? "unsupported" : "linux-x64";
   const unsupported = platform === "unsupported";
   const win = platform === "win-x64" || platform === "win-arm64";
   const spec = HOWTO[howtoTab] || HOWTO.install;
@@ -291,7 +293,7 @@ function applyHowto(platform) {
   }
   const hint = document.getElementById("howto-hint");
   if (hint) {
-    const hintKey = unavailable ? "macHint" : spec.hint;
+    const hintKey = unavailable ? "macHint" : win ? `${spec.hint}Win` : spec.hint;
     if (how?.[hintKey]) hint.textContent = how[hintKey];
   }
   document.querySelectorAll("[data-howto]").forEach((btn) => {
@@ -302,6 +304,11 @@ function applyHowto(platform) {
     if (active) document.getElementById("howto-panel")?.setAttribute("aria-labelledby", btn.id);
   });
 }
+
+document.getElementById("install-platform")?.addEventListener("change", (event) => {
+  selectedPlatform = event.target.value;
+  applyHowto(detectedPlatform);
+});
 
 const howtoTabs = [...document.querySelectorAll("[data-howto]")];
 howtoTabs.forEach((btn) => {

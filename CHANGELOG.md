@@ -4,6 +4,57 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.24] - 2026-09-22
+
+### Added
+
+- Command blocks retain command text, working directory, exit status, duration
+  and output locations, with actions for reviewing errors and saving project tasks.
+- Saved workspace layouts, a docked plugin sidebar and a unified task center
+  keep terminal sessions, development tools and background work accessible together.
+- The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named
+  Galdr commands, and retains bounded task results with cancellation and retry.
+  Its development pages provide Docker/Compose operations, HTTP requests,
+  JSON/log inspection, image previews, read-only SQLite queries and Kubernetes browsing.
+- Workbench supports configurable OpenAI-compatible providers and credential-broker
+  authorization. Error context and generated commands remain editable; sending a
+  request or running a saved command requires an explicit action.
+- Git, SSH, downloader and password-manager workflows integrate with the updated
+  host UI, task and credential services.
+- Plugins support verified publisher signatures, diagnostics and rollback;
+  the credential vault supports TOTP and authenticated encrypted backup/import.
+- Cancellable cross-pane/project search, local mux reconnection, file:line
+  navigation, PNG/JPEG previews and native accessibility improve daily workflows.
+
+### Changed
+
+- The official website uses a warm white, graphite and cobalt visual design
+  across the homepage, plugin marketplace and documentation, with responsive
+  layouts, Chinese/English navigation and improved search and install controls.
+
+### Fixed
+
+- Updated Rustls to 0.23.45 in the application and downloader plugin to reject
+  TLS 1.3 handshake messages that cross encryption level boundaries.
+- Delayed IME fallback characters retain their order across fast typing, spaces,
+  modifier changes and focus shortcuts. Docked panels reserve the terminal's
+  drawing area, and workspace buttons complete pending form edits.
+- Idle or malformed Unix mux clients release their connections and subscribers.
+  The task center prioritizes active work across plugins and reports truncation.
+- Preserved development tools no longer expose a user's home or credential
+  directories. Rustup proxies resolve to the installed toolchain inside the sandbox.
+- Shell command lifecycle records preserve failure, interruption and multiline
+  behavior, including multiple completion records delivered in one output batch.
+- Completion history now applies session, project, global and disabled scopes.
+  Dynamic plugin queries carry current directory, pane and session context;
+  bounded caches expire and remain separate across directories, while candidate
+  kinds, sources, scores and request identifiers survive ranking and display.
+- Task plugins retain their runtime while work is active during a workspace
+  switch. Workbench rejects retries belonging to a different workspace, and
+  persisted task data and output are bounded.
+- Updated plugins require Galdr 0.2.24 so older hosts do not load contributions
+  that depend on the new sidebar, task and credential protocols.
+
 ## [0.2.23] - 2026-09-09
 
 ### Fixed

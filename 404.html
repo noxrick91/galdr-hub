@@ -3,24 +3,19 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>未找到 — Galdr</title>
-  <meta name="theme-color" content="#f1efe9">
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <title data-i18n-title="notfound">未找到页面 — Galdr</title>
+  <meta name="theme-color" content="#f7f7f2">
+  <link rel="icon" href="/assets/favicon.svg?v=v0.2.24-1790085055" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css?v=v0.2.23-1788890560">
-  <meta http-equiv="refresh" content="3; url=./">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css?v=v0.2.24-1790085055">
 </head>
 <body>
-  <header class="site-header"><div class="wrap top"><a class="brand" href="./"><img src="./assets/logo.svg" alt="Galdr"></a></div></header>
-  <main class="wrap hero-split notfound-main">
-    <section class="hero">
-      <p class="eyebrow"><span class="rune" aria-hidden="true">ᚷ</span>404 / LOST COMMAND</p>
-      <h1>没有这一页。<br><em>命令去了别处。</em></h1>
-      <p class="lede">三秒后返回首页，或者现在继续。</p>
-      <div class="row"><a class="btn" href="./">返回首页 <span aria-hidden="true">→</span></a><a class="btn btn-ghost" href="./docs.html#/install">阅读文档 <span aria-hidden="true">↗</span></a></div>
-    </section>
-  </main>
+  <a class="skip-link" href="#main" data-i18n="a11y.skip">跳到正文</a>
+  <header class="site-header"><div class="wrap top"><a class="brand" href="/" data-keep-lang aria-label="Galdr"><img src="/assets/logo.svg?v=v0.2.24-1790085055" alt="Galdr" width="128" height="38"></a><nav class="nav" aria-label="Primary"><a href="/" data-keep-lang data-i18n="nav.home">首页</a><a href="/plugins.html" data-keep-lang data-i18n="nav.market">插件</a><a href="/docs.html#/install" data-keep-lang data-i18n="nav.docs">文档</a><span class="lang" role="group" aria-label="Language"><button type="button" data-lang="zh">中</button><button type="button" data-lang="en">EN</button></span></nav></div></header>
+  <main class="wrap notfound-main" id="main"><section><p class="eyebrow">404 / PATH NOT FOUND</p><h1 data-i18n-html="notfound.title">这个页面，<br><em>暂时离线。</em></h1><p class="lede" data-i18n="notfound.lede">路径可能已经变更，或者链接有误。回到首页，继续你的探索。</p><div class="hero-actions"><a class="btn" href="/" data-keep-lang><span data-i18n="notfound.back">返回首页</span><span aria-hidden="true">↗</span></a><a class="btn btn-ghost" href="/docs.html#/install" data-keep-lang data-i18n="notfound.docs">浏览文档</a></div></section><div class="lost-terminal" aria-hidden="true"><code>❯ cd /somewhere</code><strong>404_</strong><p>galdr: path not found</p><p>Try heading back to ~</p></div></main>
+  <footer class="site-footer"><div class="wrap footer-base"><span>© 2026 GALDR</span><span>BUILT WITH RUST. MADE FOR FLOW.</span></div></footer>
+  <script src="/assets/i18n.js?v=v0.2.24-1790085055"></script>
 </body>
 </html>

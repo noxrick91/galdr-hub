@@ -188,6 +188,13 @@ function renderPage(page, ordered) {
   const group = liveGroup(page);
   const prose = document.getElementById("prose");
   prose.innerHTML = renderMarkdown(`# ${title}\n\n${page.md}`);
+  prose.querySelectorAll("a[href]").forEach((a) => {
+    if (a.getAttribute("href").startsWith("#") || a.origin !== location.origin) return;
+    if (!/(?:\.html|\/)$/i.test(a.pathname)) return;
+    const params = new URLSearchParams(a.search);
+    params.set("lang", lang());
+    a.search = params.toString();
+  });
 
   const toc = document.getElementById("toc-list");
   const right = document.getElementById("docs-right");
@@ -202,7 +209,8 @@ function renderPage(page, ordered) {
     a.textContent = h.textContent;
     a.addEventListener("click", (e) => {
       e.preventDefault();
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
+      document.getElementById(id)?.scrollIntoView({ behavior, block: "start" });
     });
     toc.append(a);
   });
@@ -272,6 +280,7 @@ function closeSearch() {
 }
 
 function openSearch(pages) {
+  if (document.getElementById("docs-side")?.classList.contains("open")) closeNav(true);
   const modal = document.getElementById("docs-modal");
   const input = document.getElementById("docs-search-input");
   const hits = document.getElementById("docs-search-hits");
@@ -345,13 +354,16 @@ function showCurrent() {
   }
   renderNav(state.nav, ordered, page);
   renderPage(page, ordered);
-  closeNav();
+  closeNav(true);
 }
 
 let navReturnFocus = null;
 
 function closeNav(restoreFocus = false) {
-  document.getElementById("docs-side")?.classList.remove("open");
+  const side = document.getElementById("docs-side");
+  side?.classList.remove("open");
+  side?.removeAttribute("role");
+  side?.removeAttribute("aria-modal");
   const back = document.getElementById("docs-backdrop");
   if (back) back.hidden = true;
   document.getElementById("docs-contents-btn")?.setAttribute("aria-expanded", "false");
@@ -367,6 +379,14 @@ function toggleNav() {
   const open = !side.classList.contains("open");
   if (open) navReturnFocus = document.activeElement;
   side.classList.toggle("open", open);
+  if (open) {
+    side.setAttribute("role", "dialog");
+    side.setAttribute("aria-modal", "true");
+    document.getElementById("docs-nav-close")?.focus();
+  } else {
+    side.removeAttribute("role");
+    side.removeAttribute("aria-modal");
+  }
   if (back) back.hidden = !open;
   document.getElementById("docs-contents-btn")?.setAttribute("aria-expanded", String(open));
   document.body.classList.toggle("nav-open", open);
@@ -422,6 +442,8 @@ bindSearch("docs-search-btn");
 bindSearch("docs-search-btn-mobile");
 
 document.getElementById("docs-contents-btn")?.addEventListener("click", toggleNav);
+document.getElementById("docs-nav-close")?.addEventListener("click", () => closeNav(true));
+document.getElementById("docs-search-close")?.addEventListener("click", closeSearch);
 document.getElementById("docs-backdrop")?.addEventListener("click", () => closeNav(true));
 document.getElementById("docs-modal")?.addEventListener("click", (e) => {
   if (e.target.id === "docs-modal") closeSearch();
@@ -456,7 +478,7 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
     moveHit(-1);
   }
-  if (e.key === "Enter") {
+  if (e.key === "Enter" && e.target.id === "docs-search-input") {
     const hit = document.querySelector(".docs-hit.on");
     if (hit) {
       e.preventDefault();
@@ -466,8 +488,26 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape" || !document.getElementById("docs-modal")?.hidden) return;
-  if (document.getElementById("docs-side")?.classList.contains("open")) closeNav(true);
+  if (!document.getElementById("docs-modal")?.hidden) return;
+  const side = document.getElementById("docs-side");
+  if (!side?.classList.contains("open")) return;
+  if (e.key === "Escape") closeNav(true);
+  if (e.key === "Tab") {
+    const focusable = [...side.querySelectorAll('a[href], button:not([disabled])')];
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last?.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first?.focus();
+    }
+  }
+});
+
+window.matchMedia("(min-width: 821px)").addEventListener("change", (e) => {
+  if (e.matches) closeNav();
 });
 
 main();

@@ -1,6 +1,45 @@
 const LANGS = ["zh", "en"];
 const I18N = {
   zh: {
+    home: {
+      "kicker": "原生构建，为专注而生",
+      "title": "心无旁骛。\n<em>一行，进入状态。</em>",
+      "lede": "从第一行命令，到最后一个构建。让 Shell、分屏、会话与插件，融入你的工作节奏。",
+      "quickStart": "从这里开始",
+      "demoWorkspace": "工作空间",
+      "demoSplit": "自由分屏",
+      "demoCompletion": "智能补全",
+      "sessionLabel": "开发会话",
+      "workspaceLabel": "工作空间",
+      "sessionsLabel": "会话",
+      "demoHelp": "准备就绪。保持专注，继续创造。",
+      "completionLabel": "命令补全",
+      "demoCaption": "交互演示 · 试试切换工作模式",
+      "foundationTitle": "少一点阻力。\n多一点心流。",
+      "foundationLead": "打磨每一次输入，照顾每一处细节。你需要的终端基础能力，从一开始就完整。",
+      "gpuTitle": "每个像素，各就其位。",
+      "gpuBody": "GPU 加速渲染，适配 HiDPI。从中文到 emoji，从输入法到滚动，每个细节都清晰呈现。",
+      "shellTitle": "熟悉的命令，自己的节奏。",
+      "shellBody": "内置 galdr-shell，配合命令补全与统一的 galdrc 配置。也可以选择你熟悉的系统 Shell。",
+      "panesTitle": "给每项工作，一席之地。",
+      "panesBody": "自由拆分窗口、拖动标签、调整分栏。代码、日志和远程会话，在同一个视野里井然有序。",
+      "sessionTitle": "离开窗口。\n<em>留住工作。</em>",
+      "sessionBody": "会话独立于窗口运行。分离，再附着，回到原来的标签与分屏。让工作延续，少一次从头开始。",
+      "sessionLink": "了解会话与分屏",
+      "sessionPersistent": "持续运行",
+      "sessionCaption": "重新连接，接着往下。",
+      "pluginsTitle": "一个终端。\n更多可能。",
+      "pluginsBody": "把常用工具带进工作流。浏览官方插件，安装前查看平台支持和请求权限。",
+      "git": "版本管理，触手可及。",
+      "ssh": "远程主机，即刻连接。",
+      "downloader": "下载任务，尽在掌握。",
+      "vault": "凭证管理，安心有序。",
+      "installTitle": "下一行命令，\n<em>从这里开始。</em>",
+      "installBody": "选择你的平台，复制命令。安装器会自动匹配架构并校验下载文件。",
+      "manualDownloads": "手动下载与校验和",
+      "footerTagline": "留在终端，进入状态。",
+      "backTop": "回到顶部 ↑"
+},
     meta: {
       title: "Galdr — GPU 加速终端",
       desc: "GPU 加速的原生终端、内置 Shell、可恢复会话与安全插件系统。",
@@ -48,6 +87,9 @@ const I18N = {
       installHint: "装到 ~/.galdr/bin，并加入应用菜单和文件夹右键。装完请 source ~/.galdr/env 或新开终端。",
       updateHint: "再跑一次安装器。安装器会校验并可回滚地替换整套运行时，不会中断当前会话；完成后重启已打开的 Galdr，并 source ~/.galdr/env 确认版本。",
       uninstallHint: "运行 ~/.galdr/uninstall（Windows 为 uninstall.ps1），会去掉菜单项。配置在 ~/.config/galdr/，不会一起删。",
+      installHintWin: "在 PowerShell 中运行，安装到用户目录的 .galdr/bin，并加入 PATH、开始菜单与文件夹右键菜单。",
+      updateHintWin: "在 PowerShell 中重新运行安装器，校验并替换运行时。完成后重启已打开的 Galdr，再运行 galdr --version 确认版本。",
+      uninstallHintWin: "在 PowerShell 中运行卸载脚本，移除程序与菜单项，保留用户配置。",
       macUnavailable: "macOS 预编译包暂未开放",
       macHint: "当前公开版本仅提供 Linux 与 Windows 安装包。",
     },
@@ -98,6 +140,8 @@ const I18N = {
       sandboxed: "由 galdr-plugin-host 隔离运行",
     },
     docs: {
+      close: "关闭",
+      searchHint: "输入关键词，按 Enter 打开",
       loading: "正在加载文档…",
       fail: "文档加载失败。请用本地 HTTP 服务打开，不要用 file://。",
       toc: "目录",
@@ -112,8 +156,8 @@ const I18N = {
     },
     market: {
       kicker: "GALDR PLUGIN API · V1",
-      title: "扩展命令，\n<em>不扩张信任。</em>",
-      lede: "插件可以贡献命令、Shell 集成、事件和声明式界面；版本、平台与权限在安装之前就清楚可见。",
+      title: "让终端，\n<em>多一种可能。</em>",
+      lede: "连接远程主机、管理代码与凭证、处理下载。把需要的工具带进终端，每项权限都由你决定。",
       explore: "浏览插件",
       build: "开发插件",
       manage: "管理插件",
@@ -171,7 +215,7 @@ const I18N = {
       loading: "加载中…",
       stats: (a, b, n) => `本版 ${a} 次，一共 ${b} 次 · ${n} 个版本`,
       meta: (tag, label, date, a, b) =>
-        `${tag} · ${label}${date ? ` · ${date}` : ""}`,
+        `${tag}${date ? ` · ${date}` : ""}`,
     },
     dl: {
       prefix: "下载",
@@ -196,9 +240,48 @@ const I18N = {
       attached: "已附着  work  ·  3 个标签  ·  左右分屏",
       attachedShort: "已附着",
     },
-    notfound: { title: "没有这一页。", back: "回首页" },
+    notfound: { title: "这个页面，\n<em>暂时离线。</em>", back: "返回首页", lede: "路径可能已经变更，或者链接有误。回到首页，继续你的探索。", docs: "浏览文档", metaTitle: "未找到页面 — Galdr" },
   },
   en: {
+    home: {
+      "kicker": "NATIVELY BUILT. THOUGHTFULLY CRAFTED.",
+      "title": "Make room\n<em>for flow.</em>",
+      "lede": "From the first command to the final build. Your shell, sessions, and tools — together in a terminal that feels like yours.",
+      "quickStart": "Explore the docs",
+      "demoWorkspace": "Workspace",
+      "demoSplit": "Split panes",
+      "demoCompletion": "Completion",
+      "sessionLabel": "dev session",
+      "workspaceLabel": "WORKSPACE",
+      "sessionsLabel": "SESSIONS",
+      "demoHelp": "Ready when you are. Stay focused. Keep creating.",
+      "completionLabel": "COMMAND COMPLETION",
+      "demoCaption": "Interactive preview · try a different workspace mode",
+      "foundationTitle": "Less friction.\nMore momentum.",
+      "foundationLead": "Thoughtful from the first keystroke. The terminal essentials, crafted to keep you in your element.",
+      "gpuTitle": "Every pixel. In its place.",
+      "gpuBody": "GPU-accelerated rendering, built for HiDPI. Crisp text, CJK, emoji, and input methods that feel right at home.",
+      "shellTitle": "Your shell. Your rhythm.",
+      "shellBody": "Meet galdr-shell, with command completion and one clear galdrc configuration. Or bring your favorite system shell.",
+      "panesTitle": "Space for every thought.",
+      "panesBody": "Split panes, rearrange tabs, and resize your view. Keep code, logs, and remote sessions within reach.",
+      "sessionTitle": "Leave the window.\n<em>Keep the work.</em>",
+      "sessionBody": "Sessions live beyond the window. Detach, reattach, and return to your tabs and splits. Less starting over. More carrying on.",
+      "sessionLink": "Explore sessions and splits",
+      "sessionPersistent": "RUNNING",
+      "sessionCaption": "Reconnect. Right where you left off.",
+      "pluginsTitle": "One terminal.\nMore possibilities.",
+      "pluginsBody": "Bring your everyday tools into the flow. Explore official plugins, with platforms and permissions visible before you install.",
+      "git": "Your code, under control.",
+      "ssh": "Remote feels right here.",
+      "downloader": "Downloads, all in hand.",
+      "vault": "Credentials, kept in order.",
+      "installTitle": "Your next command\n<em>starts here.</em>",
+      "installBody": "Choose your platform. Copy the command. The installer matches your architecture and verifies the download.",
+      "manualDownloads": "Manual downloads & checksums",
+      "footerTagline": "Stay in your terminal. Find your flow.",
+      "backTop": "Back to top ↑"
+},
     meta: {
       title: "Galdr — a GPU-accelerated terminal",
       desc: "A native GPU-accelerated terminal with its own shell, restorable sessions, and a capability-based plugin system.",
@@ -246,6 +329,9 @@ const I18N = {
       installHint: "Installs into ~/.galdr/bin and adds the app menu plus folder context menu. Afterwards source ~/.galdr/env or open a new terminal.",
       updateHint: "Run the installer again. It verifies and replaces the complete runtime with rollback without interrupting the current session; afterwards restart open Galdr windows, source ~/.galdr/env, and check the version.",
       uninstallHint: "Run ~/.galdr/uninstall (uninstall.ps1 on Windows) so menu entries are removed. Config in ~/.config/galdr/ is left alone.",
+      installHintWin: "Run in PowerShell. Installs into .galdr/bin in your user directory and adds PATH, Start menu, and folder context menu entries.",
+      updateHintWin: "Run the installer again in PowerShell to verify and replace the runtime. Restart open Galdr windows, then run galdr --version to check the version.",
+      uninstallHintWin: "Run the uninstaller in PowerShell to remove the app and menu entries. Your user configuration is kept.",
       macUnavailable: "macOS prebuilt packages are temporarily unavailable",
       macHint: "The current public release only provides Linux and Windows builds.",
     },
@@ -296,6 +382,8 @@ const I18N = {
       sandboxed: "Isolated by galdr-plugin-host",
     },
     docs: {
+      close: "Close",
+      searchHint: "Type to search, press Enter to open",
       loading: "Loading docs…",
       fail: "Could not load the docs. Serve this site over HTTP, not file://.",
       toc: "Contents",
@@ -310,8 +398,8 @@ const I18N = {
     },
     market: {
       kicker: "GALDR PLUGIN API · V1",
-      title: "Extend commands.\n<em>Not trust.</em>",
-      lede: "Plugins can contribute commands, shell integration, events, and declarative UI. Version, platform support, and permissions are visible before install.",
+      title: "Your terminal.\n<em>More possibilities.</em>",
+      lede: "Connect to remote hosts. Manage code and credentials. Keep downloads moving. Bring your tools into the terminal, with permissions you control.",
       explore: "Browse plugins",
       build: "Build a plugin",
       manage: "Manage plugins",
@@ -369,7 +457,7 @@ const I18N = {
       loading: "Loading…",
       stats: (a, b, n) => `${a} this build · ${b} all time · ${n} versions`,
       meta: (tag, label, date, a, b) =>
-        `${tag} · ${label}${date ? ` · ${date}` : ""}`,
+        `${tag}${date ? ` · ${date}` : ""}`,
     },
     dl: {
       prefix: "Download",
@@ -394,7 +482,7 @@ const I18N = {
       attached: "attached  work  ·  3 tabs  ·  split ×2",
       attachedShort: "attached",
     },
-    notfound: { title: "This page is not here.", back: "Home" },
+    notfound: { title: "A little off\n<em>the command line.</em>", back: "Back home", lede: "This path may have moved, or the link took a wrong turn. Head home and find your flow again.", docs: "Explore the docs", metaTitle: "Page not found — Galdr" },
   },
 };
 
@@ -438,7 +526,7 @@ function applyI18n(root = document) {
   const title = document.querySelector("title");
   if (title && title.dataset.i18nTitle) {
     const key = title.dataset.i18nTitle;
-    title.textContent = key === "docs"
+    title.textContent = key === "notfound" ? d.notfound.metaTitle : key === "docs"
       ? d.meta.docsTitle
       : key === "plugins"
       ? d.meta.marketplaceTitle
@@ -472,8 +560,10 @@ function applyI18n(root = document) {
     const hashAt = href.indexOf("#");
     const hash = hashAt >= 0 ? href.slice(hashAt) : "";
     const before = hashAt >= 0 ? href.slice(0, hashAt) : href;
-    const path = before.split("?")[0];
-    a.setAttribute("href", `${path}?lang=${getLang()}${hash}`);
+    const [path, query = ""] = before.split("?");
+    const params = new URLSearchParams(query);
+    params.set("lang", getLang());
+    a.setAttribute("href", `${path}?${params}${hash}`);
   });
 }
 
