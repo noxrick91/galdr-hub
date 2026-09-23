@@ -22,9 +22,9 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.26** — 2026-09-23
+**What's new in v0.2.27** — 2026-09-23
 
-- The Git plugin explains that creating a worktree needs Git 2.48 or newer
+- Workbench requests verify certificates against the operating system trust
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

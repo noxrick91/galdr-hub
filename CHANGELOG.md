@@ -4,6 +4,17 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.27] - 2026-09-23
+
+Includes everything listed for 0.2.24, 0.2.25 and 0.2.26 below: those
+versions were tagged but never published, so this is the first release to
+carry them.
+
+### Changed
+
+- Workbench requests verify certificates against the operating system trust
+  store, like the rest of Galdr, and the plugin now builds for Windows ARM64.
+
 ## [0.2.26] - 2026-09-23
 
 Includes everything listed for 0.2.24 and 0.2.25 below: those versions were
