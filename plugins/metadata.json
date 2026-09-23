@@ -29,6 +29,17 @@
       ]
     },
     {
+      "id": "com.noxcaw.term.monitor",
+      "name": "Galdr Monitor",
+      "description": "Live CPU, memory, and process monitor with filtering, a process tree, and process termination",
+      "license": "Proprietary",
+      "capabilities": [
+        "ui",
+        "processes_read",
+        "processes_manage"
+      ]
+    },
+    {
       "id": "com.noxcaw.term.password-manager",
       "name": "Galdr Password Manager",
       "description": "Encrypted credentials, scoped plugin authorization, and security controls",
