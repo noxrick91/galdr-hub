@@ -22,24 +22,14 @@ Galdr 是 GPU 加速终端。打开就是内置的 **galdr-shell**。启动文�
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.24** — 2026-09-22
+**What's new in v0.2.25** — 2026-09-23
 
-- Command blocks retain command text, working directory, exit status, duration
-- Saved workspace layouts, a docked plugin sidebar and a unified task center
-- The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named
-- Workbench supports configurable OpenAI-compatible providers and credential-broker
-- Git, SSH, downloader and password-manager workflows integrate with the updated
-- Plugins support verified publisher signatures, diagnostics and rollback;
-- Cancellable cross-pane/project search, local mux reconnection, file:line
-- The official website uses a warm white, graphite and cobalt visual design
-- Updated Rustls to 0.23.45 in the application and downloader plugin to reject
-- Delayed IME fallback characters retain their order across fast typing, spaces,
-- Idle or malformed Unix mux clients release their connections and subscribers.
-- Preserved development tools no longer expose a user's home or credential
-- Shell command lifecycle records preserve failure, interruption and multiline
-- Completion history now applies session, project, global and disabled scopes.
-- Task plugins retain their runtime while work is active during a workspace
-- Updated plugins require Galdr 0.2.24 so older hosts do not load contributions
+- The terminal scrollbar marks command boundaries, running and failed commands,
+- Ctrl+Alt+Up / Down jumps to the previous / next command, and
+- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind
+- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and
+- Command blocks and scrollbar markers no longer disappear when the window is
+- The terminal scrollbar is easier to grab: in a window that is not maximized
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -207,6 +197,8 @@ action = "none"
 | Ctrl+Alt+E | 均分 pane |
 | Ctrl+Shift+F | 搜索 |
 | Ctrl+Shift+P | 命令面板 |
+| Ctrl+Alt+Up / Down | 跳到上一条 / 下一条命令 |
+| Ctrl+Alt+Shift+Up / Down | 跳到上一条 / 下一条失败命令 |
 | Ctrl+Shift+M | 插件市场 |
 | Ctrl+Shift+Space | Quick select |
 | Ctrl+Shift+X | 复制 / vi 模式 |
@@ -260,6 +252,11 @@ name = "galdr-dark"
 name = "xterm-256color"
 dec1007 = true              # alternate-screen wheel → cursor keys
 
+[scrollbar]
+commands = true           # 命令边界、运行中与失败命令
+search = true             # 当前窗格的搜索命中
+selection = true          # 选区所在行
+
 [shell]
 kind = "galdr"            # galdr | system
 launcher = "auto"         # auto | helper | integrated
@@ -299,6 +296,19 @@ osc52 = "confirm"         # copy | confirm | off
 
 - 拖分隔条改比例；双击分隔条把这一刀两侧均分
 - Ctrl+Shift+D / E 向下 / 向右拆；Alt+方向键切焦点；Ctrl+Shift+Z 放大一栏；Ctrl+Alt+E 均分全部
+
+### 滚动条
+
+滚动条轨道上带标记，一眼看到回滚里有什么：
+
+- 左半边细线：命令边界；蓝色是还在运行的命令
+- 整条红线：失败的命令（退出码非 0）
+- 右半边：搜索命中；整条高亮的是当前命中
+- 左边缘竖条：选区所在的行
+
+鼠标停在标记上会显示命令、退出码、耗时和目录；点一下把那条命令滚到顶部。键盘上用 Ctrl+Alt+Up / Down 在命令之间跳，加 Shift 只跳失败的命令；越过最后一条会回到底部。
+
+命令标记需要 shell 上报命令（galdr-shell 自带），只覆盖最近 128 条命令。全屏应用（vim、htop 等）没有回滚，不显示标记。在 `[scrollbar]` 或 设置 → 终端 里可以分别关掉三类标记。
 
 ### 其它
 

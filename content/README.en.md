@@ -22,24 +22,14 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.24** — 2026-09-22
+**What's new in v0.2.25** — 2026-09-23
 
-- Command blocks retain command text, working directory, exit status, duration
-- Saved workspace layouts, a docked plugin sidebar and a unified task center
-- The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named
-- Workbench supports configurable OpenAI-compatible providers and credential-broker
-- Git, SSH, downloader and password-manager workflows integrate with the updated
-- Plugins support verified publisher signatures, diagnostics and rollback;
-- Cancellable cross-pane/project search, local mux reconnection, file:line
-- The official website uses a warm white, graphite and cobalt visual design
-- Updated Rustls to 0.23.45 in the application and downloader plugin to reject
-- Delayed IME fallback characters retain their order across fast typing, spaces,
-- Idle or malformed Unix mux clients release their connections and subscribers.
-- Preserved development tools no longer expose a user's home or credential
-- Shell command lifecycle records preserve failure, interruption and multiline
-- Completion history now applies session, project, global and disabled scopes.
-- Task plugins retain their runtime while work is active during a workspace
-- Updated plugins require Galdr 0.2.24 so older hosts do not load contributions
+- The terminal scrollbar marks command boundaries, running and failed commands,
+- Ctrl+Alt+Up / Down jumps to the previous / next command, and
+- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind
+- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and
+- Command blocks and scrollbar markers no longer disappear when the window is
+- The terminal scrollbar is easier to grab: in a window that is not maximized
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
@@ -207,6 +197,8 @@ action = "none"
 | Ctrl+Alt+E | Equalize panes |
 | Ctrl+Shift+F | Search |
 | Ctrl+Shift+P | Command palette |
+| Ctrl+Alt+Up / Down | Jump to previous / next command |
+| Ctrl+Alt+Shift+Up / Down | Jump to previous / next failed command |
 | Ctrl+Shift+M | Plugin marketplace |
 | Ctrl+Shift+Space | Quick select |
 | Ctrl+Shift+X | Copy / vi mode |
@@ -260,6 +252,11 @@ name = "galdr-dark"
 name = "xterm-256color"
 dec1007 = true              # alternate-screen wheel → cursor keys
 
+[scrollbar]
+commands = true           # command boundaries, running and failed commands
+search = true             # search matches in the active pane
+selection = true          # lines covered by the selection
+
 [shell]
 kind = "galdr"            # galdr | system
 launcher = "auto"         # auto | helper | integrated
@@ -299,6 +296,19 @@ The window attaches to a session. Close it and the tabs and splits stay. `galdr 
 
 - Drag a divider to resize; double-click it to equalize that split
 - Ctrl+Shift+D / E split down / right; Alt+arrows focus; Ctrl+Shift+Z zoom a pane; Ctrl+Alt+E equalize all
+
+### Scrollbar
+
+The scrollbar track carries markers, so you can see what is in the scrollback at a glance:
+
+- Thin left-half tick: a command boundary; blue means the command is still running
+- Full-width red line: a failed command (non-zero exit)
+- Right half: a search match; the full-width highlight is the current match
+- Strip along the left edge: the lines covered by the selection
+
+Hover a marker for the command, exit status, duration and directory; click it to scroll that command to the top. From the keyboard, Ctrl+Alt+Up / Down jumps between commands, and adding Shift visits failed commands only; jumping past the last command returns to the bottom.
+
+Command markers need the shell to report commands (galdr-shell does) and cover the latest 128 commands. Full-screen apps (vim, htop, …) have no scrollback, so no markers are shown. Each of the three kinds can be turned off in `[scrollbar]` or Settings → Terminal.
 
 ### Other
 

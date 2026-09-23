@@ -4,6 +4,31 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.25] - 2026-09-23
+
+### Added
+
+- The terminal scrollbar marks command boundaries, running and failed commands,
+  search matches and the selection. Hover a marker for the command, exit status,
+  duration and directory; click it to jump there.
+- Ctrl+Alt+Up / Down jumps to the previous / next command, and
+  Ctrl+Alt+Shift+Up / Down to the previous / next failed command.
+- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind
+  off individually; the same toggles are in Settings → Terminal.
+- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and
+  exits, which works where the desktop blocks screen capture (Wayland).
+
+### Fixed
+
+- Command blocks and scrollbar markers no longer disappear when the window is
+  resized, a pane is split, the font size changes or a full-screen app runs:
+  command positions now follow their text through reflow. Clearing the screen
+  or scrollback, or overwriting a command's output, only affects the commands
+  whose text actually changed.
+- The terminal scrollbar is easier to grab: in a window that is not maximized
+  it no longer sits under the resize edge, its pointer zone is wider and
+  reaches the window edge, and it widens while hovered.
+
 ## [0.2.24] - 2026-09-22
 
 ### Added

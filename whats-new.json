@@ -1,26 +1,16 @@
 {
-  "tag": "v0.2.24",
-  "version": "0.2.24",
-  "date": "2026-09-22",
-  "title": "What's new in v0.2.24",
+  "tag": "v0.2.25",
+  "version": "0.2.25",
+  "date": "2026-09-23",
+  "title": "What's new in v0.2.25",
   "notes": [
-    "Command blocks retain command text, working directory, exit status, duration",
-    "Saved workspace layouts, a docked plugin sidebar and a unified task center",
-    "The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named",
-    "Workbench supports configurable OpenAI-compatible providers and credential-broker",
-    "Git, SSH, downloader and password-manager workflows integrate with the updated",
-    "Plugins support verified publisher signatures, diagnostics and rollback;",
-    "Cancellable cross-pane/project search, local mux reconnection, file:line",
-    "The official website uses a warm white, graphite and cobalt visual design",
-    "Updated Rustls to 0.23.45 in the application and downloader plugin to reject",
-    "Delayed IME fallback characters retain their order across fast typing, spaces,",
-    "Idle or malformed Unix mux clients release their connections and subscribers.",
-    "Preserved development tools no longer expose a user's home or credential",
-    "Shell command lifecycle records preserve failure, interruption and multiline",
-    "Completion history now applies session, project, global and disabled scopes.",
-    "Task plugins retain their runtime while work is active during a workspace",
-    "Updated plugins require Galdr 0.2.24 so older hosts do not load contributions"
+    "The terminal scrollbar marks command boundaries, running and failed commands,",
+    "Ctrl+Alt+Up / Down jumps to the previous / next command, and",
+    "`[scrollbar]` `commands`, `search` and `selection` switch each marker kind",
+    "`GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and",
+    "Command blocks and scrollbar markers no longer disappear when the window is",
+    "The terminal scrollbar is easier to grab: in a window that is not maximized"
   ],
-  "body": "### Added\n\n- Command blocks retain command text, working directory, exit status, duration\n  and output locations, with actions for reviewing errors and saving project tasks.\n- Saved workspace layouts, a docked plugin sidebar and a unified task center\n  keep terminal sessions, development tools and background work accessible together.\n- The Workbench plugin discovers Cargo, npm, Make and Just tasks, saves named\n  Galdr commands, and retains bounded task results with cancellation and retry.\n  Its development pages provide Docker/Compose operations, HTTP requests,\n  JSON/log inspection, image previews, read-only SQLite queries and Kubernetes browsing.\n- Workbench supports configurable OpenAI-compatible providers and credential-broker\n  authorization. Error context and generated commands remain editable; sending a\n  request or running a saved command requires an explicit action.\n- Git, SSH, downloader and password-manager workflows integrate with the updated\n  host UI, task and credential services.\n- Plugins support verified publisher signatures, diagnostics and rollback;\n  the credential vault supports TOTP and authenticated encrypted backup/import.\n- Cancellable cross-pane/project search, local mux reconnection, file:line\n  navigation, PNG/JPEG previews and native accessibility improve daily workflows.\n\n### Changed\n\n- The official website uses a warm white, graphite and cobalt visual design\n  across the homepage, plugin marketplace and documentation, with responsive\n  layouts, Chinese/English navigation and improved search and install controls.\n\n### Fixed\n\n- Updated Rustls to 0.23.45 in the application and downloader plugin to reject\n  TLS 1.3 handshake messages that cross encryption level boundaries.\n- Delayed IME fallback characters retain their order across fast typing, spaces,\n  modifier changes and focus shortcuts. Docked panels reserve the terminal's\n  drawing area, and workspace buttons complete pending form edits.\n- Idle or malformed Unix mux clients release their connections and subscribers.\n  The task center prioritizes active work across plugins and reports truncation.\n- Preserved development tools no longer expose a user's home or credential\n  directories. Rustup proxies resolve to the installed toolchain inside the sandbox.\n- Shell command lifecycle records preserve failure, interruption and multiline\n  behavior, including multiple completion records delivered in one output batch.\n- Completion history now applies session, project, global and disabled scopes.\n  Dynamic plugin queries carry current directory, pane and session context;\n  bounded caches expire and remain separate across directories, while candidate\n  kinds, sources, scores and request identifiers survive ranking and display.\n- Task plugins retain their runtime while work is active during a workspace\n  switch. Workbench rejects retries belonging to a different workspace, and\n  persisted task data and output are bounded.\n- Updated plugins require Galdr 0.2.24 so older hosts do not load contributions\n  that depend on the new sidebar, task and credential protocols.",
+  "body": "### Added\n\n- The terminal scrollbar marks command boundaries, running and failed commands,\n  search matches and the selection. Hover a marker for the command, exit status,\n  duration and directory; click it to jump there.\n- Ctrl+Alt+Up / Down jumps to the previous / next command, and\n  Ctrl+Alt+Shift+Up / Down to the previous / next failed command.\n- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind\n  off individually; the same toggles are in Settings → Terminal.\n- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and\n  exits, which works where the desktop blocks screen capture (Wayland).\n\n### Fixed\n\n- Command blocks and scrollbar markers no longer disappear when the window is\n  resized, a pane is split, the font size changes or a full-screen app runs:\n  command positions now follow their text through reflow. Clearing the screen\n  or scrollback, or overwriting a command's output, only affects the commands\n  whose text actually changed.\n- The terminal scrollbar is easier to grab: in a window that is not maximized\n  it no longer sits under the resize edge, its pointer zone is wider and\n  reaches the window edge, and it widens while hovered.",
   "url": "./CHANGELOG.md"
 }
