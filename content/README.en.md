@@ -22,14 +22,9 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.25** — 2026-09-23
+**What's new in v0.2.26** — 2026-09-23
 
-- The terminal scrollbar marks command boundaries, running and failed commands,
-- Ctrl+Alt+Up / Down jumps to the previous / next command, and
-- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind
-- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and
-- Command blocks and scrollbar markers no longer disappear when the window is
-- The terminal scrollbar is easier to grab: in a window that is not maximized
+- The Git plugin explains that creating a worktree needs Git 2.48 or newer
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 

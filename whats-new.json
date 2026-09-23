@@ -1,16 +1,11 @@
 {
-  "tag": "v0.2.25",
-  "version": "0.2.25",
+  "tag": "v0.2.26",
+  "version": "0.2.26",
   "date": "2026-09-23",
-  "title": "What's new in v0.2.25",
+  "title": "What's new in v0.2.26",
   "notes": [
-    "The terminal scrollbar marks command boundaries, running and failed commands,",
-    "Ctrl+Alt+Up / Down jumps to the previous / next command, and",
-    "`[scrollbar]` `commands`, `search` and `selection` switch each marker kind",
-    "`GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and",
-    "Command blocks and scrollbar markers no longer disappear when the window is",
-    "The terminal scrollbar is easier to grab: in a window that is not maximized"
+    "The Git plugin explains that creating a worktree needs Git 2.48 or newer"
   ],
-  "body": "### Added\n\n- The terminal scrollbar marks command boundaries, running and failed commands,\n  search matches and the selection. Hover a marker for the command, exit status,\n  duration and directory; click it to jump there.\n- Ctrl+Alt+Up / Down jumps to the previous / next command, and\n  Ctrl+Alt+Shift+Up / Down to the previous / next failed command.\n- `[scrollbar]` `commands`, `search` and `selection` switch each marker kind\n  off individually; the same toggles are in Settings → Terminal.\n- `GALDR_CAPTURE=shot.png` saves one of Galdr's own rendered frames as PNG and\n  exits, which works where the desktop blocks screen capture (Wayland).\n\n### Fixed\n\n- Command blocks and scrollbar markers no longer disappear when the window is\n  resized, a pane is split, the font size changes or a full-screen app runs:\n  command positions now follow their text through reflow. Clearing the screen\n  or scrollback, or overwriting a command's output, only affects the commands\n  whose text actually changed.\n- The terminal scrollbar is easier to grab: in a window that is not maximized\n  it no longer sits under the resize edge, its pointer zone is wider and\n  reaches the window edge, and it widens while hovered.",
+  "body": "Includes everything listed for 0.2.24 and 0.2.25 below: those versions were\ntagged but never published, so this is the first release to carry them.\n\n### Fixed\n\n- The Git plugin explains that creating a worktree needs Git 2.48 or newer\n  instead of failing with an unknown-option error on older Git (Debian 12,\n  Ubuntu 24.04).",
   "url": "./CHANGELOG.md"
 }

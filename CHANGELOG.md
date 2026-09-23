@@ -4,6 +4,17 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.26] - 2026-09-23
+
+Includes everything listed for 0.2.24 and 0.2.25 below: those versions were
+tagged but never published, so this is the first release to carry them.
+
+### Fixed
+
+- The Git plugin explains that creating a worktree needs Git 2.48 or newer
+  instead of failing with an unknown-option error on older Git (Debian 12,
+  Ubuntu 24.04).
+
 ## [0.2.25] - 2026-09-23
 
 ### Added
