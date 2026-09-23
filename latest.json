@@ -1,7 +1,76 @@
 {
   "tag_name": "v0.2.27",
   "published_at": "2026-09-23T10:16:39Z",
-  "assets": [],
+  "assets": [
+    {
+      "name": "galdr-aarch64-pc-windows-msvc.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-aarch64-pc-windows-msvc.exe"
+    },
+    {
+      "name": "galdr-aarch64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-aarch64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-plugin-aarch64-pc-windows-msvc.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-aarch64-pc-windows-msvc.exe"
+    },
+    {
+      "name": "galdr-plugin-aarch64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-aarch64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-plugin-host-aarch64-pc-windows-msvc.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-host-aarch64-pc-windows-msvc.exe"
+    },
+    {
+      "name": "galdr-plugin-host-aarch64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-host-aarch64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-plugin-host-x86_64-pc-windows-gnu.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-host-x86_64-pc-windows-gnu.exe"
+    },
+    {
+      "name": "galdr-plugin-host-x86_64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-host-x86_64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-plugin-x86_64-pc-windows-gnu.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-x86_64-pc-windows-gnu.exe"
+    },
+    {
+      "name": "galdr-plugin-x86_64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-plugin-x86_64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-sh-aarch64-pc-windows-msvc.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-sh-aarch64-pc-windows-msvc.exe"
+    },
+    {
+      "name": "galdr-sh-aarch64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-sh-aarch64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-sh-x86_64-pc-windows-gnu.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-sh-x86_64-pc-windows-gnu.exe"
+    },
+    {
+      "name": "galdr-sh-x86_64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-sh-x86_64-unknown-linux-gnu"
+    },
+    {
+      "name": "galdr-x86_64-pc-windows-gnu.exe",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-x86_64-pc-windows-gnu.exe"
+    },
+    {
+      "name": "galdr-x86_64-unknown-linux-gnu",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/galdr-x86_64-unknown-linux-gnu"
+    },
+    {
+      "name": "SHA256SUMS",
+      "browser_download_url": "https://github.com/noxrick91/galdr-hub/releases/download/v0.2.27/SHA256SUMS"
+    }
+  ],
   "installers": {
     "install": "1d0eb09d705883f45a6d03b7d93ae206e0d3e983345c6b64e58cd91138187f61",
     "install.ps1": "171a06a91a1e0a00efd1e8e5c8d70a0ed6bcf929d7db474d884420c836f0731b"

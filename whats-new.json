@@ -1,11 +1,17 @@
 {
-  "tag": "v0.2.27",
-  "version": "0.2.27",
+  "tag": "v0.2.28",
+  "version": "0.2.28",
   "date": "2026-09-23",
-  "title": "What's new in v0.2.27",
+  "title": "What's new in v0.2.28",
   "notes": [
-    "Workbench requests verify certificates against the operating system trust"
+    "Galdr Monitor plugin: a live page with per-CPU, memory and swap meters and a",
+    "Plugin capabilities `processes_read` (list every process, including command",
+    "Plugin pages can pin content with a `sticky` node, lay out meters in a",
+    "Plugin page scrollbars are wider and can be dragged or clicked.",
+    "Plugin tables keep their header visible while scrolling, shade alternate",
+    "Plugin table rows no longer end in a stray \"…\" when the last column fits.",
+    "Installing a new Galdr while a window is open now replaces the running"
   ],
-  "body": "Includes everything listed for 0.2.24, 0.2.25 and 0.2.26 below: those\nversions were tagged but never published, so this is the first release to\ncarry them.\n\n### Changed\n\n- Workbench requests verify certificates against the operating system trust\n  store, like the rest of Galdr, and the plugin now builds for Windows ARM64.",
+  "body": "### Added\n\n- Galdr Monitor plugin: a live page with per-CPU, memory and swap meters and a\n  process table you can filter, sort and view as a tree, plus a\n  `galdr-monitor` Galdr Shell command that prints one snapshot. Ending a\n  process always asks first. Works on Linux and Windows.\n- Plugin capabilities `processes_read` (list every process, including command\n  lines) and `processes_manage` (end your processes). Plugins stay sandboxed:\n  the plugin host collects the data and delivers the signal, and checks each\n  process's start time so a reused PID is never signalled.\n- Plugin pages can pin content with a `sticky` node, lay out meters in a\n  `grid`, and draw `chart` line charts. Galdr Monitor uses them for a usage\n  history chart, per-core meters in columns, and a filter row that stays\n  visible above the process table.\n\n### Changed\n\n- Plugin page scrollbars are wider and can be dragged or clicked.\n- Plugin tables keep their header visible while scrolling, shade alternate\n  rows, and mark the selected row with an accent bar.\n\n### Fixed\n\n- Plugin table rows no longer end in a stray \"…\" when the last column fits.\n- Installing a new Galdr while a window is open now replaces the running\n  plugin host even when the installer moves the old binary aside first, so new\n  windows no longer reach an outdated host that rejects current plugins.",
   "url": "./CHANGELOG.md"
 }

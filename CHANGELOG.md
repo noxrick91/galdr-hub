@@ -4,6 +4,36 @@ User-facing changes to Galdr. Versions match Git tags.
 
 ## [Unreleased]
 
+## [0.2.28] - 2026-09-23
+
+### Added
+
+- Galdr Monitor plugin: a live page with per-CPU, memory and swap meters and a
+  process table you can filter, sort and view as a tree, plus a
+  `galdr-monitor` Galdr Shell command that prints one snapshot. Ending a
+  process always asks first. Works on Linux and Windows.
+- Plugin capabilities `processes_read` (list every process, including command
+  lines) and `processes_manage` (end your processes). Plugins stay sandboxed:
+  the plugin host collects the data and delivers the signal, and checks each
+  process's start time so a reused PID is never signalled.
+- Plugin pages can pin content with a `sticky` node, lay out meters in a
+  `grid`, and draw `chart` line charts. Galdr Monitor uses them for a usage
+  history chart, per-core meters in columns, and a filter row that stays
+  visible above the process table.
+
+### Changed
+
+- Plugin page scrollbars are wider and can be dragged or clicked.
+- Plugin tables keep their header visible while scrolling, shade alternate
+  rows, and mark the selected row with an accent bar.
+
+### Fixed
+
+- Plugin table rows no longer end in a stray "…" when the last column fits.
+- Installing a new Galdr while a window is open now replaces the running
+  plugin host even when the installer moves the old binary aside first, so new
+  windows no longer reach an outdated host that rejects current plugins.
+
 ## [0.2.27] - 2026-09-23
 
 Includes everything listed for 0.2.24, 0.2.25 and 0.2.26 below: those

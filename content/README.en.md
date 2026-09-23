@@ -22,9 +22,15 @@ Start with [Install](#/install) and [Quick start](#/quick-start). Use **中文 /
 
 This page lists changes in the **current public release**.
 
-**What's new in v0.2.27** — 2026-09-23
+**What's new in v0.2.28** — 2026-09-23
 
-- Workbench requests verify certificates against the operating system trust
+- Galdr Monitor plugin: a live page with per-CPU, memory and swap meters and a
+- Plugin capabilities `processes_read` (list every process, including command
+- Plugin pages can pin content with a `sticky` node, lay out meters in a
+- Plugin page scrollbars are wider and can be dragged or clicked.
+- Plugin tables keep their header visible while scrolling, shade alternate
+- Plugin table rows no longer end in a stray "…" when the last column fits.
+- Installing a new Galdr while a window is open now replaces the running
 
 Full history: [CHANGELOG.md](./CHANGELOG.md).
 
