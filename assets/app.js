@@ -278,6 +278,12 @@ function applyHowto(platform) {
   const spec = HOWTO[howtoTab] || HOWTO.install;
   const how = typeof dict === "function" ? dict().howto : null;
   const unavailable = unsupported && howtoTab !== "uninstall";
+  const heroCmd = document.getElementById("hero-cmd");
+  if (heroCmd) heroCmd.textContent = unsupported
+    ? (how?.macUnavailable || "macOS prebuilt packages are temporarily unavailable")
+    : (win ? INSTALL_WIN : INSTALL_UNIX);
+  const heroCopy = document.getElementById("copy-hero");
+  if (heroCopy) heroCopy.disabled = unsupported;
   const cmd = document.getElementById("howto-cmd");
   if (cmd) cmd.textContent = unavailable
     ? (how?.macUnavailable || "macOS prebuilt packages are temporarily unavailable")
@@ -368,6 +374,19 @@ document.getElementById("copy-howto")?.addEventListener("click", async () => {
     if (label) label.textContent = d?.copyFailed || "复制失败，请手动选择指令";
   }
   setTimeout(() => applyHowto(detectedPlatform), 1600);
+});
+
+document.getElementById("copy-hero")?.addEventListener("click", async (event) => {
+  const btn = event.currentTarget;
+  const text = document.getElementById("hero-cmd")?.textContent;
+  if (!text) return;
+  try {
+    await copyText(text);
+    btn.classList.add("copied");
+    setTimeout(() => btn.classList.remove("copied"), 1600);
+  } catch {
+    document.getElementById("howto")?.scrollIntoView();
+  }
 });
 
 let detectedPlatform = "linux-x64";

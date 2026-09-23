@@ -52,7 +52,7 @@ let marketplaceCategory = "all";
 const MARKET_COPY = {
   zh: {
     all: "全部插件", development: "开发工具", remote: "远程连接", downloads: "下载", security: "安全", tools: "工具",
-    filterLabel: "插件分类", trustKicker: "YOUR TERMINAL. YOUR RULES.", trustTitle: "能力透明，边界清晰。",
+    filterLabel: "插件分类", trustKicker: "你的终端，你的规则", trustTitle: "能力透明，边界清晰。",
     securityDocs: "了解权限与隔离", snapshot: "当前显示网站附带的目录快照，安装时会查询市场索引。",
     downloader: "并发下载与断点续传，支持文件、媒体、HLS、Magnet 和 BitTorrent。",
     git: "在终端里查看提交历史、审阅改动、管理分支与执行远程操作。",
@@ -61,7 +61,7 @@ const MARKET_COPY = {
   },
   en: {
     all: "All plugins", development: "Development", remote: "Remote", downloads: "Downloads", security: "Security", tools: "Tools",
-    filterLabel: "Plugin categories", trustKicker: "YOUR TERMINAL. YOUR RULES.", trustTitle: "Clear capabilities. Clear boundaries.",
+    filterLabel: "Plugin categories", trustKicker: "Your terminal, your rules", trustTitle: "Clear capabilities. Clear boundaries.",
     securityDocs: "Explore permissions & isolation", snapshot: "Showing the catalog snapshot included with this site. Installation checks the marketplace index.",
   },
 };
