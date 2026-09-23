@@ -24,7 +24,8 @@
         "http",
         "ui",
         "credentials_use",
-        "ssh_agent_use"
+        "ssh_agent_use",
+        "events"
       ]
     },
     {
@@ -51,7 +52,23 @@
         "files_write",
         "user_files_read",
         "ui",
-        "ssh_agent_use"
+        "ssh_agent_use",
+        "credentials_use"
+      ]
+    },
+    {
+      "id": "com.noxcaw.term.workbench",
+      "name": "Galdr Workbench",
+      "description": "Project tasks, development services, API requests, data tools and reviewed AI command drafts",
+      "license": "Proprietary",
+      "capabilities": [
+        "context_read",
+        "workspace_write",
+        "user_files_read",
+        "http",
+        "ui",
+        "clipboard_write",
+        "credentials_use"
       ]
     }
   ]
